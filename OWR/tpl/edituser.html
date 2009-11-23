@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php" type="text/css" media="screen" />
+<title><?php echo $this->_utilities->_('User creation');?></title>
+</head>
+<body>
+    <div id="login" class="shadow full_rounded">
+        <form action="<?php echo OWR\Config::iGet()->makeURI('edituser');?>" method="post">
+            <fieldset><legend><?php echo $this->_utilities->_('User informations');?></legend>
+<?php   if(isset($error)) {
+            echo '<p class="error">'.$error.'</p>';
+        } ?>
+            <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
+            <input type="hidden" name="id" value="<?php echo isset($id) ? $id : 0;?>"/>
+            <label for="login"><?php echo $this->_utilities->_('Login');?> (*) :</label>
+            <br/>
+            <input type="text" name="login" maxlength="55" size="25" id="login" value="<?php if(isset($login)){ echo $login;}?>"/>
+            <br />
+            <label for="passwd"><?php echo $this->_utilities->_('Password');?> (*) :</label>
+            <br/>
+            <input type="password" name="passwd" size="25" id="passwd" value=""/>
+            <br />
+            <label for="confirmpasswd"><?php echo $this->_utilities->_('Confirm password');?> (*)</label>
+            <br/>
+            <input type="password" name="confirmpasswd" size="25" id="confirmpasswd" value=""/>
+            <br/>
+            <label for="email"><?php echo $this->_utilities->_('Email');?> (*) :</label>
+            <br/>
+            <input type="text" name="email" size="25" id="email" value="<?php if(isset($email)){ echo $email;}?>"/>
+            <br/>
+            <label for="rights"><?php echo $this->_utilities->_('User rights');?> (*) :</label>
+            <br/>
+            <select name="rights" id="rights">
+                <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>
+<?php       if($userrights > OWR\User::LEVEL_USER) {
+                echo '<option value="'.OWR\User::LEVEL_ADMIN.'"'.(isset($rights) && $rights == 2 ? 'selected="selected"' : '').'>'.$this->_utilities->_('Administrator').'</option>';
+            } ?>
+            </select>
+            <br/>
+            <label for="ulang"><?php echo $this->_utilities->_('Interface language');?> (*) :</label>
+            <br/>
+            <select name="ulang" id="ulang">
+                <option value="en_US"<?php if(isset($lang) && $lang === 'en_US'){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('English');?></option>
+                <option value="fr_FR"<?php if(isset($lang) && $lang === 'fr_FR'){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('French');?></option>
+            </select>
+            <br/>
+            <label for="timezone"><?php echo $this->_utilities->_('Timezone');?> (*) :</label>
+            <br/>
+            <select name="timezone" id="timezone">
+<?php       foreach($timezones as $tz => $key) {
+                echo '<option value="'.$tz.'"'.(isset($timezone) && strcmp($tz, $timezone) === 0 ? 'selected="selected"' : '').'>'.$tz.'</option>';
+            } ?>
+            </select>
+            <br/>
+            <label for="identifier">OpenID :</label>
+            <br/>
+            <input type="text" name="openid" size="25" id="openid" value="<?php if(isset($openid)){ echo $openid;}?>"/>
+            <br/>
+            <input type="submit" name="submit" value="<?php echo $this->_utilities->_('Submit');?>" />
+            <input type="button" value="<?php echo $this->_utilities->_('Cancel');?>" onclick="javascript:window.location='<?php echo OWR\Config::iGet()->makeURI('', 'token='.$token);?>';"/>
+            </fieldset>
+        </form>
+    </div>
+</body>
+</html>

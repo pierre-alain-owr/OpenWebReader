@@ -1,0 +1,6 @@
+!- conf : bloquage image ou pas ?
+
+~- faire un gabarit pour l'index modulable comme on veux : un array sérializé dans la DB qui, pour chaque template original, stock les éventuels ajouts/modifications sur le nom du fichier
+~- ajouter la gestion des plugins
+~- regénérer le token toutes les X minutes ?
+~- faire une classe qui gère les dates ?

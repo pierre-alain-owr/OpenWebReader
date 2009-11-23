@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+    <ShortName>OWR</ShortName>
+    <Description>
+        <?php echo $this->_utilities->_('Search').' '.$this->_utilities->_('In');?> OpenWebReader !
+    </Description>
+    <Url type="text/html" method="get" template="<?php echo OWR\Config::iGet()->makeURI('opensearch', 'oskeywords={searchTerms}');?>"/>
+</OpenSearchDescription>

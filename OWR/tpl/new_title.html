@@ -1,0 +1,17 @@
+                <div class="article_title full_rounded shadow new_container_<?php if($live){ echo 'n';}?>read" id="new_<?php echo $id.'_'.$rssid.'_'.$gid;?>" title="<?php echo $this->_utilities->_('Show the new');?>">
+                    <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');rP.clearNew(this);" class="link_go left backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
+<?php           if($live) {
+                    echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new left backgrounded"></a>';
+                } 
+?>
+                    <span class="verysmall"><?php echo $title;?></span>
+                    <div class="article_description">
+<?php           if(!empty($favicon)) {
+                    echo '<img src="'.$favicon.'" alt="" class="favicon left" width="16px" height="16px"/>';
+                }
+                echo $this->_utilities->_('Posted').' '.$this->_utilities->_('In').' "'.$name.'"'.('Root' !== $gname ? ' ('.$gname.')' : '').(!empty($author) ? ', '.$this->_utilities->_('By').' "'.$author.'"' : '').', '.$this->_utilities->_('On').' '.$pubDate; 
+?>
+                    </div>
+                </div>
+                <div class="article_contents full_rounded hidden" id="new__<?php echo $id.'_'.$rssid.'_'.$gid;?>"></div>
+                <div class="news_spacer"></div>

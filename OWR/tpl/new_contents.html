@@ -1,0 +1,193 @@
+<?php if(!empty($contents)) { ?>
+    <div class="article_content">
+        <a class="stream_details" title="<?php echo $this->_utilities->_('Show/hide details of the new');?>" href="javascript:;" onclick="rP.getNewDetails(<?php echo $id;?>, this);"><?php echo $this->_utilities->_('More');?></a>
+        <div class="article_full_details full_rounded" id="new_details_<?php echo $id;?>"></div>
+        <div class="spacer"><br/><br/></div>
+<?php   
+        if(!empty($contents['enclosure']))
+        {
+            isset($contents['enclosure'][0]) || $contents['enclosure'][0] = array($contents['enclosure']);
+
+            foreach($contents['enclosure'] as $enclosure)
+            {
+                if(empty($enclosure['attributes']['type']) || empty($enclosure['attributes']['url'])) continue;
+                $type = explode('/', $enclosure['attributes']['type']);
+                if('image' === $type[0])
+                {
+                    echo '<img src="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/>&nbsp;';
+                }
+                elseif('video' === $type[0] || 'application/ogg' === $enclosure['attributes']['type'])
+                {
+                    $id = 'video_'.md5($enclosure['attributes']['url']);
+                    if('flv' === mb_substr($enclosure['attributes']['url'], -3, 3, 'UTF-8'))
+                    { ?>
+                <div class="enclosure">
+                    <object type="application/x-shockwave-flash" data="dewtube.swf?movie=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>" width="512" height="384">
+                        <param name="allowFullScreen" value="true" />
+                        <param name="movie" value="dewtube.swf?movie=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>" />
+                        <p>Sorry, your browser does not support Flash.</p>
+                    </object>
+                    <div class="spacer"></div>
+<?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                    <br/><br/>
+                </div>
+<?php               }
+                    else
+                    { ?>
+                <div class="enclosure">
+                    <video id="<?php echo $id;?>" src="<?php echo $enclosure['attributes']['url'];?>" controls>
+                        <p>Sorry, your browser does not support the &lt;video&gt; element</p>
+                    </video>
+                    <div class="spacer"></div>
+                    <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
+                    <div class="spacer"></div>
+<?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                    <br/><br/>
+                </div>
+<?php               }
+                }
+                elseif('audio' === $type[0])
+                {
+                    $id = 'audio_'.md5($enclosure['attributes']['url']);
+                    if('mp3' === mb_substr($enclosure['attributes']['url'], -3, 3, 'UTF-8'))
+                    { ?>
+                    <div class="enclosure">
+                        <object type="application/x-shockwave-flash" data="dewplayer.swf?mp3=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>&amp;showtime=1" width="200" height="20">
+                            <param name="wmode" value="transparent" />
+                            <param name="movie" value="dewplayer.swf?mp3=test.mp3&amp;showtime=1" />
+                        </object>
+                        <div class="spacer"></div>
+<?php                   echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                        <br/><br/>
+                    </div>
+<?php               }
+                    else
+                    {
+                ?>
+                <div class="enclosure">
+                    <audio id="<?php echo $id;?>" src="<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>" controls>
+                        <p>Sorry, your browser does not support the &lt;audio&gt; element.</p>
+                    </audio>
+                    <div class="spacer"></div>
+                    <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
+                    <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
+                    <div class="spacer"></div>
+<?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                    <br/><br/>
+                </div>
+<?php           
+                    }
+                }
+                else
+                {
+                    echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';
+                }
+            }
+        }
+        elseif(!empty($contents['link']))
+        {
+            foreach($contents['link'] as $link)
+            {
+                if(!empty($link['attributes']) && !empty($link['attributes']['href']) && !empty($link['attributes']['type']) && isset($link['attributes']['rel']) && 'enclosure' === $link['attributes']['rel'])
+                {
+                    $type = explode('/', $link['attributes']['type']);
+                    if('image' === $type[0])
+                    {
+                        echo '<img src="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/>&nbsp;';
+                    }
+                    elseif('video' === $type[0] || 'application/ogg' === $link['attributes']['type'])
+                    {
+                        $id = 'video_'.md5($link['attributes']['href']);
+                        if('flv' === mb_substr($link['attributes']['href']))
+                        { ?>
+                        <div class="enclosure">
+                            <object type="application/x-shockwave-flash" data="dewtube.swf?movie=<?php echo htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8');?>" width="512" height="384">
+                                <param name="allowFullScreen" value="true" />
+                                <param name="movie" value="dewtube.swf?movie=<?php echo htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8');?>" />
+                                <p>Sorry, your browser does not support Flash.</p>
+                            </object>
+                            <div class="spacer"></div>
+<?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                            <br/><br/>
+                        </div>
+<?php                   }
+                        else
+                        { ?>
+                        <div class="enclosure">
+                            <video id="<?php echo $id;?>" src="<?php echo htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8');?>" controls>
+                                <p>Sorry, your browser does not support the &lt;video&gt; element
+<?php                           echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';?>
+                                </p>
+                            </video>
+                            <div class="spacer"></div>
+                            <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
+                            <div class="spacer"></div>
+<?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                            <br/><br/>
+                        </div>
+<?php                   }
+                    }
+                    elseif('audio' === $type[0])
+                    {
+                        $id = 'audio_'.md5($link['attributes']['href']);
+                        if('mp3' === mb_substr($link['attributes']['href'], -3, 3, 'UTF-8'))
+                        { ?>
+                        <div class="enclosure">
+                            <object type="application/x-shockwave-flash" data="dewplayer.swf?mp3=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>&amp;showtime=1" width="200" height="20">
+                                <param name="wmode" value="transparent" />
+                                <param name="movie" value="dewplayer.swf?mp3=test.mp3&amp;showtime=1" />
+                            </object>
+                            <div class="spacer"></div>
+<?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                            <br/><br/>
+                        </div>
+<?php                   }
+                        else
+                        { ?>
+                        <div class="enclosure">
+                            <audio id="<?php echo $id;?>" src="<?php echo htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8');?>" controls>
+                                <p>Sorry, your browser does not support the &lt;audio&gt; element
+<?php                           echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';?>
+                                </p>
+                            </audio>
+                            <div class="spacer"></div>
+                            <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
+                            <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
+                            <div class="spacer"></div>
+<?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
+                            <br/><br/>
+                        </div>
+<?php                   }
+                    }
+                    else
+                    {
+                        echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';
+                    }
+                }
+            }
+        }
+        if(!empty($contents['encoded'])) {
+            echo $contents['encoded']['contents'];
+        } elseif(!empty($contents['description'])) {
+            echo $contents['description']['contents'];
+        } ?>
+    </div>
+<?php } ?>

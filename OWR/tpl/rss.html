@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>OWR gateway</title>
+        <link><?php echo OWR\Strings::toXML($surl);?></link>
+        <description>OWR gateway <?php echo ($id>0 ? 'for stream '.OWR\Strings::toXML($gname) : 'for all unread news').' for user '.OWR\Strings::toXML($userlogin);?></description>
+<?php   foreach($news as $new) {
+            echo '
+        <item>
+            <title>'.OWR\Strings::toXML($new['title']).'</title>
+            <link>'.OWR\Strings::toXML($new['link']).'</link>
+            <description>'.(empty($new['contents']['description']['contents']) ? '' : OWR\Strings::toXML($new['contents']['description']['contents'])).'</description>
+            <pubDate>'.OWR\Strings::toXML($new['pubDate']).'</pubDate>
+        </item>';
+        } ?>
+    </channel>
+</rss>

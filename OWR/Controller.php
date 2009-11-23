@@ -1,0 +1,2504 @@
+<?php
+/**
+ * Controller class
+ * Get the request, clean it and execute the given action
+ *
+ * PHP 5
+ *
+ * OWR - OpenWebReader
+ *
+ * Copyright (c) 2009, Pierre-Alain Mignot
+ *
+ * Home page: http://openwebreader.org
+ *
+ * E-Mail: contact@openwebreader.org
+ *
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * @author Pierre-Alain Mignot <contact@openwebreader.org>
+ * @copyright Copyright (c) 2009, Pierre-Alain Mignot
+ * @license http://www.gnu.org/copyleft/gpl.html
+ * @package OWR
+ */
+namespace OWR;
+use OWR\DB\Request as DBRequest,
+    OWR\Logic\Response as LogicResponse;
+if(!defined('INC_CONFIG')) die('Please include config file');
+/**
+ * This object is the front door of the application
+ * @uses DAO deals with database
+ * @uses Config the config instance
+ * @uses Cron manages cron settings
+ * @uses Singleton implements the singleton pattern
+ * @uses DB the database link
+ * @uses View the page renderer
+ * @uses Session session managing
+ * @uses Request the request to execute
+ * @uses User the current user
+ * @uses Exception the exceptions handler
+ * @uses Error the errors handler
+ * @uses OWR\DB\Request a request sent to database
+ * @uses Logs the logs/errors storing object
+ * @package OWR
+ */
+class Controller extends Singleton
+{
+    /**
+     * @var mixed the Config instance
+     * @access protected
+     */
+    protected $_cfg;
+
+    /**
+     * @var boolean are we called by the upload frame ?
+     * @access protected
+     */
+    protected $_isFrame = false;
+
+    /**
+     * @var mixed the DB instance
+     * @access protected
+     */
+    protected $_db;
+
+    /**
+     * @var mixed the View instance
+     * @access protected
+     */
+    protected $_view;
+
+    /**
+     * @var mixed the Session instance
+     * @access protected
+     */
+    protected $_sh;
+
+    /**
+     * @var array the list of timezones
+     * @access protected
+     */
+    protected $_tz;
+
+    /**
+     * @var mixed the current User instance
+     * @access protected
+     */
+    protected $_user;
+
+    /**
+     * @var mixed the \IntlDateFormatter instance
+     * @access protected
+     */
+    protected $_dateFormatter;
+
+    /**
+     * @var mixed the Cron instance
+     * @access protected
+     */
+    protected $_cron;
+
+    /**
+     * @var int the actual minimum ttl
+     * @access protected
+     */
+    protected $_minCronTtl;
+
+    /**
+     * @var mixed the current Request instance
+     * @access protected
+     */
+    protected $_request;
+
+    /**
+     * Constructor, sets : all needed instances, session handler, errors and exceptions handler,
+     * starts the session, and register the user session
+     *
+     * @access protected
+     */
+    protected function __construct()
+    {
+        $this->_cfg = Config::iGet();
+
+        // secure only ?
+        if($this->_cfg->get('httpsecure') && (!isset($_SERVER['HTTPS']) || 'on' !== $_SERVER['HTTPS']))
+        {
+            header('Location: https://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+            exit;
+        }
+
+        set_error_handler(array(__NAMESPACE__.'\Error', 'error_handler')); // errors
+        set_exception_handler(array(__NAMESPACE__.'\Exception', 'exception_handler')); // exceptions not catched
+        error_reporting(DEBUG ? -1 :    E_CORE_ERROR | 
+                                        E_COMPILE_ERROR | 
+                                        E_ERROR | 
+                                        E_PARSE | 
+                                        E_USER_ERROR | 
+                                        E_USER_WARNING | 
+                                        E_USER_NOTICE | 
+                                        E_USER_DEPRECATED);
+
+        try
+        {
+            $this->_db = DB::iGet(); // init DB connexion
+        }
+        catch(Exception $e)
+        {
+            throw new Exception($e->getContent(), Exception::E_OWR_UNAVAILABLE);
+        }
+
+        $this->_sh = Session::iGet(); // init session
+        
+        try
+        {
+            $this->_sh->init(array('sessionLifeTime' => $this->_cfg->get('sessionLifeTime'),
+                'path' => $this->_cfg->get('path'),
+                'domain' => $this->_cfg->get('url'),
+                'httpsecure' => $this->_cfg->get('httpsecure')));
+        }
+        catch(Exception $e)
+        {
+            throw new Exception($e->getContent(), Exception::E_OWR_UNAVAILABLE);
+        }
+
+        $this->_user = $this->_sh->get('User');
+        if(!isset($this->_user) || !($this->_user instanceof User))
+        {
+            $this->_user = User::iGet();
+            $this->_user->reg(); // populate into the session
+        }
+    }
+    
+    /**
+     * Executes the given action
+     * This method only accepts a Request object
+     * It will try to log the user in, and execute the action
+     * Throws a fatal Exception if something goes really wrong
+     *
+     * If you want to execute an action without the controller displays anything
+     * set $isInternal to true, and all errors will be logged instead
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed Request the request to execute
+     * @access public
+     * @return $this
+     */
+    public function execute(Request $request)
+    {
+        $this->_request = $request;
+        $this->_request->begintime = microtime(true);
+
+        try 
+        {
+            if(isset($this->_request->identifier) || 'verifyopenid' === $this->_request->do)
+            { // openid, add it to include_path
+                ini_set('include_path', HOME_PATH.'libs'.DIRECTORY_SEPARATOR.
+                        'openID'.DIRECTORY_SEPARATOR.PATH_SEPARATOR.ini_get('include_path'));
+            }
+
+            if(!$this->_user->isLogged())
+            {
+                if($this->_request->tlogin && $this->_request->key)
+                {
+                    switch($this->_request->do)
+                    { // atm only getting stream is allowed, but for the future ..
+                        case 'getrss':
+                        case 'getopml':
+                            break;
+                        default: 
+                            throw new Exception('Invalid action '.$this->_request->do, Exception::E_OWR_BAD_REQUEST);
+                            break;
+                    }
+                   
+                    $this->do_login(true);
+                }
+                elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login')
+                {
+                    $this->_user->regenerateToken();
+                    $this->redirect('login');
+                }
+            }
+            else
+            {
+                $token = $this->_user->getToken();
+                // check HTTP User-Agent and token
+                if(($this->_user->getAgent() !== md5($token.$_SERVER['HTTP_USER_AGENT'])) ||
+                    $this->_request->token !== $token)
+                {
+                    if($this->_request->do !== 'logout')
+                    { // for external action, there's no tokens set
+                    // we prompt the user to log-in to confirm he is really who he pretends to be
+                        if($this->_request->do === 'opensearch' || $this->_request->do === 'add')
+                            $this->_request->back = basename(trim(Filter::iGet()->purify($_SERVER['REQUEST_URI'])));
+                        $this->_getPage('login', array('error'=>'You lost your token ! Confirm back your identity'));
+                        return $this;
+                    }
+                }
+                unset($token);
+            }
+    
+            $action = 'do_'.$this->_request->do;
+    
+            if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin
+                throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
+        
+            if($this->_user->isAdmin())
+            {
+                // we redirect if some clear caching is asked
+                // to not have '?clear(db|html)cache' in the url
+                if(!empty($this->_request->clearcache))
+                {
+                    Cache::clearCache();
+                    $this->redirect();
+                }
+                elseif(!empty($this->_request->clearhtmlcache))
+                {
+                    Cache::clearHTMLCache();
+                    $this->redirect();
+                }
+                elseif(!empty($this->_request->cleardbcache))
+                {
+                    Cache::clearDBCache();
+                    $this->redirect();
+                }
+            }
+
+            $this->$action(); // execute the given action
+        } 
+        catch(Exception $e) 
+        {
+            $this->_db->rollback();
+
+            throw new Exception($e->getContent(), $e->getCode());
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns a clone of the current request object
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return mixed clone of the current request
+     * @access public
+     */
+    public function getRequest()
+    {
+        return clone($this->_request);
+    }
+
+    /**
+     * Render the page
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param int $statusCode HTTP status code, usefull for errors
+     * @return $this
+     * @access public
+     */
+    public function renderPage($statusCode = 200)
+    {
+        $error = @ob_get_clean();
+        if($error)
+        {
+            do
+            {
+                Logs::iGet()->log($error);
+            }
+            while($error = @ob_get_clean());
+        }
+        
+        isset($this->_view) || $this->_view = View::iGet();
+
+        if(isset($_SERVER['HTTP_ACCEPT']) && 'application/json' === $_SERVER['HTTP_ACCEPT'])
+        {
+            $this->_view->addHeaders(array('Content-Type' => 'application/json; charset=utf-8'));
+            $page = array('contents' => '');
+
+            if(!isset($this->_request->unreads))
+            {
+                try
+                {
+                    $this->do_getunread(true);
+                }
+                catch(Exception $e)
+                {
+                    Logs::iGet()->log($e->getContent(), $e->getCode());
+                }
+            }
+
+            $page['unreads'] =& $this->_request->unreads;
+            $page['contents'] =& $this->_request->page;
+
+            if(Logs::iGet()->hasLogs())
+            {
+                if(DEBUG || $this->_user->isAdmin())
+                {
+                    $page['errors'] = Logs::iGet()->getLogs();
+                    $this->_cleanIndent($page['errors']);
+                }
+                else
+                {
+                    Logs::iGet()->writeLogs();
+                    $errors = Logs::iGet()->getLogs();
+    
+                    foreach($errors as $errcode=>$errmsg)
+                    {
+                        if(Exception::E_OWR_DIE === $errcode)
+                        {
+                            $this->_cleanIndent($errmsg);
+                            foreach($errmsg as $err)
+                                $page['errors'][] = $err;
+                        }
+                    }
+
+                    if(empty($page['errors'])) $page['errors'][] = 'Non-blocking error(s) occured';
+                }
+            }
+            
+            if(empty($page['errors']) && isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
+            {
+                $etag = '"owr-'.md5(serialize($page)).'"';
+                $this->_view->addHeaders(array(
+                    'Cache-Control' => 'Public, must-revalidate',
+                    "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
+                    'Etag' => $etag
+                ), true);
+                if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
+                {
+                    $this->_view->setStatusCode(304, true);
+                    flush();
+                    return true;
+                }
+            }
+
+            $now = microtime(true);
+            $page['executionTime'] = round($now - $this->_cfg->get('begintime'), 6);
+            $page['requestTime'] = round($now - $this->_request->begintime, 6);
+            $page['sqlTime'] = round(DB::getTime(), 6);
+            $page['renderingTime'] = round(View::getTime(), 6);
+            $page = json_encode($page);
+        }
+        else
+        {
+            $this->_view->addHeaders(array('Content-type' => 'text/html; charset=utf-8'));
+            if(Logs::iGet()->hasLogs())
+            {
+                if(DEBUG || $this->_user->isAdmin())
+                {
+                    $errors = Logs::iGet()->getLogs();
+                    $err = array();
+                    foreach($errors as $errcode=>$errmsg)
+                    {
+                        $this->_cleanIndent($errmsg);
+                        foreach($errmsg as $msg)
+                            $err[] = $msg;
+                    }
+
+                    $this->_request->page .= '<script type="text/javascript">';
+                    $this->_request->page .= "var e=window.parent||window;if(e.addEvent){ e.addEvent('domready', function(){ if(e.rP) { e.rP.setLogs(e.JSON.decode('".addslashes(json_encode($err))."'),true); }else{ e.document.write('".addslashes(join('<br/>', $err))."'); }});} else {e.document.write('".addslashes(join('<br/>', $err))."');}";
+                    $this->_request->page .= '</script>';
+                    $this->_request->page .= '<noscript>';
+                    $this->_request->page .= join('<br/>', $err);
+                    $this->_request->page .= '</noscript>';
+                }
+                else
+                {
+                    $errors = Logs::iGet()->getLogs();
+                    $err = array();
+                    foreach($errors as $errcode=>$errmsg)
+                    {
+                        if(Exception::E_OWR_DIE === $errcode)
+                        {
+                            $this->_cleanIndent($errmsg);
+                            foreach($errmsg as $msg)
+                                $err[] = $msg;
+                        }
+                    }
+
+                    if(empty($page['errors'])) $page['errors'][] = 'Non-blocking error(s) occured';
+
+                    Logs::iGet()->writeLogs();
+
+                    if(!empty($err))
+                    {
+                        $this->_request->page .= '<script type="text/javascript">';
+                        $this->_request->page .= "var e=window.parent||window;if(e.addEvent){ e.addEvent('domready', function(){ if(e.rP) { e.rP.setLogs(e.JSON.decode('".addslashes(json_encode($err))."'),true); }else{ e.document.write('".addslashes(join('<br/>', $err))."'); }});} else {e.document.write('".addslashes(join('<br/>', $err))."');}";
+                        $this->_request->page .= '</script>';
+                        $this->_request->page .= '<noscript>';
+                        $this->_request->page .= join('<br/>', $err);
+                        $this->_request->page .= '</noscript>';
+                    }
+                    else
+                    {
+                        if(isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
+                        {
+                            $etag = '"owr-'.md5($this->_request->page).'"';
+                            $this->_view->addHeaders(array(
+                                'Cache-Control' => 'Public, must-revalidate',
+                                "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
+                                'Etag' => $etag
+                            ), true);
+                            if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
+                            {
+                                $this->_view->setStatusCode(304, true);
+                                flush();
+                                return $this;
+                            }
+                        }
+                        $now = microtime(true);
+                        $this->_request->page .= '<!-- Execution time: '.round($now - $this->_cfg->get('begintime'), 6).'s (Request time: '. round($now - $this->_request->begintime, 6).'s => '.round(DB::getTime(), 6).'s of SQL) -->';
+                    }
+                }
+
+                unset($errors, $err);
+            }
+            else
+            {
+                if(isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
+                {
+                    $etag = '"owr-'.md5($this->_request->page).'"';
+                    $this->_view->addHeaders(array(
+                        'Cache-Control' => 'Public, must-revalidate',
+                        "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
+                        'Etag' => $etag
+                    ), true);
+                    if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
+                    {
+                        $this->_view->setStatusCode(304, true);
+                        flush();
+                        return $this;
+                    }
+                }
+
+                $now = microtime(true);
+                $this->_request->page .= '<!-- Execution time: '.round($now - $this->_cfg->get('begintime'), 6).'s (Request time: '. round($now - $this->_request->begintime, 6).'s => '.round(DB::getTime(), 6).'s of SQL, '.round(View::getTime(), 6).'s of page rendering) -->';
+            }
+            
+            $page =& $this->_request->page;
+        }
+
+        $this->_view->setStatusCode($statusCode, true);
+
+        $this->_view->render($page);
+
+        $this->_request->page = null;
+
+        return $this;
+    }
+
+    /**
+     * Adds a string to $this->_request->page
+     *
+     * @access public
+     * @param mixed $content the content to add (string if page=string, associative array if page=array)
+     */
+    public function addToPage($content)
+    {
+        if(is_array($this->_request->page))
+        {
+            $content = (array) $content;
+            foreach($content as $k=>$v)
+                $this->_request->page[$k] = (string) $v;
+        }
+        else
+        {
+            $this->_request->page .= (string) $content;
+        }
+    }
+
+    /**
+     * Redirects the user to a specific page
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $url the url to redirect
+     * @access public
+     */
+    public function redirect($url = null)
+    {
+        $url = (string) $url;
+
+        if('login' === $url)
+        {
+            $params = 'timeout=1';
+            if(isset($_SERVER['REQUEST_URI']) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest'))
+            {
+                $request = trim(Filter::iGet()->purify($_SERVER['REQUEST_URI']));
+                $current = basename($request);
+                if(false === strpos($current, 'logout') && false === strpos($current, 'login') && $this->_cfg->get('path') !== $request)
+                    $params .= '&back='.urlencode($current);
+            }
+        }
+        else
+        {
+            $params = 'token='.$this->_user->getToken();
+        }
+
+        $surl = $this->_cfg->makeURI($url, $params, false);
+
+        if(isset($_SERVER['HTTP_ACCEPT']) && 'application/json' === $_SERVER['HTTP_ACCEPT'])
+        {
+            $page = json_encode(array('location' => $surl));
+            isset($this->_view) || $this->_view = View::iGet();
+            $this->_view->render($page);
+        }
+        elseif(!$this->_isFrame && !headers_sent())
+        {
+            header('Location: '.$surl);
+        } 
+        else
+        {
+            $page = '<a href="'.$surl.'">Redirection</a>';
+            $page .= '<script type="text/javascript">';
+            $page .= $this->_isFrame ? 'window.parent.location.href="'.$surl.'";' : 'window.location.href="'.$surl.'";';
+            $page .= '</script>';
+            $page .= '<noscript>';
+            $page .= '<meta http-equiv="refresh" content="0;url='.$surl.'" />';
+            $page .= '</noscript>';
+            isset($this->_view) || $this->_view = View::iGet();
+            $this->_view->render($page);
+        }
+        exit;
+    }
+
+    /**
+     * Process the response of a Logic call
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param mixed LogicResponse the response of the 
+     */
+    public function processResponse(LogicResponse $response)
+    {
+        $status = $response->getStatus();
+        if($status)
+            View::iGet()->setStatusCode($status);
+
+        switch($response->getNext())
+        {
+            case 'redirect': // redirection
+                $this->redirect($response->getLocation()); // implicit exit
+                break;
+
+            case 'error': // error
+                $this->_request->errors = $response->getErrors();
+                $tpl = $response->getTpl();
+                if($tpl)
+                {
+                    $this->_getPage($response->getTpl(), $response->getDatas());
+                }
+                else Logs::iGet()->log($response->getError(), $response->getStatus());
+                $ret = false;
+                break;
+
+            case 'ok': // ok !
+                $ret = true;
+                $tpl = $response->getTpl();
+                if($tpl)
+                {
+                    $this->_getPage($tpl, $response->getDatas());
+                }
+                break;
+
+            default:
+                throw new Exception('Invalid return from Logic', Exception::E_OWR_DIE);
+                break;
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Returns a date in user lang from a timestamp
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param int $timestamp the timestamp to convert
+     * @return string the date
+     * @access protected
+     */
+    protected function _getDate($timestamp)
+    {
+        isset($this->_dateFormatter) ||
+        $this->_dateFormatter = new \IntlDateFormatter(
+            $this->_user->getLang(), 
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::MEDIUM
+        );
+        return $this->_dateFormatter->format((int)$timestamp);
+    }
+
+    /**
+     * Removes whitespaces characters
+     * Used for javascript response that can not handle them
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed &$contents the contents to clean, array or string
+     * @access protected
+     */
+    protected function _cleanIndent(&$contents)
+    {
+        if(is_array($contents))
+        {
+            array_walk_recursive($contents, array($this, '_cleanIndent'));
+        }
+        else
+        {
+            $contents = preg_replace('/(\s)\s+/s', "\\1", (string) $contents);
+            $contents = str_replace("\n\n", ' ', $contents);
+            $contents = str_replace("\n", ' ', $contents);
+            $contents = str_replace("\r\r", '', $contents);
+            $contents = str_replace("\r", '', $contents);
+            $contents = str_replace("\t\t", ' ', $contents);
+            $contents = str_replace("\t", ' ', $contents);
+            $contents = str_replace('  ', ' ', $contents);
+        }
+    }
+
+    /**
+     * Gets a template to display
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $tpl the name of the tpl, without the extension
+     * @param array $datas the datas to apply to the template
+     * @param boolean $return returns the template instead of rendering it
+     * @return mixed the template if $return=true, else true
+     * @access protected
+     */
+    protected function _getPage($tpl, array $datas = array(), $return = false)
+    {
+        isset($this->_view) || $this->_view = View::iGet();
+
+        $cacheTime = $this->_cfg->get('cacheTime');
+
+        $xml = $empty = false;
+        $page = '';
+        
+        switch($tpl)
+        {
+            case 'new':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                    
+                if(isset($this->_request->offset))
+                    $offset = (int)(($this->_request->offset*100) + 99);
+                else $offset = 0;
+                
+                $query = "
+    SELECT DISTINCT(n.id), rel.rssid rssid, title, link, status live, rrn.name, n.pubDate, rg.name gname, r.favicon
+        FROM news n
+        JOIN streams r ON (n.rssid=r.id)
+        JOIN news_relations rel ON (n.id=rel.newsid)
+        JOIN streams_relations_name rrn ON (rrn.rssid=n.rssid AND rrn.uid=rel.uid)
+        JOIN streams_relations rr ON (rr.rssid=rrn.rssid AND rr.uid=rel.uid)
+        JOIN streams_groups rg ON (rg.id=rr.gid AND rg.uid=rel.uid)
+        WHERE rel.uid=".$this->_user->getUid()." AND status=1
+        ORDER BY n.pubDate DESC, n.lastupd DESC
+        LIMIT {$offset},1";
+                    
+                $news = $this->_db->get($query);
+                if(!$news)
+                {
+                    $empty = true;
+                    break;
+                }
+
+                while($new = $news->fetch(\PDO::FETCH_ASSOC))
+                {
+                    $new['pubDate'] = $this->_getDate($new['pubDate']);
+                    $page .= $this->_view->get('new_title', $new, $xml, $cacheTime);
+                }
+                
+                $news->closeCursor();
+                unset($news, $new);
+                $datas['nbNews'] = $this->_request->unreads[0];
+                $pager = array('nbNews'=>$datas['nbNews'],
+                                'offset' => $offset,
+                                'sort'  => !empty($datas['sort']) ? $datas['sort'] : null,
+                                'dir'   => !empty($datas['dir']) ? $datas['dir'] : null);
+                $page .= $this->_view->get('news_tools', $pager, $xml, $cacheTime);
+            break;
+
+            case 'new_contents':
+                $query = "
+    SELECT DISTINCT(n.id), rrn.name, n.title
+        FROM news n
+        JOIN news_relations rel ON (n.id=rel.newsid)
+        JOIN streams_relations_name rrn ON (rrn.rssid=n.rssid)
+        WHERE rel.uid=".$this->_user->getUid()." AND n.id=".$datas['id']."
+        ORDER BY n.pubDate DESC, n.lastupd DESC";
+                
+                $new = $this->_db->getRow($query);
+                if(!$new->next())
+                {
+                    $empty = true;
+                    break;
+                }
+
+                $query = '
+    SELECT contents
+        FROM news_contents
+        WHERE id='.$new->id;
+                $contents = $this->_db->cGetOne($query);
+                $new->contents = (array) ($contents->next() ? unserialize($contents->contents) : '');
+                unset($contents);
+                $page .= $this->_view->get('new_contents', $new->asArray(), $xml, $cacheTime);
+                unset($new);
+            break;
+
+            case 'new_details':
+                $datas['token'] = User::iGet()->getToken();
+                $datas['details'] = array();
+                $query = '
+    SELECT contents
+        FROM news_contents
+        WHERE id='.(int)$datas['id'];
+                $contents = $this->_db->cGetOne($query);
+                if(!$contents->next()) break;
+                $datas['details'] = (array) unserialize($contents->contents);
+                unset($contents);
+                $datas['url'] = htmlspecialchars($datas['details']['url']['contents'], ENT_COMPAT, 'UTF-8');
+                $datas['title'] = htmlspecialchars($datas['details']['title']['contents'], ENT_COMPAT, 'UTF-8');
+                $datas['details']['title'] = $datas['details']['pubDate'] = $datas['details']['guid'] = $datas['details']['url'] = $datas['details']['description'] = $datas['details']['author'] = $datas['details']['encoded'] = $datas['details']['content'] = null;
+            break;
+                
+            case 'menu_part_category':
+                $datas['gname'] = $datas['name'];
+                $datas['groupid'] = $datas['gid'];
+                
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                
+                $datas['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+                $tpl = 'menu_contents';
+                break;
+                
+            case 'menu_part_group':
+                $query = '
+    SELECT DISTINCT(r.id), rr.gid AS groupid, r.url, rc.contents, r.lastupd, r.ttl, rrn.name, r.favicon, r.status
+        FROM streams r
+        JOIN streams_contents rc ON (r.id=rc.rssid)
+        JOIN streams_relations rr ON (rr.rssid=r.id)
+        JOIN streams_relations_name rrn ON (rrn.rssid=rr.rssid AND rrn.uid=rr.uid)
+        WHERE rr.uid='.$this->_user->getUid().' AND rr.gid='.(int)$datas['id'].'
+        ORDER BY name';
+                $streams = $this->_db->getAll($query);
+                if(!$streams->count())
+                {
+                    $empty = true;
+                    break;
+                }
+                
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+
+                $query = '
+    SELECT name, id
+        FROM streams_groups
+        WHERE uid='.$this->_user->getUid().'
+        ORDER BY name';
+                
+                $groups = $this->_db->getAll($query);
+                if(!$groups->count())
+                {
+                    $empty = true;
+                    break;
+                }
+
+                $streams->groups = array();
+                while($groups->next())
+                {
+                    $streams->groups->{$groups->id} = $groups->name;
+                }
+                unset($groups);
+                
+                $streams->groups = $streams->groups->asArray(); // force array
+
+                while($streams->next())
+                {
+                    $streams->contents = (array) unserialize($streams->contents);
+                    $streams->unread = (isset($this->_request->unreads[$streams->id]) ? $this->_request->unreads[$streams->id] : 0);
+                    if($streams->status > 0) 
+                    {
+                        $streams->unavailable = $this->_getDate($streams->status);
+                    }
+                    $page .= $this->_view->get('menu_streams', $streams->asArray(), $xml, $cacheTime);
+                }
+                unset($streams);
+
+                break;
+                
+            case 'menu_part_stream':
+                $query = '
+    SELECT DISTINCT(r.id), rc.contents, r.ttl, r.url
+        FROM streams r
+        JOIN streams_contents rc ON (r.id=rc.rssid)
+        JOIN streams_relations rr ON (rr.rssid=r.id)
+        WHERE rr.uid='.$this->_user->getUid().' AND r.id='.(int)$datas['id'];
+                $stream = $this->_db->getRow($query);
+                if(!$stream->next())
+                {
+                    break;
+                }
+
+                $datas['stream'] = $stream->asArray();
+                unset($stream);
+                $datas['stream']['contents'] = (array) unserialize($datas['stream']['contents']);
+                $datas['stream']['contents']['id'] = $datas['stream']['id'];
+                $datas['stream']['contents']['url'] = $datas['stream']['url'];
+                $datas['stream']['contents']['title'] = null;
+                $datas['stream']['contents']['next_refresh'] = $this->_getDate($this->_request->begintime + $datas['stream']['ttl']);
+                break;
+                
+            case 'news':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+
+                $cache = false;
+                
+                $ids = null;
+                $uid = $this->_user->getUid();
+                $order = !empty($datas['sort']) ? $datas['sort'].' '.$datas['dir'] : 'n.pubDate DESC, n.lastupd DESC';
+
+                if(isset($datas['id']) && is_array($datas['id']))
+                {
+                    if(empty($datas['id']))
+                    {
+                        $empty = true;
+                        break;
+                    }
+                    array_walk($datas['id'], 'intval');
+                    
+                    $query = '
+    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live, nr.rssid
+        FROM news_relations nr
+        JOIN news n ON (nr.newsid=n.id)
+        WHERE uid='.$uid.' AND n.id IN ('.join(',', $datas['id']).')
+        ORDER BY '.$order;
+
+                    if(isset($datas['offset']))
+                    {
+                        $datas['offset'] = (int)$datas['offset'];
+                        
+                        if($datas['offset'] > 0)
+                        {
+                            $offset = (int)($datas['offset']*10);
+                            $query .= "
+                        LIMIT {$offset},10";
+                        }
+                        else
+                        {
+                            $query .= '
+                        LIMIT 10';
+                        }
+                    }
+                    else
+                    {
+                        $query .= '
+                        LIMIT 10';
+                    }
+
+                    $datas['nbNews'] = count($datas['id']);
+                }
+                elseif(!isset($datas['id']) || !$datas['id'])
+                {
+                    $query = '
+    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
+        FROM news_relations nr
+        JOIN news n ON (nr.newsid=n.id)
+        WHERE uid='.$uid.' AND status=1
+        ORDER BY '.$order;
+
+                    if(isset($datas['offset']))
+                    {
+                        $datas['offset'] = (int)$datas['offset'];
+                        
+                        if($datas['offset'] > 0)
+                        {
+                            $offset = (int)($datas['offset']*10);
+                            $query .= "
+                        LIMIT {$offset},10";
+                        }
+                        else
+                        {
+                            $query .= '
+                        LIMIT 10';
+                        }
+                    }
+                    else
+                    {
+                        $query .= '
+                        LIMIT 10';
+                    }
+
+                    $datas['nbNews'] = $this->_request->unreads[0];
+                }
+                else
+                {
+                    try
+                    {
+                        $table = DAO::getType($datas['id']);
+                    }
+                    catch(Exception $e)
+                    {
+                        switch($e->getCode())
+                        {
+                            case Exception::E_OWR_NOTICE:
+                            case Exception::E_OWR_WARNING:
+                                Logs::iGet()->log($e->getContent(), $e->getCode());
+                                $empty = true;
+                                break 2;
+                            default: throw new Exception($e->getContent(), $e->getCode());
+                                break;
+                        }
+                    }
+                    
+                    if('streams' === $table)
+                    {
+                        $query = '
+    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
+        FROM news_relations nr
+        JOIN news n ON (nr.newsid=n.id)
+        WHERE nr.uid='.$uid.' AND nr.rssid='.(int)$datas['id'].'
+        ORDER BY '.$order;
+    
+                        if(isset($datas['offset']))
+                        {
+                            $datas['offset'] = (int)$datas['offset'];
+                            
+                            if($datas['offset'] > 0)
+                            {
+                                $offset = (int)($datas['offset']*10);
+                                $query .= "
+                            LIMIT {$offset},10";
+                            }
+                            else
+                            {
+                                $query .= '
+                            LIMIT 10';
+                            }
+                        }
+                        else
+                        {
+                            $query .= '
+                            LIMIT 10';
+                        }
+    
+                        $nbNews = $this->_db->getOne('
+    SELECT COUNT(newsid) AS nb
+        FROM news_relations
+        WHERE uid='.$uid.' AND rssid='.(int)$datas['id']);
+                        $datas['nbNews'] = $nbNews->next() ? $nbNews->nb : 0;
+                    }
+                    elseif('streams_groups' === $table)
+                    {
+                        $query = '
+    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
+        FROM news_relations nr
+        JOIN news n ON (nr.newsid=n.id)
+        JOIN streams_relations sr ON (sr.rssid=n.rssid AND sr.uid='.$uid.')
+        JOIN streams_groups rg ON (sr.gid=rg.id AND sr.uid='.$uid.')
+        WHERE nr.uid='.$uid.' AND rg.id='.(int)$datas['id'].'
+        ORDER BY '.$order;
+    
+                        if(isset($datas['offset']))
+                        {
+                            $datas['offset'] = (int)$datas['offset'];
+                            
+                            if($datas['offset'] > 0)
+                            {
+                                $offset = (int)($datas['offset']*10);
+                                $query .= "
+                            LIMIT {$offset},10";
+                            }
+                            else
+                            {
+                                $query .= '
+                            LIMIT 10';
+                            }
+                        }
+                        else
+                        {
+                            $query .= '
+                            LIMIT 10';
+                        }
+    
+                        $nbNews = $this->_db->getOne('
+    SELECT COUNT(DISTINCT(n.newsid)) AS nb
+        FROM news_relations n
+        JOIN streams_relations s ON (n.rssid=s.rssid AND s.uid=n.uid)
+        WHERE n.uid='.$uid.' AND s.gid='.(int)$datas['id']);
+                        $datas['nbNews'] = $nbNews->next() ? $nbNews->nb : 0;
+                    }
+                    else
+                    {
+                        Logs::iGet()->log('Invalid id');
+                        $empty = true;
+                        break;
+                    }
+                }
+
+                $ids = $this->_db->execute($query);
+                if(!$ids->count())
+                {
+                    $empty = true;
+                    break;
+                }
+
+                $pager = array('nbNews'=>$datas['nbNews'],
+                                'offset' => (int)$this->_request->offset,
+                                'sort'  => !empty($datas['sort']) ? $datas['sort'] : null,
+                                'dir'   => !empty($datas['dir']) ? $datas['dir'] : null);
+                $pager = $this->_view->get('news_tools', $pager, $xml, $cacheTime);
+                $page .= $pager;
+                $streams = $groups = array();
+
+                // get the related streams and groups
+                while($ids->next())
+                {
+                    if(!isset($streams[$ids->rssid]))
+                    {
+                        $query = '
+    SELECT s.favicon, srn.name, sr.gid
+        FROM streams s
+        JOIN streams_relations sr ON (s.id=sr.rssid AND sr.uid='.$uid.')
+        JOIN streams_relations_name srn ON (s.id=srn.rssid AND srn.uid='.$uid.')
+        WHERE s.id='.$ids->rssid;
+                        $stream = $this->_db->execute($query);
+                        if($stream->next())
+                        {
+                            $streams[$ids->rssid] = $stream;
+                            if(!isset($groups[$stream->gid]))
+                            {
+                                $query = '
+    SELECT name AS gname
+        FROM streams_groups
+        WHERE id='.$stream->gid.' AND uid='.$uid;
+                                $group = $this->_db->execute($query);
+                                $group->next();
+                                $groups[$stream->gid] = $group;
+                            }
+                        }
+                        else
+                        {
+                            Logs::iGet()->log("Can't get related streams/groups");
+                            break;
+                        }
+                    }
+                    $ids->name = $streams[$ids->rssid]->name;
+                    $ids->favicon = $streams[$ids->rssid]->favicon;
+                    $ids->gname = $groups[$streams[$ids->rssid]->gid]->gname;
+                    $ids->gid = $streams[$ids->rssid]->gid;
+                    if(isset($datas['searchResults'][$ids->id]))
+                        $ids->search_result = (float)$datas['searchResults'][$ids->id];
+                    $ids->pubDate = $this->_getDate($ids->pubDate);
+                    $page .= $this->_view->get('new_title', $ids->asArray(), $xml, $cacheTime);
+                }
+                
+                unset($ids, $groups, $streams);
+
+                $page .= $pager;
+                unset($pager);
+            break;
+
+            case 'menu':
+                $query = '
+    SELECT name AS gname, id AS groupid
+        FROM streams_groups
+        WHERE uid='.$this->_user->getUid().'
+        ORDER BY gname';
+                
+                $groups = $this->_db->getAll($query);
+                if(!$groups->count())
+                {
+                    $empty = true;
+                    break;
+                }
+                
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                
+                while($groups->next())
+                {
+                    $groups->unread = isset($this->_request->unreads[$groups->groupid]) ? $this->_request->unreads[$groups->groupid] : 0;
+                    $page .= $this->_view->get('menu_contents', $groups->asArray(), $xml, $cacheTime);
+                }
+                unset($groups);
+                break;
+                
+            case 'index':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                $token = $this->_user->getToken();
+                $surl = $this->_cfg->get('surl');
+                $ulang = $this->_user->getLang();
+                $uid = $this->_user->getUid();
+                $page .= $this->_view->get('header', array(
+                                                            'surl'=>$surl, 
+                                                            'xmlLang'=>$this->_user->getXMLLang(),
+                                                            'token' => $token), 
+                                                        $xml, 0);
+
+                $page .= $this->_view->get('board', array(
+                                                            'userlogin'=>$this->_user->getLogin(),
+                                                            'lang'=>$ulang,
+                                                            'surl'=>$surl,
+                                                            'token'=> $token), 
+                                                        $xml, 0);
+
+                $page .= $this->_view->get('menu_header', array('unread'=>$this->_request->unreads[0]), 
+                                                        $xml, $cacheTime);
+
+                $i = 0;
+                $query = '
+    SELECT name, id
+        FROM streams_groups
+        WHERE uid='.$this->_user->getUid().'
+        ORDER BY name';
+                
+                $group = $this->_db->getAll($query);
+
+                $groups = array();
+
+                while($group->next())
+                {
+                    $group->groupid = $group->id;
+                    $group->gname = $group->name;
+                    $group->unread = isset($this->_request->unreads[$group->id]) ? $this->_request->unreads[$group->id] : 0;
+                    $groups[$i] = $group->asArray();
+                    $page .= $this->_view->get('menu_contents', $groups[$i], $xml, $cacheTime);
+                    ++$i;
+                }
+
+                $page .= $this->_view->get('menu_footer', array(
+                                                            'groups'=>$groups, 
+                                                            'uid'=>$uid, 
+                                                            'userrights'=>$this->_user->getRights(),
+                                                            'surl'=>$surl,
+                                                            'token'=>$token,
+                                                            'maxuploadfilesize' => $this->_cfg->get('maxUploadFileSize')), 
+                                                        $xml, 0);
+                unset($groups);
+                $page .= $this->_view->get('contents_header', array(), $xml, $cacheTime);
+                $page .= $this->_getPage('news', $datas, true);
+                $page .= $this->_view->get('contents_footer', array(), $xml, $cacheTime);
+
+                $query = '
+    SELECT MIN(ttl) AS ttl
+        FROM streams s
+        JOIN streams_relations sr ON (s.id=sr.rssid)
+        WHERE sr.uid='.$this->_user->getUid();
+                $ttl = $this->_db->getOne($query);
+                $ttl->next();
+                $ttl = $ttl->ttl ?: $this->_cfg->get('defaultStreamRefreshTime');
+                $page .= $this->_view->get('footer', array(
+                                                        'ttl'=>$ttl*60*1000, 
+                                                        'lang'=>$ulang,
+                                                        'surl'=>$surl,
+                                                        'uid'=>$uid,
+                                                        'token'=>$token,
+                                                        'opensearch'=>(isset($datas['opensearch']) ? $datas['opensearch'] : 0)
+                                                        ), 
+                                                        $xml, 0);
+                break;
+            
+            case 'getopensearch':
+                $xml = true;
+                $datas['surl'] = $this->_cfg->get('surl');
+                break;
+
+            case 'opml':
+                $datas['userlogin'] = $this->_user->getLogin();
+                $datas['streams'] = array();
+                $xml = true;
+                $query = '
+                    SELECT name, id
+                        FROM streams_groups
+                        WHERE uid='.$this->_user->getUid().'
+                        ORDER BY name';
+                
+                $groups = $this->_db->getAll($query);
+                if(!$groups->count())
+                {
+                    break;
+                }
+                
+                $query = '
+    SELECT DISTINCT(r.id), r.url, rc.contents, r.lastupd, r.ttl, rrn.name
+        FROM streams r
+        JOIN streams_contents rc ON (r.id=rc.rssid)
+        JOIN streams_relations rr ON (rr.rssid=r.id)
+        JOIN streams_relations_name rrn ON (rrn.rssid=rr.rssid AND rrn.uid=rr.uid)
+        WHERE rr.uid=? AND rr.gid=?
+        ORDER BY name';
+
+                $uid = $this->_user->getUid();
+
+                while($groups->next())
+                {
+                    $groups->id = (int)$groups->id;
+
+                    if(!isset($datas['groups'][$groups->id]))
+                        $datas['groups'][$groups->id] = $groups->name;
+                    
+                    $streams = $this->_db->getAllP($query, new DBRequest(array($uid, $groups->id)));
+                    while($streams->next())
+                    {
+                        $streams->contents = (array) unserialize($streams->contents);
+                        $datas['streams'][$groups->id][] = $streams->asArray();
+                    }
+                }
+                unset($streams, $groups);
+                break;
+
+            case 'upload':
+                $cacheTime = 0;
+                $datas['surl'] = $this->_cfg->get('surl');
+                $datas['token'] = $this->_user->getToken();
+                $datas['maxuploadfilesize'] = $this->_cfg->get('maxUploadFileSize');
+                $query = "
+    SELECT id, name
+        FROM streams_groups
+        WHERE uid=".$this->_user->getUid()."
+        ORDER BY name";
+                
+                $groups = $this->_db->getAll($query);
+                if(!$groups)
+                {
+                    break;
+                }
+
+                while($groups->next())
+                {
+                    $datas['groups'][$groups->id] = $groups->name;
+                }
+                unset($groups);
+            break;
+            
+            case 'edituser':
+                $cacheTime = 0;
+                $datas['surl'] = $this->_cfg->get('surl');
+                $datas['token'] = $this->_user->getToken();
+                $datas['timezones'] = $this->_user->getTimeZones();
+                $datas['userrights'] = $this->_user->getRights();
+                if(!isset($datas['id'])) break;
+
+                $datas['id'] = (int)$datas['id'];
+                if(($this->_user->isAdmin() && $datas['id'] > 0) || 
+                    ($datas['id'] === $this->_user->getUid()))
+                {
+                    $query = '
+    SELECT login, rights, lang, email, openid, timezone
+        FROM users
+        WHERE id='.(int)$datas['id'];
+                    
+                    $user = $this->_db->getRow($query);
+                    if(!$user->next()) break; // strange :-D, surely a bug
+                    
+                    $user->timezone = $this->_user->getTimeZones($user->timezone); // check
+
+                    $datas = array_merge($user->asArray(), $datas);
+                    unset($user);
+                }
+            break;
+            
+            case 'users':
+                $datas['surl'] = $this->_cfg->get('surl');
+                $cacheTime = 0;
+                $datas['token'] = $this->_user->getToken();
+                $query = '
+    SELECT id, login, email, rights, openid
+        FROM users
+        ORDER BY rights DESC, login';
+                $users = $this->_db->getAll($query);
+                $datas['users'] = array();
+                $datas['nbusers'] = $users->count();
+                if(!$datas['nbusers']) break;
+                $datas['users'] = $users->getAllNext();
+                unset($users);
+            break;
+            
+            case 'rss':
+                $xml = true;
+                $datas['surl'] = $this->_cfg->get('surl');
+                $datas['userlogin'] = $this->_user->getLogin();
+                $query = '
+    SELECT DISTINCT(n.id), n.title, n.link, n.pubDate
+        FROM news n
+        JOIN news_relations nr ON (nr.newsid=n.id)
+        WHERE nr.uid='.$this->_user->getUid().' AND nr.status=1';
+                    
+                if(isset($datas['id']) && 0 !== (int)$datas['id'])
+                {
+                    $query .= ' AND n.rssid='.(int)$datas['id'];
+                } else $datas['id'] = 0;
+                
+                $datas['news'] = $ids = array();
+                
+                $rows = $this->_db->getAll($query);
+                while($rows->next())
+                {
+                    $ids[] = $rows->id;
+                    $query = '
+    SELECT contents
+        FROM news_contents
+        WHERE id='.$rows->id;
+                    $contents = $this->_db->cGetOne($query);
+                    $rows->contents = (array) ($contents->next() ? unserialize($contents->contents) : '');
+                    $rows->pubDate = date(DATE_RSS, $rows->pubDate);
+                    $datas['news'][] = $rows->asArray();
+                }
+                unset($contents, $rows);
+                
+                if($ids)
+                {
+                    $query = '
+    UPDATE news_relations
+        SET status=0
+        WHERE uid='.$this->_user->getUid().' AND newsid IN ('.join(',', $ids).')';
+                    $this->_db->set($query);
+                }
+            break;
+            
+            case 'login':
+                $cacheTime = 0;
+                $datas['surl'] = $this->_cfg->get('surl');
+                $datas['xmlLang'] = $this->_user->getXMLLang();
+                $datas['token'] = $this->_user->getToken();
+                $datas['back'] = $this->_request->back;
+            default: break;
+        }
+        
+        if(!empty($page))
+        {
+            if($return)
+                return $page;
+            else
+                $this->_request->page .= $page;
+        }
+        elseif(!$empty)
+        {
+            if($return) 
+                return $this->_view->get($tpl, $datas, $xml, $cacheTime);
+            else 
+                $this->_request->page .= $this->_view->get($tpl, $datas, $xml, $cacheTime);
+        }
+    }
+
+    /**
+     * Methods bellow are actions to be executed by $this->execute()
+     * They all are prefixed with do_*
+     * @access protected
+     * @return $this
+     */
+
+    /**
+     * Now functions that do not require a logic call
+     */
+
+    /**
+     * Redirects to an external operator
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_redirectoperator()
+    {
+        if(!$this->_request->id)
+            throw new Exception('Missing id', Exception::E_OWR_BAD_REQUEST);
+
+        if(!$this->_request->operator)
+            throw new Exception('Missing operator', Exception::E_OWR_BAD_REQUEST);
+
+        if('news' !== DAO::getType($this->_request->id))
+            throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+
+        $operator = new Operator($this->_request->operator);
+        $operator->redirect(DAO::getCachedDAO('news')->get($this->_request->id, 'title, link'));
+
+        return $this;
+    }
+
+    /**
+     * Renders the stream template related to the specified id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getrss()
+    {
+        isset($this->_view) || $this->_view = View::iGet();
+        $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
+        $this->_getPage('rss', array('id'=>$this->_request->id));
+        return $this;
+    }
+
+    /**
+     * Renders the unreads news count
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getlastnews()
+    {
+        return $this->do_getunread(true);
+    }
+
+    /**
+     * Renders the details of a new for a specific id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getnewdetails()
+    {
+        $this->_getPage('new_details', array('id' => $this->_request->id));
+        return $this;
+    }
+
+    /**
+     * Renders the category template for a specific id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getmenupartgroup()
+    {
+        $this->_getPage('menu_part_group', array('id'=>$this->_request->id));
+        return $this;
+    }
+
+    /**
+     * Renders the stream template for a specific id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     */
+    protected function do_getmenupartstream()
+    {
+        $this->_getPage('menu_part_stream', array('id'=>$this->_request->id));
+        return $this;
+    }
+    
+    /**
+     * Renders news template from a specific stream with a specific offset
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getstream()
+    {
+        if(0 < $this->_request->id)
+        {
+            $type = DAO::getType($this->_request->id);
+            
+            if('streams' !== $type && 'streams_groups' !== $type)
+                throw new Exception('Invalid Id', Exception::E_OWR_BAD_REQUEST);
+        }
+
+        $this->_getPage('news', array( 
+                            'id'        => $this->_request->id, 
+                            'offset'    => $this->_request->offset,
+                            'sort'      => $this->_request->sort,
+                            'dir'       => $this->_request->dir
+        ));
+        return $this;
+    }
+
+    /**
+     * Renders the count of unreads news for a specific id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getlivenews()
+    {
+        if(!$this->_request->id)
+        {
+            $query = '
+    SELECT COUNT(newsid) AS nb
+        FROM news_relations
+        WHERE status=1 AND uid='.$this->_user->getUid();
+        }
+        else
+        {
+            $type = DAO::getType($this->_request->id);
+            
+            if('streams' === $type)
+            {
+                $query = '
+    SELECT COUNT(newsid) AS nb
+        FROM news_relations
+        WHERE status=1 AND uid='.$this->_user->getUid().' AND rssid='.$this->_request->id;
+            }
+            elseif('streams_groups' === $type)
+            {
+                $query = '
+    SELECT COUNT(nr.newsid) AS nb
+        FROM news_relations nr
+        JOIN streams_relations rr ON (nr.rssid=rr.rssid)
+        WHERE status=1 AND nr.uid='.$this->_user->getUid().' AND rr.gid='.$this->_request->id;
+            }
+            else throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+        }
+        
+        $nb = $this->_db->getOne($query);
+        $this->_request->page = $nb->next() ? $nb->nb : 0;
+        return $this;
+    }
+    
+    /**
+     * Renders or sets the unreads news count
+     * This action NEEDS to be fast (called almost every page rendering)
+     * So we don't use DAO, wins a few ms
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param boolean $return $return sets instead of rendering
+     * @access protected
+     * @return $this
+     */
+    protected function do_getunread($return=false)
+    {
+        $unreads = array();
+        $unreads[0] = 0;
+        $query = '
+    SELECT COUNT(newsid) AS unread, rssid
+        FROM news_relations
+        WHERE uid='.$this->_user->getUid().' AND status=1
+        GROUP BY rssid';
+        $unreadObj = $this->_db->get($query);
+
+        if($unreadObj)
+        {
+            while($unread = $unreadObj->fetch(\PDO::FETCH_ASSOC))
+            {
+                $unreads[$unread['rssid']] = $unread['unread'];
+                $unreads[0] += $unread['unread'];
+            }
+            $unreadObj->closeCursor();
+        }
+        unset($unreadObj);
+
+        $query = '
+    SELECT COUNT(nr.newsid) AS unread, rr.gid
+        FROM news_relations nr
+        JOIN streams_relations rr ON (nr.rssid=rr.rssid)
+        WHERE nr.uid='.$this->_user->getUid().' AND nr.status=1
+        GROUP BY rr.gid';
+        
+        $unreadObj = $this->_db->get($query);
+
+        if($unreadObj)
+        {
+            while($unread = $unreadObj->fetch(\PDO::FETCH_ASSOC))
+            {
+                $unreads[$unread['gid']] = $unread['unread'];
+            }
+            $unreadObj->closeCursor();
+        }
+        unset($unreadObj);
+
+        $this->_request->unreads = array();
+
+        if(!$return)
+            $this->_request->page = $unreads;
+        else
+            $this->_request->unreads = $unreads;
+        return $this;
+    }
+
+    /**
+     * Renders the index page
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_index()
+    {
+        $this->_getPage('index');
+        return $this;
+    }
+    
+    /**
+     * Renders the list of the users
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected.
+     * @return $this
+     */
+    protected function do_getusers()
+    {
+        if(!$this->_user->isAdmin())
+            throw new Exception('You don\'t have the rights to do that.', Exception::E_OWR_UNAUTHORIZED);
+        
+        $this->_getPage('users');
+        return $this;
+    }
+
+    /**
+     * Renders the open search XML declaration
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getopensearch()
+    {
+        isset($this->_view) || $this->_view = View::iGet();
+        $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
+        $this->_getPage('getopensearch');
+        return $this;
+    }
+
+
+    /**
+     * Renders the contents of the news relative to the specified id
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getnewcontents()
+    {
+        if(!$this->_request->id)
+            throw new Exception('An id is required', Exception::E_OWR_BAD_REQUEST);
+        
+        $type = DAO::getType($this->_request->id);
+        if('news' !== $type) throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+        
+        if($this->_request->live)
+        {
+            try
+            {
+                $this->do_upnew(false, 'news');
+            }
+            catch(Exception $e)
+            {
+                switch($e->getCode())
+                {
+                    case Exception::E_OWR_NOTICE:
+                    case Exception::E_OWR_WARNING:
+                        Logs::iGet()->log($e->getContent(), $e->getCode());
+                        break;
+                    default:
+                        throw new Exception($e->getContent(), $e->getCode());
+                        break;
+                }
+            }
+        }
+        
+        $this->_getPage('new_contents', array('id'=>$this->_request->id, 'offset'=>$this->_request->offset));
+        return $this;
+    }
+    
+    /**
+     * Exports the feeds in OPML format
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getopml()
+    {
+        isset($this->_view) || $this->_view = View::iGet();
+        if(!empty($this->_request->dl))
+        {
+            $opml = $this->_getPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")), true);
+            $this->_view->addHeaders(array(
+                "Pragma" => "public",
+                "Expires" => "0",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Content-Type" => "text/x-opml; charset=UTF-8",
+                "Content-Transfer-Encoding" => "binary",
+                "Content-Length" => mb_strlen($opml, 'UTF-8'),
+                "Content-Disposition" => "attachment; Filename=\"OpenWebReader_Feedlist.opml\""
+            ));
+            $this->addToPage($opml);
+        }
+        else
+        {
+            $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=UTF-8'));
+            $this->_getPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")));
+        }
+        return $this;
+    }
+
+    /**
+     * Do some database cleaning/maintenance
+     * Must be an administrator
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_maintenance()
+    {
+        if($this->_user->getRights() < User::LEVEL_ADMIN)
+            throw new Exception('You don\'t have the rights to do this. Please ask for your administrator.', Exception::E_OWR_UNAUTHORIZED);
+
+        // remove unused streams
+        $query = '
+    DELETE FROM objects
+        WHERE id IN (
+            SELECT id FROM streams
+                WHERE id NOT IN (
+                    SELECT DISTINCT(rssid)
+                        FROM streams_relations
+                )
+        )';
+        $this->_db->set($query);
+
+        $query = '
+    DELETE FROM objects
+        WHERE id NOT IN (
+            SELECT id FROM streams)
+        AND id NOT IN (
+            SELECT id FROM streams_groups)
+        AND id NOT IN (
+            SELECT id FROM users)
+        AND id NOT IN (
+            SELECT id FROM news)';
+        $this->_db->set($query);
+        
+        $query = '
+    DELETE FROM objects
+        WHERE id IN (
+            SELECT id FROM streams
+                WHERE id NOT IN (
+                    SELECT DISTINCT(rssid) FROM streams_relations))';
+        
+        $this->_db->set($query);
+
+        $query = '
+    DELETE FROM news_contents
+        WHERE id NOT IN (
+            SELECT id
+                FROM news)';
+        
+        $this->_db->set($query);
+
+        $query = '
+    OPTIMIZE TABLES 
+        news, 
+        news_relations, 
+        objects, 
+        streams, 
+        streams_groups, 
+        streams_relations, 
+        streams_relations_name, 
+        sessions, 
+        news_contents, 
+        users, 
+        users_tokens';
+        // PDO bug : need to set method to 'query' else it trows exception
+        // http://bugs.php.net/bug.php?id=34499
+        $this->_db->set($query, null, 'query');
+
+        // we check we have at least one stream
+        // if there are none, we remove the crontab if not already empty
+        $query = '
+    SELECT COUNT(id) AS nb
+        FROM streams';
+        $res = $this->_db->getOne($query);
+        $res->next();
+        if((int) $res->nb === 0)
+        {
+            Cron::iGet()->manage('refreshstream');
+            Cron::iGet()->manage('managefavicons');
+            Cron::iGet()->manage('checkstreamsavailability');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Tries to auth user against OpenID
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_verifyopenid()
+    {// openid login
+        if(!empty($this->_request->identifier))
+        {
+            $this->_user->checkToken();
+            $login = $this->_request->identifier;
+            if(0 !== mb_strpos($login, 'http://', 0, 'UTF-8'))
+                $login = 'http://'.$login;
+            if('/' !== mb_substr($login, -1, 1, 'UTF-8'))
+                    $login .= '/'; 
+
+            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
+            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
+            $consumer = new \Auth_OpenID_Consumer($store);
+            $authRequest = $consumer->begin($login);
+            $sreg = \Auth_OpenID_SRegRequest::build(array('nickname'), array('fullname', 'email'));
+            $authRequest->addExtension($sreg);
+            $redirectURL = $authRequest->redirectURL($this->_cfg->get('openIDUrl'), $this->_cfg->get('openIDReturn').'&token='.$this->_user->getToken().
+                (isset($this->_request->back) ? '&back='.urlencode($this->_request->back) : ''));
+            if($redirectURL != null)
+            {
+                header('Location: '.$redirectURL); // Redirection vers l'OP
+                exit;
+            }
+
+            throw new Exception('Internal error while redirecting to your OP');
+        }
+        elseif(isset($this->_request->try))
+        {
+            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
+            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
+            $consumer = new \Auth_OpenID_Consumer($store);
+
+            $result = $consumer->complete($this->_cfg->get('openIDReturn'));
+            if($result->status != Auth_OpenID_SUCCESS)
+            {
+                unset($result);
+                $this->redirect('logout');
+            }
+
+            $this->do_login(false, $result->getDisplayIdentifier());
+            unset($result);
+        }
+        else
+        {
+            $this->_getPage('login');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Renders results from a search coming from the search toolbar of your favorite browser
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_opensearch()
+    {
+        if(empty($this->_request->oskeywords))
+        {
+            Logs::iGet()->log('Empty search, please fill the field !', Exception::E_OWR_BAD_REQUEST);
+            $datas = array();
+            $datas['sort'] = $this->_request->sort ?: '';
+            $datas['dir'] = $this->_request->dir ?: '';
+            $this->_getPage('index');
+            return $this;
+        }
+        
+        $query = '
+    SELECT id, MATCH(contents) AGAINST(?) AS result
+        FROM news_contents
+        WHERE id IN 
+            (SELECT newsid
+                FROM news_relations
+                WHERE uid='.$this->_user->getUid().') 
+            AND MATCH(contents) AGAINST(?)
+        ORDER BY result DESC
+        LIMIT 100'; // limit here, 100 is just enough.
+
+        $results = $this->_db->getAllP($query, 
+                    new DBRequest(array($this->_request->oskeywords, $this->_request->oskeywords)));
+        $datas = array('id' => array(), 'opensearch' => htmlspecialchars($this->_request->oskeywords, ENT_COMPAT, 'UTF-8', false));
+        if($results->count())
+        {
+            while($results->next())
+            {
+                $results->id = (int)$results->id;
+                $datas['id'][] = $results->id;
+                $datas['searchResults'][$results->id] = $results->result;
+            }
+            unset($results);
+            $datas['sort'] = $this->_request->sort ?: '';
+            $datas['dir'] = $this->_request->dir ?: '';
+            $this->_getPage('index', $datas);
+        }
+        else
+        {
+            Logs::iGet()->log('No results found. Try again by simplifying the request.', 204);
+            $datas['sort'] = $this->_request->sort ?: '';
+            $datas['dir'] = $this->_request->dir ?: '';
+            $this->_getPage('index', $datas);
+        }
+        return $this;
+    }
+
+    /**
+     * Renders results from a search
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_search()
+    {
+        if(empty($this->_request->keywords))
+        {
+            throw new Exception('Empty search, please fill the field !', Exception::E_OWR_BAD_REQUEST);
+            return $this;
+        }
+        
+        $query = '
+    SELECT id, MATCH(contents) AGAINST(?) result
+        FROM news_contents
+        WHERE id IN 
+            (SELECT newsid
+                FROM news_relations
+                WHERE uid='.$this->_user->getUid().') 
+            AND MATCH(contents) AGAINST(?)
+        ORDER BY result DESC
+        LIMIT 100'; // limit here, 100 is just enough.
+
+        $results = $this->_db->getAllP($query, 
+                    new DBRequest(array($this->_request->keywords, $this->_request->keywords)));
+
+        if($results->count())
+        {
+            $datas = array();
+            while($results->next())
+            {
+                $results->id = (int)$results->id;
+                $datas['id'][] = $results->id;
+                $datas['searchResults'][$results->id] = $results->result;
+            }
+            unset($results);
+            $datas['offset'] = $this->_request->offset;
+            $datas['sort'] = $this->_request->sort ?: '';
+            $datas['dir'] = $this->_request->dir ?: '';
+            $this->_getPage('news', $datas);
+        }
+        else
+        {
+            View::iGet()->setStatusCode(204); // no content
+        }
+        return $this;
+    }
+
+    /**
+     * Requires a call to a logic from here
+     */
+
+    /**
+     * Changes the user interface language
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_changelang()
+    {
+        Logic::getCachedLogic('users')->changeLang($this->_request);
+        $this->processResponse($this->_request->getResponse());
+        return $this;
+    }
+
+    /**
+     * Tries to auth user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param boolean $auto automatic auth (gateway mode)
+     * @param string $openid OpenID authentication, optionnal
+     * @access protected
+     * @return $this
+     */
+    protected function do_login($auto=false, $openid=null)
+    {
+        $exists = DAO::getCachedDAO('users')->get(null, 'COUNT(id) AS nb');
+        
+        if(!$exists || !$exists->nb)
+        {
+            $this->_user->reset();
+            $this->_getPage('edituser', array('id'=>0));
+            return $this;
+        }
+        unset($exists);
+        
+        if(!$auto && empty($_POST) && !isset($openid))
+        {
+            $datas = array();
+            if(isset($this->_request->timeout)) $datas['error'] = 'Session timeout';
+            if(isset($this->_request->back)) $datas['back'] = $this->_request->back;
+            $this->_user->reset();
+            $this->_getPage('login', $datas);
+            return $this;
+        }
+        
+        $uid = 0;
+        
+        if($auto)
+        {
+            if(!$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, $this->_request->do))
+            {
+                $this->_user->reset();
+                $this->_getPage('login', array('error'=>'Invalid token'));
+                return $this;
+            }
+        }
+        elseif($openid)
+        {
+            $token = $this->_user->getToken();
+            // check HTTP User-Agent and token
+            if(($this->_user->getAgent() !== md5($token.
+            (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'X'))) ||
+            $this->_request->token !== $token)
+            {
+                $this->_user->reset();
+                $this->_getPage('login', array('error'=>'Invalid token'));
+                return $this;
+            }
+            $this->_user->openIdAuth($openid);
+        }
+        else
+        {
+            $isLogged = $this->_user->isLogged();
+            if(!$this->_user->checkToken())
+            {
+                $this->_user->reset();
+                $this->_getPage('login', array('error'=>'Invalid token'));
+                return $this;
+            }
+            
+            if(empty($this->_request->login) || empty($this->_request->passwd))
+            {
+                $this->_user->reset();
+                $this->_getPage('login', array('error'=>'Please fill all the fields.'));
+                return $this;
+            }
+            elseif(mb_strlen($this->_request->login, 'UTF-8') > 55)
+            {
+                $this->_user->reset();
+                $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
+                return $this;
+            }
+            
+            $this->_user->auth($this->_request->login, md5($this->_request->login.$this->_request->passwd));
+
+            unset($this->_request->passwd);
+        }
+        
+        $uid = $this->_user->getUid();
+
+        if(!$uid)
+        {
+            $this->_user->reset();
+            $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
+            return $this;
+        }
+        
+        if(!$auto)
+        { // we set the session only if it is NOT a token login
+        // because actions for this type of login is restricted and will always need
+        // token and key passed by get or post
+        // Also, we do not regenerate session id for case that the user already is logged
+        // and is trying to log in again (for opensearch by example)
+            if(!isset($isLogged) || !$isLogged)
+            {
+                $this->_sh->regenerateSessionId(true);
+                $this->_user->reg(); // need to link back $_SESSION['User'] and the current user
+                $this->_user->regenerateToken();
+            }
+            $this->redirect(isset($this->_request->back) ? $this->_request->back : null);
+        }
+        return $this;
+    }
+
+    /**
+     * Logout the user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param boolean $redirect redirects the user to the login page
+     * @access protected
+     * @return $this
+     */
+    protected function do_logout($redirect=true)
+    {
+        $this->_user->reset();
+        $_SESSION = array();
+        
+        $session = session_name();
+        $sessid = session_id();
+
+        foreach(array('uid', 'tlogin', 'key', $session) as $name)
+        {
+            if(isset($_COOKIE[$name])) 
+            {
+                setcookie($name, '', $this->_request->begintime - 42000, $this->_cfg->get('path'), $this->_cfg->get('url'), $this->_cfg->get('httpsecure'), true);
+            }
+        }
+        
+        if($sessid) session_destroy();
+        
+        unset($sessid);
+        if($redirect)
+            $this->redirect('login');
+        return $this;
+    }
+
+    /**
+     * Moves a stream into another category
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_move()
+    {
+        Logic::getCachedLogic('streams')->move($this->_request);
+        $this->processResponse($this->_request->getResponse());
+        return $this;
+    }
+
+    /**
+     * Deletes object(s)
+     * If no id is specified, we deletes everything related to the user but not the user himself
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_delete()
+    {
+        if(!$this->_request->id)
+        {
+            Logic::getCachedLogic('users')->deleteRelated($this->_request);
+            if(!$this->processResponse($this->_request->getResponse())) return $this;
+        }
+        else
+        {
+            $type = DAO::getType($this->_request->id);
+
+            switch($type)
+            {
+                case 'users':
+                    Logic::getCachedLogic('users')->delete($this->_request);
+                    if(!$this->processResponse($this->_request->getResponse())) return $this;
+                    $escape = true;
+                    break;
+
+                case 'news':
+                case 'streams':
+                case 'streams_groups':
+                    $tpl = 'news';
+                    Logic::getCachedLogic($type)->delete($this->_request);
+                    if(!$this->processResponse($this->_request->getResponse())) return $this;
+                    break;
+
+                default:
+                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                    break;
+            }
+        }
+        
+        if(!isset($escape) && (!$this->_request->currentid || $this->_request->id === $this->_request->currentid))
+        {
+            $this->_getPage('news', array('id' => 0, 'sort' => $this->_request->sort ?: '', 'dir' => $this->_request->dir ?: ''));
+        } 
+
+        return $this;
+    }
+    
+    /**
+     * Adds a stream and redirects the user to the index
+     * Used by externals call
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_add()
+    {
+        $this->do_editstream();
+       
+        $this->redirect();
+        return $this;
+    }
+    
+    /**
+     * Adds a stream
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $url the url of the stream, optionnal
+     * @param boolean $escapeNews must-we insert the parsed news ?
+     * @access protected
+     * @return $this
+     */
+    protected function do_editstream($url = null, $escapeNews = false)
+    {
+        $this->_request->url = $url ?: $this->_request->url;
+        $this->_request->escapeNews = $escapeNews;
+        $this->_request->escape = isset($url);
+
+        Logic::getCachedLogic('streams')->edit($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+    
+    /**
+     * Adds/Edits a category
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $name the name of the category, optionnal
+     * @access protected
+     * @return $this
+     */
+    protected function do_editstreamgroup($name = null)
+    {
+        $this->_request->name = $name ?: $this->_request->name;
+        $this->_request->new = false;
+        $this->_request->escape = isset($name);
+
+        Logic::getCachedLogic('streams_groups')->edit($this->_request);
+        if(!$this->processResponse($this->_request->getResponse())) return $this;
+
+        if(!isset($name))
+        {
+            $contents = array('id' => $this->_request->id);
+            if($this->_request->new)
+                $contents['menu'] = $this->_getPage('menu_part_category', array('gid'=>$this->_request->id, 'name'=>$this->_request->name), true);
+            $this->_request->page = array();
+            $this->addToPage($contents);
+        }
+
+        return $this;
+    }
+    
+    /**
+     * Adds streams from OPML input
+     * If an url is passed, we'll try to get the opml remote file
+     * else it is an uploaded file
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param $url the url of the OPML file, optional
+     * @access protected
+     * @return $this
+     */
+    protected function do_editopml($url = null)
+    {
+        $this->_isFrame = true;
+        $this->_request->url = $url ?: $this->_request->url;
+        $this->_request->escape = isset($url);
+
+        Logic::getCachedLogic('streams')->editOPML($this->_request);
+        if(!$this->processResponse($this->_request->getResponse())) return $this;
+
+        if(!$this->_request->getResponse()->getTpl())
+            $this->redirect();
+        return $this;
+    }
+
+    /**
+     * Renders REST auth tokens
+     * We'll generate it if it does not exists
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_regeneraterestauthtoken()
+    {
+        $tokensObj = DAO::getCachedDAO('users_tokens')->get('restauth', 'token AS tlogin, token_key AS tlogin_key');
+        if(!$tokensObj)
+        {
+            $tokens = $this->_user->regenerateActionToken('restauth');
+        }
+        else $tokens = (array)$tokensObj;
+
+        unset($tokensObj);
+        $return = 'uid:'.$this->_user->getUid().';tlogin:'.$tokens['tlogin'].';key:'.$tokens['tlogin_key'];
+        unset($tokens);
+        $this->addToPage($return);
+        return $this;
+    }
+
+    /**
+     * Renders the stream gateway token
+     * We'll generate it if it does not exists
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_regeneratersstoken()
+    {
+        $tokensObj = DAO::getCachedDAO('users_tokens')->get($this->_request->do, 'token AS tlogin, token_key AS tlogin_key');
+        if(!$tokensObj)
+        {
+            $tokens = $this->_user->regenerateActionToken('getrss');
+        }
+        else $tokens = (array)$tokensObj;
+
+        unset($tokensObj);
+        
+        $url = $this->_cfg->get('surl').'?do=getrss&uid='.$this->_user->getUid().'&tlogin='.$tokens['tlogin'].'&key='.$tokens['tlogin_key'];
+        unset($tokens);
+        $this->addToPage($url);
+        return $this;
+    }
+
+    /**
+     * Renders an OPML gateway token
+     * We'll generate it if it does not exists
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_regenerateopmltoken()
+    {
+        $tokensObj = DAO::getCachedDAO('users_tokens')->get($this->_request->do, 'token AS tlogin, token_key AS tlogin_key');
+        if(!$tokensObj)
+        {
+            $tokens = $this->_user->regenerateActionToken('getopml');
+        }
+        else $tokens = (array)$tokensObj;
+        
+        unset($tokensObj);
+        
+        $url = $this->_cfg->get('surl').'?do=getopml&uid='.$this->_user->getUid().'&tlogin='.$tokens['tlogin'].'&key='.$tokens['tlogin_key'];
+        unset($tokens); 
+        $this->addToPage($url);
+        return $this;
+    }
+
+    /**
+     * Tries to refresh stream(s)
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_refreshstream()
+    {
+        Logic::getCachedLogic('streams')->refresh($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+    
+
+    /**
+     * Update new(s) status (read/unread)
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param boolean $display must-we render something ?
+     * @param string the name of the table corresponding to the specified id, optionnal
+     * @access protected
+     * @return $this
+     */
+    protected function do_upnew($display=true, $table='')
+    {
+        Logic::getCachedLogic('news')->update($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+    
+    /**
+     * Delete all news relations between the user and a specified stream/category
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_clearstream()
+    {
+        Logic::getCachedLogic('streams')->clear($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+    
+    /**
+     * Adds/Edits a user
+     * Must be an administrator to add or edit another user
+     * If no users are detected, we set the user automaticly as an administrator
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_edituser()
+    {
+        Logic::getCachedLogic('users')->edit($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+
+    /**
+     * Renames a stream/category
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_rename()
+    {
+        if(!$this->_request->id)
+        {
+            $this->processResponse(new LogicResponse(array(
+                'do'        => 'warning',
+                'error'     => 'Invalid id',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+        
+        if(empty($this->_request->name))
+        {
+            $this->processResponse(new LogicResponse(array(
+                'do'        => 'warning',
+                'error'     => 'Missing name',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+
+        $type = DAO::getType($this->_request->id);
+        $obj = null;
+        switch($type)
+        {
+            case 'streams':
+                Logic::getCachedLogic('streams')->rename($this->_request);
+                if(!$this->processResponse($this->_request->getResponse())) return $this;
+                break;
+            
+            case 'streams_groups':
+                Logic::getCachedLogic('streams_groups')->rename($this->_request);
+                if(!$this->processResponse($this->_request->getResponse())) return $this;
+                break;
+
+            default:
+                $this->processResponse(new LogicResponse(array(
+                    'do'        => 'warning',
+                    'error'     => 'Invalid id',
+                    'status'    => Exception::E_OWR_BAD_REQUEST
+                )));
+                break;
+        }
+
+        return $this;
+    }
+}

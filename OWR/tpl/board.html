@@ -1,0 +1,13 @@
+        <div id="board" class="bottom_rounded shadow">
+            <a href="<?php echo OWR\Config::iGet()->makeURI('logout');?>" class="logout left backgrounded opac" title="<?php echo htmlentities($userlogin, ENT_COMPAT, 'UTF-8').' - '.$this->_utilities->_('Logout');?>"></a>
+<?php       if('fr_FR' === $lang) { ?>
+            <a href="javascript:;" class="lang_us left backgrounded opac" onclick="rP.setLang('en_US');" title="<?php echo $this->_utilities->_('Change the interface language').' ('.$this->_utilities->_('English');?>)"></a>
+<?php       }else{ ?>
+            <a href="javascript:;" class="lang_fr left backgrounded opac" onclick="rP.setLang('fr_FR');" title="<?php echo $this->_utilities->_('Change the interface language').' ('.$this->_utilities->_('French');?>)"></a>
+<?php       } ?>
+            <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearLogs();" title="<?php echo $this->_utilities->_('Clear logs');?>"></a>
+            <div id="logs_container"><ul id="logs"></ul></div>
+            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'token='.$token);?>">
+            <img id="logo" class="logo right" src="<?php echo $surl;?>images/images.php?f=owr_loading.gif" alt="OpenWebReader" title="OpenWebReader - <?php echo $this->_utilities->_('Home');?>"/>
+            </a>
+        </div>

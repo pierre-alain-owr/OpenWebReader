@@ -1,0 +1,17 @@
+        <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php"></script>
+        <script type="text/javascript">
+            var rP = {};
+            window.addEvent('domready', function(){ 
+<?php
+            echo 'rP = new OWR("'.$lang.'", '.$ttl.', "'.$token.'", "'.($opensearch ?: '0').'");';
+?>
+                window.addEvent('beforeunload', function (){ return rP.confirmExit(); });
+                window.addEvent('unload', function(){ rP.clear(); });
+                var s = new Element('script');
+                s.set('type', 'text/javascript');
+                s.set('src', 'http://s7.addthis.com/js/250/addthis_widget.js?domready=1');
+                $('menu').adopt(s);
+            });
+        </script>
+    </body>
+</html>

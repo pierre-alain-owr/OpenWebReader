@@ -1,0 +1,58 @@
+RewriteEngine On
+
+# forbidden
+RewriteBase /OWR
+RewriteRule ^OWR/.* index.php [R=301,L]
+# same, forbidden
+RewriteBase /OWR
+RewriteRule ^install/.* index.php [R=301,L]
+# don't want any index.php in the url
+# only for GET requests
+# RewriteBase /OWR
+# RewriteCond ${REQUEST_METHOD} =GET
+# RewriteRule ^index.php$ ./ [R=301,L]
+# base service
+# RewriteBase /OWR
+# RewriteRule ^index(/(.*))?$ index.php/$2 [QSA,L]
+# rest service
+RewriteBase /OWR
+RewriteRule ^rest(/(.*))?$ rest.php/$2 [QSA,L]
+# internal redirect /action to ?do=action
+# uncomment here for uri style = 'action'
+#RewriteBase /OWR
+#RewriteRule ^([a-zA-Z_]+)$ ?do=$1 [QSA,L]
+
+
+
+# <VirtualHost *:80>
+#         DocumentRoot /var/www/OWR/
+#         ServerName owr.localhost
+# 
+#         RewriteCond %{REQUEST_FILENAME} !-f
+#         RewriteCond %{REQUEST_FILENAME} !-d
+#         RewriteRule ^rest(/(.*))?$ rest.php/$2 [L]
+# 
+#         <Directory /var/www/OWR/>
+#                 Options -Indexes FollowSymLinks
+#                 AllowOverride None
+#                 Order allow,deny
+#                 allow from all
+#         </Directory>
+# 
+#          <Directory "/var/www/OWR/OWR/">
+#                 Order deny,allow
+#                 Deny from all
+#         </Directory>
+# 
+#         <Directory "/var/www/install/">
+#                 Order deny,allow
+#                 Deny from all
+#         </Directory>
+# 
+#         ErrorLog /var/log/apache2/error.log
+#         # Possible values include: debug, info, notice, warn, error, crit,
+#         # alert, emerg.
+#         LogLevel warn
+# 
+#         CustomLog /var/log/apache2/access.log combined
+# </VirtualHost>

@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $xmlLang;?>">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+        <link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php" type="text/css" media="screen" />
+        <link rel="icon" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png" />
+        <link rel="shortcut icon" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png" />
+        <title>OpenWebReader - <?php echo $this->_utilities->_('Restricted access');?></title>
+    </head>
+    <body>
+        <div id="login" class="full_rounded shadow">
+            <a href="http://openwebreader.org/">
+            <img class="logo right" src="<?php echo $surl;?>images/images.php?f=owr_50_50.png" alt="OpenWebReader" title="OpenWebReader - http://openwebreader.org"/>
+            </a>
+            <form action="<?php echo OWR\Config::iGet()->makeURI('login');?>" method="post">
+                <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
+                <input type="hidden" name="back" id="back" value="<?php echo $back;?>"/>
+                <fieldset>
+                    <legend><?php echo $this->_utilities->_('Authentication');?></legend>
+<?php   if(isset($error)){ echo '<p class="error">'.$error.'</p>';} ?>
+                    <label for="login"><?php echo $this->_utilities->_('Login');?> :</label>
+                    <br />
+                    <input type="text" name="login" maxlength="55" size="31" id="login" />
+                    <br />
+                    <label for="passwd"><?php echo $this->_utilities->_('Password');?> :</label>
+                    <br />
+                    <input type="password" name="passwd" size="31" id="passwd" />
+                    <br />
+                    <input type="submit" name="submit"/>
+                </fieldset>
+            </form>
+        </div>
+        <div id="loginOpenID" class="full_rounded shadow">
+            <form action="<?php echo OWR\Config::iGet()->makeURI('verifyOpenId');?>" method="post">
+                <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
+                <input type="hidden" name="back" id="back" value="<?php echo $back;?>"/>
+                <fieldset>
+                    <legend>OpenID</legend>
+<?php   if(isset($openIDerror)){ echo '<p class="error">'.$openIDerror.'</p>';} ?>
+                    <input class="openid" type="texte" size="31" name="identifier"/>
+                    <br />
+                    <input type="submit"/>
+                </fieldset>
+            </form>
+        </div>
+    </body>
+</html>

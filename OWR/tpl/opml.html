@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<opml version="1.0">
+    <head>
+        <title>OpenWebReader Feeds List</title>
+        <dateCreated><?php echo $dateCreated;?></dateCreated>
+        <dateModified><?php echo $dateCreated;?></dateModified>
+        <ownerName><?php echo $userlogin;?></ownerName>
+    </head>
+    <body>
+<?php
+    $gcount = 0;
+    foreach($streams as $gname => $gstreams) {
+        if(count($gstreams)>0) {
+            if('Root' !== $gname) {
+                ++$gcount;
+                if(!isset($currentgroup)) {
+                    echo '
+                    <outline 
+                        title="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        text="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        description="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        type="folder">';
+                } elseif($currentgroup !== $gname) {
+                    echo '
+                    </outline>
+                    <outline 
+                        title="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        text="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        description="'.OWR\Strings::toXML($groups[$gname]).'" 
+                        type="folder">';
+                }
+                $currentgroup = $gname;
+            }elseif(isset($currentgroup)){
+                unset($currentgroup);
+                echo '</outline>';
+            }
+            foreach($gstreams as $stream) {
+                echo '
+                <outline 
+                    title="'.OWR\Strings::toXML($stream['name']).'" 
+                    text="'.OWR\Strings::toXML($stream['name']).'" 
+                    description="'./*var_export($stream['contents']['description'],true)*/(isset($stream['contents']['description']) && !empty($stream['contents']['description']['contents']) ?
+                    OWR\Strings::toXML(is_array($stream['contents']['description']['contents']) ? $stream['contents']['description']['contents'][0] : $stream['contents']['description']['contents']) : OWR\Strings::toXML($stream['name'])).'" 
+                    type="'.(isset($stream['contents']['version']) && $stream['contents']['version'] === 'atom' ? 'pie' : 'rss').'"
+                    xmlUrl="'.OWR\Strings::toXML($stream['url']).'"/>';
+            }
+        }
+    }
+    if($gcount>0) {
+        echo '</outline>';
+    } ?>
+    </body>
+</opml>
