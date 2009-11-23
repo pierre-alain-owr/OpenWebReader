@@ -49,23 +49,27 @@ use OWR\Controller as C,
     OWR\View as View,
     OWR\DAO as DAO,
     OWR\XML as XML,
-    OWR\Logic\Response as LogicResponse;
+    OWR\Logic\Response as LogicResponse,
+    OWR\Cron as Cron,
+    OWR\Logic as Logic;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
- * @uses DAO deals with database
- * @uses Config the config instance
- * @uses Singleton implements the singleton pattern
- * @uses DB the database link
- * @uses View the page renderer
- * @uses Session session managing
- * @uses Rest\Request the request to execute
- * @uses User the current user
- * @uses Exception the exceptions handler
- * @uses Error the errors handler
- * @uses DBRequest a request sent to database
- * @uses Log the logs/errors storing object
- * @uses XML serialize/unserialize XML datas
+ * @uses OWR\DAO deals with database
+ * @uses OWR\Config the config instance
+ * @uses OWR\Singleton implements the singleton pattern
+ * @uses OWR\DB the database link
+ * @uses OWR\View the page renderer
+ * @uses OWR\Session session managing
+ * @uses OWR\Rest\Request the request to execute
+ * @uses OWR\User the current user
+ * @uses OWR\Exception the exceptions handler
+ * @uses OWR\Error the errors handler
+ * @uses OWR\DBRequest a request sent to database
+ * @uses OWR\Log the logs/errors storing object
+ * @uses OWR\XML serialize/unserialize XML datas
+ * @uses OWR\Cron adds/modify crontab
+ * @uses OWR\Logic the main Logic object
  * @package OWR
  * @subpackage Rest
  */
@@ -107,6 +111,8 @@ class Controller extends C
             throw new Exception($e->getContent(), 503);
         }
         $this->_user = User::iGet();
+
+        $this->_cron = Cron::iGet();
     }
     
     /**
@@ -240,7 +246,7 @@ class Controller extends C
                 default:
                     break;
             }
-            throw new Exception($e->getContent(), $e->getCode());
+            throw new Exception($e->getContent(), $status);
         }
 
         return $this;
@@ -422,7 +428,8 @@ class Controller extends C
 
         if('text/html' === $this->_request->getHTTPAccept())
         {
-            $this->_request->page = parent::_getPage($tpl, $datas, $return);
+            if($return) return parent::_getPage($tpl, $datas, $return);
+            else $this->_request->page = parent::_getPage($tpl, $datas, $return);
             return;
         }
 
@@ -431,84 +438,55 @@ class Controller extends C
         
         switch($tpl)
         {
-            case 'new':
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-                    
-                if(isset($this->_request->offset))
-                    $offset = (int)(($this->_request->offset*100) + 99);
-                else $offset = 0;
-                
-                $query = "
-    SELECT DISTINCT(n.id), rel.rssid rssid, title, link, status live, rrn.name, n.pubDate, rg.name gname, r.favicon
-        FROM news n
-        JOIN streams r ON (n.rssid=r.id)
-        JOIN news_relations rel ON (n.id=rel.newsid)
-        JOIN streams_relations_name rrn ON (rrn.rssid=n.rssid AND rrn.uid=rel.uid)
-        JOIN streams_relations rr ON (rr.rssid=rrn.rssid AND rr.uid=rel.uid)
-        JOIN streams_groups rg ON (rg.id=rr.gid AND rg.uid=rel.uid)
-        WHERE rel.uid=".$this->_user->getUid()." AND status=1
-        ORDER BY n.pubDate DESC, n.lastupd DESC
-        LIMIT {$offset},1";
-                    
-                $news = $this->_db->get($query);
-                if(!$news)
-                {
-                    $empty = true;
-                    break;
-                }
-
-                while($new = $news->fetch(\PDO::FETCH_ASSOC))
-                {
-                    $new['pubDate'] = $this->_getDate($new['pubDate']);
-                    $page['news'][] = $new;
-                }
-                
-                $news->closeCursor();
-                unset($news, $new);
-                $page['nbNews'] = $this->_request->unreads[0];
-            break;
-
             case 'new_contents':
-                $query = "
-    SELECT DISTINCT(n.id), rrn.name, n.title
-        FROM news n
-        JOIN news_relations rel ON (n.id=rel.newsid)
-        JOIN streams_relations_name rrn ON (rrn.rssid=n.rssid)
-        WHERE rel.uid=".$this->_user->getUid()." AND n.id=".$datas['id']."
-        ORDER BY n.pubDate DESC, n.lastupd DESC";
-                
-                $new = $this->_db->getRow($query);
-                if(!$new->next())
+                $request = new Request($datas);
+                Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
-                    $empty = true;
-                    break;
+                    $page = $response->getDatas();
                 }
-
-                $query = '
-    SELECT contents
-        FROM news_contents
-        WHERE id='.$new->id;
-                $contents = $this->_db->cGetOne($query);
-                $new->contents = (array) ($contents->next() ? unserialize($contents->contents) : '');
-                unset($contents);
-                $page['contents'] = $new->asArray();
-                unset($new);
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
             break;
 
             case 'new_details':
                 $page['details'] = array();
-                $query = '
-    SELECT contents
-        FROM news_contents
-        WHERE id='.(int)$datas['id'];
-                $contents = $this->_db->cGetOne($query);
-                if(!$contents->next()) break;
-                $page['details'] = (array) unserialize($contents->contents);
-                unset($contents);
-                $page['url'] = urlencode($page['details']['link']['contents']);
-                $page['title'] = urlencode($page['details']['title']['contents']);
-                $page['details']['title'] = $page['details']['link'] = $page['details']['pubDate'] = $page['details']['guid'] = $page['details']['url'] = $page['details']['description'] = $page['details']['author'] = $page['details']['encoded'] = null;
+                $request = new Request($datas);
+                Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $data = $response->getDatas();
+                    $page['url'] = htmlspecialchars($data['link'], ENT_COMPAT, 'UTF-8');
+                    $page['title'] = htmlspecialchars($data['title'], ENT_COMPAT, 'UTF-8');
+                    foreach($data['contents'] as $k => $content)
+                    {
+                        switch($k)
+                        {
+                            case 'description':
+                            case 'content':
+                            case 'encoded':
+                            case 'url':
+                            case 'title':
+                                break;
+
+                            default:
+                                $page['details'][$k] = $content;
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
             break;
                 
             case 'menu_part_category':
@@ -571,28 +549,27 @@ class Controller extends C
                     {
                         $streams->unavailable = $this->_getDate($streams->status);
                     }
-                    $page['groups'][] = $streams->asArray();
+                    $page['streams'][] = $streams->asArray();
                 }
                 unset($streams);
 
                 break;
                 
             case 'menu_part_stream':
-                $query = '
-    SELECT DISTINCT(r.id), r.url, rc.contents, r.ttl
-        FROM streams r
-        JOIN streams_contents rc ON (r.id=rc.rssid)
-        JOIN streams_relations rr ON (rr.rssid=r.id)
-        WHERE rr.uid='.$this->_user->getUid().' AND r.id='.(int)$datas['id'];
-                $stream = $this->_db->getRow($query);
-                if(!$stream->next())
+                $request = new Request($datas);
+                Logic::getCachedLogic('streams')->view($request);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
-                    break;
+                    $page['stream'] = $response->getDatas();
+                    $page['stream']['nextRefresh'] = $this->_getDate($this->_request->begintime + $page['stream']['ttl']);
                 }
-
-                $page['stream'] = $stream->asArray();
-                $page['stream']['contents'] = (array) unserialize($page['stream']['contents']);
-                unset($stream);
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
                 break;
                 
             case 'news':
@@ -838,36 +815,48 @@ class Controller extends C
             break;
 
             case 'menu':
-                $query = '
-    SELECT name AS gname, id AS groupid
-        FROM streams_groups
-        WHERE uid='.$this->_user->getUid().'
-        ORDER BY gname';
-                
-                $groups = $this->_db->getAll($query);
-                if(!$groups->count())
+                $request = new Request($datas);
+                Logic::getCachedLogic('streams_groups')->view($request);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
+                    if(empty($this->_request->unreads))
+                        $this->do_getunread(true);
+                    $datas = $response->getDatas();
+                    if(empty($datas))
+                    {
+                        $empty = true;
+                        break;
+                    }
+                    
+                    foreach($datas as $data)
+                    {
+                        $data['gid'] = $data['id'];
+                        $data['gname'] = $data['name'];
+                        $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
+                        unset($data['id'], $data['name']);
+                        $page['groups'][] = $data;
+                    }
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
                     $empty = true;
-                    break;
                 }
-                
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-                
-                while($groups->next())
-                {
-                    $groups->unread = isset($this->_request->unreads[$groups->groupid]) ? $this->_request->unreads[$groups->groupid] : 0;
-                    $page['groups'][] = $groups->asArray();
-                }
-                unset($groups);
+                unset($response, $request);
                 break;
                 
             case 'index':
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
 
-                $page += $this->_getPage('menu', $datas, true);
-                $page += $this->_getPage('news', $datas, true);
+                $groups = $this->_getPage('menu', $datas, true);
+                $page['groups'] = $groups['groups'];
+                unset($groups);
+
+                $news = $this->_getPage('news', $datas, true);
+                $page['news'] = $news['news'];
+                unset($news);
 
                 $query = '
     SELECT MIN(ttl) AS ttl
@@ -877,168 +866,119 @@ class Controller extends C
                 $ttl = $this->_db->getOne($query);
                 $ttl->next();
                 $ttl = $ttl->ttl ? $ttl->ttl : $this->_cfg->get('defaultStreamRefreshTime');
-                $page += array(
-                            'ttl'=>$ttl*60*1000, 
-                            'lang'=>$this->_user->getLang(),
-                            'surl'=>$this->_cfg->get('surl'),
-                            'sort'=>$datas['sort'],
-                            'dir'=>$datas['dir'],
-                            'uid'=>$this->_user->getUid()
-                );
+                $page['ttl'] = $ttl->ttl ? $ttl->ttl : $this->_cfg->get('defaultStreamRefreshTime');
+                $page['lang'] = $this->_user->getLang();
+                $page['sort'] = $datas['sort'];
+                $page['dir'] = $datas['dir'];
+                $page['uid'] = $this->_user->getUid();
                 break;
 
             case 'opml':
+                $page['dateCreated'] = $datas['dateCreated'];
                 $page['userlogin'] = $this->_user->getLogin();
                 $page['streams'] = array();
                 $xml = true;
-                $query = '
-                    SELECT name, id
-                        FROM streams_groups
-                        WHERE uid='.$this->_user->getUid().'
-                        ORDER BY name';
-                
-                $groups = $this->_db->getAll($query);
-                if(!$groups->count())
+                $request = new Request(array('id'=>null));
+                Logic::getCachedLogic('streams')->view($request);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
-                    break;
-                }
-                
-                $query = '
-    SELECT DISTINCT(r.id), r.url, rc.contents, r.lastupd, r.ttl, rrn.name
-        FROM streams r
-        JOIN streams_contents rc ON (r.id=rc.rssid)
-        JOIN streams_relations rr ON (rr.rssid=r.id)
-        JOIN streams_relations_name rrn ON (rrn.rssid=rr.rssid AND rrn.uid=rr.uid)
-        WHERE rr.uid=? AND rr.gid=?
-        ORDER BY name';
-
-                while($groups->next())
-                {
-                    $groups->id = (int)$groups->id;
-
-                    if(!isset($page['groups'][$groups->id]))
-                        $page['groups'][$groups->id] = $groups->name;
-                    
-                    $streams = $this->_db->getAllP($query, new DBRequest(array($this->_user->getUid(), $groups->id)));
-                    while($streams->next())
+                    $streams = $response->getDatas();
+                    if(empty($streams)) break;
+                    $args = array();
+                    foreach($streams as $stream)
                     {
-                        $streams->contents = (array) unserialize($streams->contents);
-                        $page['streams'][$groups->id][] = $streams->asArray();
+                        if(!isset($page['groups'][$stream['gid']]))
+                            $page['groups'][$stream['gid']] = $stream['gname'];
+                        $page['streams'][$stream['gid']][] = $stream;
                     }
                 }
-                unset($streams, $groups);
-                break;
-                
-
-            case 'upload':
-                $page['surl'] = $this->_cfg->get('surl');
-                $page['token'] = $this->_user->getToken();
-                $page['maxuploadfilesize'] = $this->_cfg->get('maxUploadFileSize');
-                $query = "
-    SELECT id, name
-        FROM streams_groups
-        WHERE uid=".$this->_user->getUid()."
-        ORDER BY name";
-                
-                $groups = $this->_db->getAll($query);
-                if(!$groups)
+                else
                 {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request, $streams);
+                break;
+            
+            case 'edituser':
+                if(empty($datas['id']))
+                {
+                    $page['contents']['surl'] = $this->_cfg->get('surl');
+                    $page['contents']['timezones'] = $this->_user->getTimeZones();
+                    $page['contents']['userrights'] = $this->_user->getRights();
                     break;
                 }
 
-                while($groups->next())
-                {
-                    $page['groups'][$groups->id] = $groups->name;
-                }
-                unset($groups);
-            break;
-            
-            case 'edituser':
+                $request = new Request($datas);
                 $page['surl'] = $this->_cfg->get('surl');
-                $page['token'] = $this->_user->getToken();
                 $page['timezones'] = $this->_user->getTimeZones();
                 $page['userrights'] = $this->_user->getRights();
-                if(!isset($datas['id'])) break;
-
-                $datas['id'] = (int)$datas['id'];
-                if(($this->_user->isAdmin() && $datas['id'] > 0) || 
-                    ($datas['id'] === $this->_user->getUid()))
+                $cacheTime = 0;
+                Logic::getCachedLogic('users')->view($request);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
-                    $query = '
-    SELECT login, rights, lang, email, openid, timezone
-        FROM users
-        WHERE id='.(int)$datas['id'];
-                    
-                    $user = $this->_db->getRow($query);
-                    if(!$user->next()) break; // strange :-D, surely a bug
-                    
-                    $user->timezone = $this->_user->getTimeZones($user->timezone); // check
-
-                    $page += array_merge($user->asArray(), $datas);
-                    unset($user);
+                    $page['user'] = $response->getDatas();
                 }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
             break;
             
             case 'users':
-                $page['surl'] = $this->_cfg->get('surl');
-                $query = '
-    SELECT id, login, email, rights, openid
-        FROM users
-        ORDER BY rights DESC, login';
-                $users = $this->_db->getAll($query);
-                $page['users'] = array();
-                $page['nbusers'] = $users->count();
-                if(!$page['nbusers']) break;
-                $page['users'] = $users->getAllNext();
-                unset($users);
+                $request = new Request($datas);
+                $cacheTime = 0;
+                $datas['surl'] = $this->_cfg->get('surl');
+                Logic::getCachedLogic('users')->view($request, array(), 'login');
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $page['users'] = $response->getDatas();
+                    $page['nbUsers'] = count($datas['users']);
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
             break;
             
             case 'rss':
                 $xml = true;
+                $request = new Request(array('id'=>null));
                 $page['surl'] = $this->_cfg->get('surl');
                 $page['userlogin'] = $this->_user->getLogin();
-                $query = '
-    SELECT DISTINCT(n.id), n.title, n.link, n.pubDate
-        FROM news n
-        JOIN news_relations nr ON (nr.newsid=n.id)
-        WHERE nr.uid='.$this->_user->getUid().' AND nr.status=1';
-                    
-                if(isset($datas['id']) && 0 !== (int)$datas['id'])
-                {
-                    $query .= ' AND n.rssid='.(int)$datas['id'];
-                } else $datas['id'] = 0;
-                
+                $args = array('status' => 1);
+                if(!empty($datas['id']))
+                    $args['rssid'] = $datas['id'];
                 $page['news'] = $ids = array();
-                
-                $rows = $this->_db->getAll($query);
-                while($rows->next())
+                Logic::getCachedLogic('news')->view($request, $args);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
                 {
-                    $ids[] = $rows->id;
-                    $query = '
-    SELECT contents
-        FROM news_contents
-        WHERE id='.$rows->id;
-                    $contents = $this->_db->cGetOne($query);
-                    $rows->contents = (array) ($contents->next() ? unserialize($contents->contents) : '');
-                    $rows->pubDate = date(DATE_RSS, $rows->pubDate);
-                    $page['news'][] = $rows->asArray();
+                    $page['news'] = $response->getDatas();
+                    foreach($datas['news'] as $k=>$new)
+                    {
+                        $ids[] = $new['id'];
+                        $page['news'][$k]['pubDate'] = date(DATE_RSS, $new['pubDate']);
+                    }
                 }
-                unset($contents, $rows);
-                
-                if($ids)
+                else
                 {
-                    $query = '
-    UPDATE news_relations
-        SET status=0
-        WHERE uid='.$this->_user->getUid().' AND newsid IN ('.join(',', $ids).')';
-                    $this->_db->set($query);
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
                 }
+                unset($response, $request);
             break;
             
             case 'login':
                 $page['surl'] = $this->_cfg->get('surl');
                 $page['xmlLang'] = $this->_user->getXMLLang();
-                $page['token'] = $this->_user->getToken();
                 $page['back'] = $this->_request->back;
             default: break;
         }
@@ -1101,17 +1041,18 @@ class Controller extends C
 
         $order = $offset = null;
 
-        if(!empty($request->order))
+        if(!empty($this->_request->order))
         {
             $order = $request->order.' '.$request->dir;
         }
 
-        if(!empty($request->offset))
+        if(!empty($this->_request->offset))
         {
             $offset = ($request->offset * 10).',10';
         }
 
-        $this->_request->page = Logic::getCachedLogic($type)->view($request, array(), $order, '', $offset);
+        $this->_request->page = Logic::getCachedLogic($type)->view($this->_request, array(), $order, '', $offset);
+        $this->processResponse($this->_request->getResponse());
 
         return $this;
     }

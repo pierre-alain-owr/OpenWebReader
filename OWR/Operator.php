@@ -34,6 +34,7 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
+ * @deprecated replaced by addthis, just keep in case
  */
 namespace OWR;
 use OWR\DAO\News as News;

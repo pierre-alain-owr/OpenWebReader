@@ -98,8 +98,18 @@ class Objects extends Logic
         }
 
         DAO::getType($request->id); // check user has the rights to do that
+        $this->_db->beginTransaction();
+        try
+        {
+            $this->_dao->delete($request->id);
+        }
+        catch(Exception $e)
+        {
+            $this->_db->rollback();
+            throw new Exception($e->getContent(), $e->getCode());
+        }
+        $this->_db->commit();
 
-        $this->_dao->delete($request->id);
         $request->setResponse(new Response);
         return $this;
     }
@@ -130,11 +140,11 @@ class Objects extends Logic
                 $data = $this->_dao->get($args, '*', $order, $groupby, $limit);
                 if(!$data)
                 {
-                    $request->setResponse(array(
+                    $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
                         'status'    => Exception::E_OWR_BAD_REQUEST
-                    ));
+                    )));
                     return $this;
                 }
 
@@ -147,29 +157,30 @@ class Objects extends Logic
             $datas = $this->_dao->get($args, '*', $order, $groupby, $limit);
             if(!$datas)
             {
-                $request->setResponse(array(
+                $request->setResponse(new Response(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST
-                ));
+                )));
                 return $this;
             }
 
-            parent::getCachedLogic($datas->type)->view($request);
+            parent::getCachedLogic($datas['type'])->view($request, $args, $order, $groupby, $limit);
+            return $this;
         }
         else
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Missing id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
-        $request->setResponse(array(
+        $request->setResponse(new Response(array(
             'datas'        => $datas
-        ));
+        )));
         return $this;
     }
 }

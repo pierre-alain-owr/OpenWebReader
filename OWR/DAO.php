@@ -328,7 +328,7 @@ abstract class DAO implements iDAO
                     
                     if($exists->next() && $exists->nb > 0)
                     {
-                        throw new Exception('Aborting '.$this->_fullName.'::save(): some values are not uniques', Exception::E_OWR_WARNING);
+                        throw new Exception('Aborting '.$this->_fullName.'::save(): some values are not uniques', 409);
                     }
                     unset($exists);
                 }
@@ -347,7 +347,7 @@ abstract class DAO implements iDAO
             }
             else
             {
-                throw new Exception('Aborting '.$this->_fullName.'::save(): don\'t know what to save !', Exception::E_OWR_WARNING);
+                throw new Exception('Aborting '.$this->_fullName.'::save(): don\'t know what to save !', Exception::E_OWR_BAD_REQUEST);
             }
         }
 
@@ -364,7 +364,7 @@ abstract class DAO implements iDAO
                     else
                     {
                         if(!isset($this->$field))
-                            throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_WARNING);
+                            throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_BAD_REQUEST);
 
                         switch($decl['type'])
                         {
@@ -382,7 +382,7 @@ abstract class DAO implements iDAO
                             case DBRequest::PARAM_IP:
                             case \PDO::PARAM_STR:
                                 if(empty($this->$field))
-                                    throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_WARNING);
+                                    throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_BAd_REQUEST);
 
                             default:
                                 break;
@@ -428,7 +428,7 @@ abstract class DAO implements iDAO
             if(!isset($this->_fields['uid']) && $this->_idField)
             {
                 if(!isset($this->{$this->_idField}))
-                    throw new Exception('Aborting '.$this->_fullName.'::delete(): can not delete nothing !', Exception::E_OWR_WARNING);
+                    throw new Exception('Aborting '.$this->_fullName.'::delete(): can not delete nothing !', Exception::E_OWR_BAD_REQUEST);
                 $args = $this->{$this->_idField};
             }
         }

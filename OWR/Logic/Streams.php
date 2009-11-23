@@ -475,18 +475,18 @@ class Streams extends Logic
                 $data = $this->_dao->get($args, 'id,url,ttl,lastupd,favicon,status', $order, $groupby, $limit);
                 if(!$data)
                 {
-                    $request->setResponse(array(
+                    $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
                         'status'    => Exception::E_OWR_BAD_REQUEST
-                    ));
+                    )));
                     return $this;
                 }
 
-                $data->gid = $daoStreams->get(array('rssid' => $data->id), 'gid')->gid;
-                $data->gname = $daoGroups->get(array('gid' => $data->gid), 'name')->name;
-                $data->name = $daoNames->get(array('rssid' => $data->id), 'name')->name;
-                $data->contents = unserialize($daoContents->get(array('rssid' => $data->id), 'contents')->contents);
+                $data['gid'] = $daoStreams->get(array('rssid' => $data['id']), 'gid')->gid;
+                $data['gname'] = $daoGroups->get(array('gid' => $data['gid']), 'name')->name;
+                $data['name'] = $daoNames->get(array('rssid' => $data['id']), 'name')->name;
+                $data['contents'] = unserialize($daoContents->get(array('rssid' => $data['id']), 'contents')->contents);
 
                 $datas[] = $data;
             }
@@ -497,18 +497,18 @@ class Streams extends Logic
             $datas = $this->_dao->get($args, 'id,url,ttl,lastupd,favicon,status', $order, $groupby, $limit);
             if(!$datas)
             {
-                $request->setResponse(array(
+                $request->setResponse(new Response(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST
-                ));
+                )));
                 return $this;
             }
 
-            $datas->gid = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas->id), 'gid')->gid;
-            $datas->gname = DAO::getCachedDAO('streams_groups')->get(array('gid' => $datas->gid), 'name')->name;
-            $datas->name = DAO::getCachedDAO('streams_relations_name')->get(array('rssid' => $datas->id), 'name')->name;
-            $datas->contents = unserialize(DAO::getCachedDAO('streams_contents')->get(array('rssid' => $datas->id), 'contents')->contents);
+            $datas['gid'] = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas['id']), 'gid')->gid;
+            $datas['gname'] = DAO::getCachedDAO('streams_groups')->get(array('id' => $datas['gid']), 'name')->name;
+            $datas['name'] = DAO::getCachedDAO('streams_relations_name')->get(array('rssid' => $datas['id']), 'name')->name;
+            $datas['contents'] = unserialize(DAO::getCachedDAO('streams_contents')->get(array('rssid' => $datas['id']), 'contents')->contents);
         }
         else
         {
@@ -525,18 +525,18 @@ class Streams extends Logic
             $daoContents = DAO::getCachedDAO('streams_contents');
             $groups = array();
 
-            foreach($datas as $data)
+            foreach($datas as $k=>$data)
             {
-                $data->gid = $daoStreams->get(array('rssid' => $data->id), 'gid')->gid;
-                $data->gname = $daoGroups->get(array('gid' => $data->gid), 'name')->name;
-                $data->name = $daoNames->get(array('rssid' => $data->id), 'name')->name;
-                $data->contents = unserialize($daoContents->get(array('rssid' => $data->id), 'contents')->contents);
+                $datas[$k]['gid'] = $daoStreams->get(array('rssid' => $data['id']), 'gid')->gid;
+                $datas[$k]['gname'] = $daoGroups->get(array('id' => $datas[$k]['gid']), 'name')->name;
+                $datas[$k]['name'] = $daoNames->get(array('rssid' => $data['id']), 'name')->name;
+                $datas[$k]['contents'] = unserialize($daoContents->get(array('rssid' => $data['id']), 'contents')->contents);
             }
         }
 
-        $request->setResponse(array(
+        $request->setResponse(new Response(array(
             'datas'        => $datas
-        ));
+        )));
         return $this;
     }
 
@@ -552,11 +552,11 @@ class Streams extends Logic
         $type = DAO::getType($request->id);
         if('streams' !== $type)
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Invalid id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
@@ -726,8 +726,7 @@ class Streams extends Logic
 
         try
         {
-            $cron = Cron::iGet();
-            $cron->manage(array('type'=>'refreshstream','ttl'=>$ttl));
+            Cron::iGet()->manage(array('type'=>'refreshstream','ttl'=>$ttl));
         }
         catch(Exception $e)
         {

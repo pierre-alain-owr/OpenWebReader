@@ -102,7 +102,7 @@ class Streams extends DAO
     {
         if(!isset($this->{$this->_idField}))
         {
-            throw new Exception('Please specify the stream to set as unavailable', Exception::E_OWR_WARNING);
+            throw new Exception('Please specify the stream to set as unavailable', Exception::E_OWR_BAD_REQUEST);
         }
 
         $this->status = time();

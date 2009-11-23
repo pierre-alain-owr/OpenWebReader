@@ -74,7 +74,8 @@ class Users extends Logic
         {
             $request->setResponse(new Response(array(
                 'do'        => 'redirect',
-                'location'  => 'login'
+                'location'  => 'login',
+                'status'    => Exception::E_OWR_UNAUTHORIZED
             )));
             return $this;
         }
@@ -96,7 +97,8 @@ class Users extends Logic
         {
             $request->setResponse(new Response(array(
                 'do'        => 'redirect',
-                'location'  => 'logout'
+                'location'  => 'logout',
+                'status'    => Exception::E_OWR_UNAUTHORIZED
             )));
             return $this;
         }
@@ -107,7 +109,8 @@ class Users extends Logic
                 'do'        => 'error',
                 'tpl'       => 'edituser',
                 'error'     => 'Please fill all the fields.',
-                'datas'     => $datas
+                'datas'     => $datas,
+                'status'    => Exception::E_OWR_BAD_REQUEST
             )));
             return $this;
         }
@@ -118,7 +121,8 @@ class Users extends Logic
                 'do'        => 'error',
                 'tpl'       => 'edituser',
                 'error'     => 'Login too long, please limit it to 55 chars.',
-                'datas'     => $datas
+                'datas'     => $datas,
+                'status'    => Exception::E_OWR_BAD_REQUEST
             )));
             return $this;
         }
@@ -132,7 +136,8 @@ class Users extends Logic
                 'do'        => 'error',
                 'tpl'       => 'edituser',
                 'error'     => 'Passwords are not identiquals.',
-                'datas'     => $datas
+                'datas'     => $datas,
+                'status'    => Exception::E_OWR_BAD_REQUEST
             )));
             return $this;
         }
@@ -288,26 +293,38 @@ class Users extends Logic
     {
         if(!$request)
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Missing id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
         $type = DAO::getType($request->id);
         if('users' !== $type)
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Invalid id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
-        DAO::getCachedDAO('objects')->delete($request->id);
+
+        $this->_db->beginTransaction();
+        try
+        {
+            DAO::getCachedDAO('objects')->delete($request->id);
+        }
+        catch(Exception $e)
+        {
+            $this->_db->rollback();
+            throw new Exception($e->getContent(), $e->getCode());
+        }
+        $this->_db->commit();
+
 
         if($request->id === User::iGet()->getUid())
         {
@@ -351,11 +368,11 @@ class Users extends Logic
                 $data = $dao->get($args, 'id,login,rights,lang,email,openid,timezone', $order, $groupby, $limit);
                 if(!$data)
                 {
-                    $request->setResponse(array(
+                    $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
                         'status'    => Exception::E_OWR_BAD_REQUEST
-                    ));
+                    )));
                     return $this;
                 }
                 $datas[] = $data;
@@ -367,11 +384,11 @@ class Users extends Logic
             $datas = $this->_dao->get($args, 'id,login,rights,lang,email,openid,timezone', $order, $groupby, $limit);
             if(!$datas)
             {
-                $request->setResponse(array(
+                $request->setResponse(new Response(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST
-                ));
+                )));
                 return $this;
             }
         }
@@ -385,9 +402,9 @@ class Users extends Logic
             }
         }
 
-        $request->setResponse(array(
+        $request->setResponse(new Response(array(
             'datas'        => $datas
-        ));
+        )));
         return $this;
     }
 
@@ -415,7 +432,9 @@ class Users extends Logic
         }
         $this->_db->commit();
 
-        $request->setResponse(new Response);
+        $request->setResponse(new Response(array(
+            'status'    => 204 // OK, no content to return
+        )));
 
         return $this;
     }

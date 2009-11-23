@@ -58,7 +58,7 @@ class Cron extends Singleton
     * @var string end line of crontab
     * @access protected
     */
-    const CRON_STOP = "# END OPENWEBREADER CRONTAB #\n";
+    const CRON_STOP = "# END OPENWEBREADER CRONTAB #";
 
     /**
     * @var boolean is a cron job locked ?
@@ -109,6 +109,16 @@ class Cron extends Singleton
             @unlink(HOME_PATH.'logs'.DIRECTORY_SEPARATOR.'cli.log');
             @touch(HOME_PATH.'logs'.DIRECTORY_SEPARATOR.'cli.log');
         }
+
+        try
+        {
+            $minCronTll = $this->getMinTtl();
+        }
+        catch(Exception $e)
+        {
+            throw new Exception($e->getContent(), Exception::E_OWR_WARNING);
+        }
+        $this->_minCronTtl =  $minCronTll ? $minCronTll : 0;
     }
 
     /**
@@ -230,21 +240,8 @@ class Cron extends Singleton
                     {
                         throw new Exception('Missing ttl for cron managing:refreshstream', Exception::E_OWR_WARNING);
                     }
-                    
-                    if(!isset($this->_minCronTtl))
-                    {
-                        try
-                        {
-                            $minCronTll = $this->getMinTtl();
-                        }
-                        catch(Exception $e)
-                        {
-                            throw new Exception($e->getContent(), Exception::E_OWR_WARNING);
-                        }
-                        $this->_minCronTtl =  $minCronTll ? $minCronTll : Config::iGet()->get('defaultStreamRefreshTime');
-                    }
-                    
-                    if($this->_minCronTtl <= $args['ttl']) return;
+
+                    if($this->_minCronTtl > 0 && $this->_minCronTtl <= $args['ttl']) return;
 
                     if($args['ttl'] > 60)
                     {
@@ -357,13 +354,13 @@ class Cron extends Singleton
      */
     protected function _add($type, $hour, $minute, $monthDay, $weekDay, $month, $cmd, $comment)
     {
-        $type = (string)$type;
+        $type = (string) $type;
         $type = $this->_url .':'. $type;
         $oldCrontab = array();
         $newCrontab = array();
         $isSection = $done = $escape = false;
         isset($this->_cronTab) || exec('crontab -l', $this->_cronTab);
-        
+
         foreach($this->_cronTab as $index => $line)
         {
             if($escape === true)
@@ -372,6 +369,8 @@ class Cron extends Singleton
                 continue;
             }
             
+            $line = (string) $line;
+
             if($isSection === true)
             {
                 $wordsLine = explode(' ', $line);
@@ -385,9 +384,21 @@ class Cron extends Singleton
                 }
             }
             
-            if((string)$line === self::CRON_START) { $isSection = true; }
+            if($line === self::CRON_START) 
+            {
+                $isSection = true;
+
+                if(isset($this->_cronTab[$index + 1]) && ((string)$this->_cronTab[$index + 1] === self::CRON_STOP))
+                {
+                    $newCrontab[] = self::CRON_START;
+                    $newCrontab[] = '# '.$type.' : '.$comment;
+                    $newCrontab[] = $minute.' '.$hour.' '.$monthDay.' '.$month.' '.$weekDay.' '.$cmd;
+                    $newCrontab[] = self::CRON_STOP;
+                    break;
+                }
+            }
             
-            if((string)$line === self::CRON_STOP)
+            if($line === self::CRON_STOP)
             {
                 if(!$done) 
                 {
@@ -407,13 +418,13 @@ class Cron extends Singleton
             $newCrontab[] = $minute.' '.$hour.' '.$monthDay.' '.$month.' '.$weekDay.' '.$cmd;
             $newCrontab[] = self::CRON_STOP;
         }
-        
+
         if($this->_cronTab !== $newCrontab)
         {
             $this->_hasChanged = true;
             $this->_cronTab = $newCrontab;
         }
-        
+
         return $type;
     }
 
@@ -430,7 +441,7 @@ class Cron extends Singleton
     {
         $oldCrontab = array();
         $newCrontab = array();
-        $isSection = false;
+        $isSection = $escape = false;
         
         $type = (string)$type;
         $type = $this->_url .':'. $type;
@@ -442,10 +453,12 @@ class Cron extends Singleton
             if($isSection === true)
             {
                 $wordsLine = explode(' ', $line);
-                if('#' !== (string)$wordsLine[0] || $type !== (string)$wordsLine[1])
+                if($escape) $escape = false;
+                elseif('#' !== (string)$wordsLine[0] || $type !== (string)$wordsLine[1])
                 {
                     $newCrontab[] = $line;
                 }
+                else $escape = true;
             }
             else
             {

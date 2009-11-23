@@ -108,6 +108,8 @@ class Controller extends MainController
         }
 
         $this->_user = User::iGet(); // init user
+
+        $this->_cron = Cron::iGet();
     }
     
     /**
@@ -140,8 +142,6 @@ class Controller extends MainController
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
         
-            isset($this->_cron) || $this->_cron = Cron::iGet();
-
             if(!$id)
             {
                 if($this->_cron->isLocked($action))
@@ -160,7 +160,7 @@ class Controller extends MainController
         } 
         catch(Exception $e) 
         {
-            if(!$id && isset($this->_cron))
+            if(!$id)
                 $this->_cron->unlock($action, true); // unlink file lock for next processing
 
             $this->_db->rollback();

@@ -96,7 +96,7 @@ class Objects extends DAO
                 break;
 
             default:
-                throw new Exception('Invalid type', Exception::E_OWR_WARNING);
+                throw new Exception('Invalid type', Exception::E_OWR_BAD_REQUEST);
                 break;
         }
 

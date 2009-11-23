@@ -119,22 +119,22 @@ class Groups extends Logic
     {
         if(empty($request->id))
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Missing id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
         $type = DAO::getType($request->id);
         if('streams_groups' !== $type)
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Invalid id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
@@ -167,7 +167,7 @@ class Groups extends Logic
                 }
             }
             unset($r);
-            DAO::getCachedDAO('objects')->delete($request);
+            DAO::getCachedDAO('objects')->delete($request->id);
         }
         catch(Exception $e)
         {
@@ -208,11 +208,11 @@ class Groups extends Logic
                 $data = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
                 if(!$data)
                 {
-                    $request->setResponse(array(
+                    $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
                         'status'    => Exception::E_OWR_BAD_REQUEST
-                    ));
+                    )));
                     return $this;
                 }
 
@@ -225,11 +225,11 @@ class Groups extends Logic
             $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
             if(!$datas)
             {
-                $request->setResponse(array(
+                $request->setResponse(new Response(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST
-                ));
+                )));
                 return $this;
             }
         }
@@ -243,9 +243,9 @@ class Groups extends Logic
             }
         }
 
-        $request->setResponse(array(
+        $request->setResponse(new Response(array(
             'datas'        => $datas
-        ));
+        )));
         return $this;
     }
 

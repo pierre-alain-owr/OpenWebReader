@@ -141,26 +141,38 @@ class News extends Logic
     {
         if(empty($request->id))
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Missing id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
+
 
         $type = DAO::getType($request->id);
         if('news' !== $type)
         {
-            $request->setResponse(array(
+            $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Invalid id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
-            ));
+            )));
             return $this;
         }
 
-        DAO::getCachedDAO('news_relations')->delete(array('newsid' => $request->id));
+        $this->_db->beginTransaction();
+        try
+        {
+            DAO::getCachedDAO('news_relations')->delete(array('newsid' => $request->id));
+        }
+        catch(Exception $e)
+        {
+            $this->_db->rollback();
+            throw new Exception($e->getContent(), $e->getCode());
+        }
+        $this->_db->commit();
+
         $request->setResponse(new Response);
         return $this;
     }
@@ -193,16 +205,16 @@ class News extends Logic
                 $data = $this->_dao->get($args, 'id,rssid AS streamid,lastupd,pubDate,author,title,link', $order, $groupby, $limit);
                 if(!$data)
                 {
-                    $request->setResponse(array(
+                    $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
                         'status'    => Exception::E_OWR_BAD_REQUEST
-                    ));
+                    )));
                     return $this;
                 }
     
-                $data->gid = $daoStreams->get(array('rssid' => $data->streamid), 'gid')->gid;
-                $data->contents = unserialize($daoContents->get(array('id' => $data->id), 'contents')->contents);
+                $data['gid'] = $daoStreams->get(array('rssid' => $data['streamid']), 'gid')->gid;
+                $data['contents'] = unserialize($daoContents->get(array('id' => $data['id']), 'contents')->contents);
 
                 $datas[] = $data;
             }
@@ -210,19 +222,19 @@ class News extends Logic
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->get($request->id, 'id,rssid AS streamid,lastupd,pubDate,author,title,link');
+            $datas = $this->_dao->get($args, 'id,rssid AS streamid,lastupd,pubDate,author,title,link', $order, $groupby, 1);
             if(!$datas)
             {
-                $request->setResponse(array(
+                $request->setResponse(new Response(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST
-                ));
+                )));
                 return $this;
             }
 
-            $datas->gid = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas->streamid), 'gid')->gid;
-            $datas->contents = unserialize(DAO::getCachedDAO('news_contents')->get(array('id' => $datas->id), 'contents')->contents);
+            $datas['gid'] = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas['streamid']), 'gid')->gid;
+            $datas['contents'] = unserialize(DAO::getCachedDAO('news_contents')->get(array('id' => $datas['id']), 'contents')->contents);
         }
         else
         {
@@ -237,16 +249,16 @@ class News extends Logic
             $daoContents = DAO::getCachedDAO('news_contents');
             $groups = array();
 
-            foreach($datas as $data)
+            foreach($datas as $k=>$data)
             {
-                $data->gid = $daoStreams->get(array('rssid' => $data->streamid), 'gid')->gid;
-                $data->contents = unserialize($daoContents->get(array('id' => $data->id), 'contents')->contents);
+                $datas[$k]['gid'] = $daoStreams->get(array('rssid' => $data['streamid']), 'gid')->gid;
+                $datas[$k]['contents'] = unserialize($daoContents->get(array('id' => $data['id']), 'contents')->contents);
             }
         }
 
-        $request->setResponse(array(
+        $request->setResponse(new Response(array(
             'datas'        => $datas
-        ));
+        )));
         return $this;
     }
 

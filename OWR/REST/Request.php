@@ -38,10 +38,14 @@
 namespace OWR\REST;
 use OWR\Request as R, 
     OWR\Config as Config,
-    OWR\Object as Object;
+    OWR\Object as Object,
+    OWR\XML as XML;
 /**
  * This object is sent to the Controller to be executed
- * @uses String convert M$ bad chars
+ * @uses OWR\String convert M$ bad chars
+ * @uses OWR\Request the main class
+ * @uses OWR\Config the config object
+ * @uses OWR\XML the (un)serializer
  * @package OWR
  * @subpackage Rest
  */
@@ -91,16 +95,17 @@ class Request extends R
             $this->_httpAccept = 'html';
         }
 
-        if(!isset($_SERVER['HTTP_X_CONTENT_TYPE']) || 'application/json' === $_SERVER['HTTP_X_CONTENT_TYPE'])
+        if(!isset($_SERVER['CONTENT_TYPE']) || 'application/json' === $_SERVER['CONTENT_TYPE'])
         {
             $this->_contentType = 'json';
         }
-        elseif('text/xml' === $_SERVER['HTTP_X_CONTENT_TYPE'] || 'application/xml' === $_SERVER['HTTP_X_CONTENT_TYPE'])
+        elseif('text/xml' === $_SERVER['CONTENT_TYPE'] || 'application/xml' === $_SERVER['CONTENT_TYPE'])
         {
             $this->_contentType = 'xml';
         }
 
-        $path = array_filter(explode('/', $_SERVER["PATH_INFO"]));
+        $path = explode('/', $_SERVER["PATH_INFO"]);
+        array_shift($path);
         if(isset($path[1]))
         {
             $this->do = mb_strtolower((string) array_shift($path), 'UTF-8');
@@ -120,24 +125,30 @@ class Request extends R
             case 'get':
                 switch($this->do)
                 {
-                    case 'getopml':
-                        if(isset($path[0]))
-                            $datas['dl'] = $path[0];
-                        break;
+//                     case 'getopml':
+//                         if(isset($path[0]))
+//                             $datas['dl'] = $path[0];
+// 
+//                         break;
 
-                    case 'get':
                     case 'getstream':
-                        if(isset($path[0]))
-                            $datas['offset'] = $path[0];
                         if(isset($path[1]))
-                            $datas['sort'] = $path[1];
+                            $datas['offset'] = $path[1];
                         if(isset($path[2]))
-                            $datas['dir'] = $path[2];
+                            $datas['sort'] = $path[2];
+                        if(isset($path[3]))
+                            $datas['dir'] = $path[3];
                         break;
 
                     case 'search':
                         if(isset($path[0]))
-                            $datas['keywords'] = (bool) $path[0];
+                            $datas['keywords'] = $path[0];
+                        if(isset($path[1]))
+                            $datas['offset'] = $path[1];
+                        if(isset($path[2]))
+                            $datas['sort'] = $path[2];
+                        if(isset($path[3]))
+                            $datas['dir'] = $path[3];
                         break;
 
                     default:
@@ -213,11 +224,15 @@ class Request extends R
                 {
                     if('json' === $this->_contentType)
                     {
-                        $data = Object::toArray(@json_decode($data));
+                        $data = @json_decode($data);
+                        if($data) $data = Object::toArray($data);
+                        else $data = null;
                     }
                     elseif('xml' === $this->_contentType)
                     {
                         $data = XML::unserialize($data);
+                        if(!empty($data['datas'])) $data = $data['datas'];
+                        else $data = null;
                     }
 
                     if(!is_array($data))
