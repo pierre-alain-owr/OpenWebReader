@@ -49,6 +49,19 @@ class Logs extends Singleton
     protected $_logs = array();
 
     /**
+     * Destructor
+     * Writes the logs if not already done and if not empty
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $msg the message to log
+     * @access public
+     */
+    public function __destruct()
+    {
+        $this->writeLogs(true);
+    }
+
+    /**
      * Stores log message in $this->_logs
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
@@ -69,7 +82,7 @@ class Logs extends Singleton
     }
 
     /**
-     * Returns all logged messages from $this->_logs
+     * Returns all logged messages from $this->_logs and empty it
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @return array the logs
@@ -77,7 +90,9 @@ class Logs extends Singleton
      */
     public function getLogs()
     {
-        return (array) $this->_logs;
+        $logs = (array) $this->_logs;
+        $this->_logs = array();
+        return $logs;
     }
 
     /**
@@ -86,11 +101,15 @@ class Logs extends Singleton
      * else in default php error log file
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param boolean $write force writting of the logs into the log file
      * @return boolean true on success
      * @access public
      */
-    public function writeLogs()
+    public function writeLogs($write = false)
     {
+        if(empty($this->_logs))
+            return;
+
         $errstr = '';
         if(CLI)
         {
@@ -110,6 +129,7 @@ class Logs extends Singleton
             
             if(!empty($errstr)) error_log($errstr, 0);
         }
+        $this->_logs = array();
     }
 
     /**
