@@ -118,7 +118,7 @@ class Cron extends Singleton
         {
             throw new Exception($e->getContent(), Exception::E_OWR_WARNING);
         }
-        $this->_minCronTtl =  $minCronTll ? $minCronTll : 0;
+        $this->_minCronTtl =  $minCronTll ?: 0;
     }
 
     /**
@@ -201,7 +201,7 @@ class Cron extends Singleton
         $minCronTll = DB::iGet()->getOne('
     SELECT MIN(ttl) AS ttl
         FROM streams');
-        return $minCronTll->next() ? $minCronTll->ttl : 30;
+        return $minCronTll->next() ? $minCronTll->ttl : 0;
     }
 
     /**
