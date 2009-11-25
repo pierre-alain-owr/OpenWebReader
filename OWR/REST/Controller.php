@@ -828,14 +828,25 @@ class Controller extends C
                         $empty = true;
                         break;
                     }
-                    
-                    foreach($datas as $data)
+
+                    if($response->isMultiple())
                     {
-                        $data['gid'] = $data['id'];
-                        $data['gname'] = $data['name'];
-                        $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
-                        unset($data['id'], $data['name']);
-                        $page['groups'][] = $data;
+                        foreach($datas as $data)
+                        {
+                            $data['gid'] = $data['id'];
+                            $data['gname'] = $data['name'];
+                            $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
+                            unset($data['id'], $data['name']);
+                            $page['groups'][] .= $datas;
+                        }
+                    }
+                    else
+                    {
+                        $datas['gid'] = $datas['id'];
+                        $datas['gname'] = $datas['name'];
+                        $datas['unreads'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+                        unset($datas['id'], $datas['name']);
+                        $page['groups'][] = $datas;
                     }
                 }
                 else
@@ -885,12 +896,20 @@ class Controller extends C
                 {
                     $streams = $response->getDatas();
                     if(empty($streams)) break;
-                    $args = array();
-                    foreach($streams as $stream)
+
+                    if($response->isMultiple())
                     {
-                        if(!isset($page['groups'][$stream['gid']]))
-                            $page['groups'][$stream['gid']] = $stream['gname'];
-                        $page['streams'][$stream['gid']][] = $stream;
+                        foreach($streams as $stream)
+                        {
+                            if(!isset($page['groups'][$stream['gid']]))
+                                $page['groups'][$stream['gid']] = $stream['gname'];
+                            $page['streams'][$stream['gid']][] = $stream;
+                        }
+                    }
+                    else
+                    {
+                        $page['groups'][$streams['gid']] = $streams['gname'];
+                        $page['streams'][$streams['gid']][] = $streams;
                     }
                 }
                 else
@@ -937,8 +956,16 @@ class Controller extends C
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $page['users'] = $response->getDatas();
-                    $page['nbUsers'] = count($datas['users']);
+                    if(!$response->isMultiple())
+                    {
+                        $page['users'][] = $response->getDatas();
+                        $page['nbusers'] = 1;
+                    }
+                    else
+                    {
+                        $page['users'] = $response->getDatas();
+                        $page['nbusers'] = count($page['users']);
+                    }
                 }
                 else
                 {
@@ -961,7 +988,27 @@ class Controller extends C
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $page['news'] = $response->getDatas();
+                    $data = $response->getDatas();
+                    if(empty($data)) break;
+
+                    if($response->isMultiple())
+                    {
+                        $page['news'] = $data;
+                        unset($data);
+                        foreach($page['news'] as $k=>$new)
+                        {
+                            $ids[] = $new['id'];
+                            $page['news'][$k]['pubDate'] = date(DATE_RSS, $new['pubDate']);
+                        }
+                    }
+                    else
+                    {
+                        $ids[] = $data['id'];
+                        $data['pubDate'] = date(DATE_RSS, $data['pubDate']);
+                        $page['news'][] = $data;
+                        unset($new);
+                    }
+
                     foreach($datas['news'] as $k=>$new)
                     {
                         $ids[] = $new['id'];
@@ -974,6 +1021,15 @@ class Controller extends C
                     $empty = true;
                 }
                 unset($response, $request);
+
+                if(!empty($ids))
+                {
+                    $query = '
+    UPDATE news_relations
+        SET status=0
+        WHERE uid='.$this->_user->getUid().' AND newsid IN ('.join(',', $ids).')';
+                    $this->_db->set($query);
+                }
             break;
             
             case 'login':

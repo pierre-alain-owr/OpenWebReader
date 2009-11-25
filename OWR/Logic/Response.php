@@ -93,6 +93,12 @@ class Response implements iResponse
     protected $_datas = array();
 
     /**
+     * @var boolean true if the logic returns datas and if it contains more than one row
+     * @access protected
+     */
+    protected $_multiple = false;
+
+    /**
      * Public constructor
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
@@ -138,6 +144,7 @@ class Response implements iResponse
         {
             !isset($contents['tpl']) || $this->_tpl = (string) $contents['tpl'];
             !isset($contents['datas']) || $this->_datas = (array) $contents['datas'];
+            !isset($contents['multiple']) || $this->_multiple = (boolean) $contents['multiple'];
         }
 
         if(empty($this->_datas['error']) && !empty($this->_error))
@@ -243,5 +250,17 @@ class Response implements iResponse
     public function getLocation()
     {
         return (string) $this->_location;
+    }
+
+    /**
+     * Returns $this->_multiple
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @return boolean true if more than one row is in $this->_datas
+     */
+    public function isMultiple()
+    {
+        return (boolean) $this->_multiple;
     }
 }

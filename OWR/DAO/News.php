@@ -108,12 +108,20 @@ class News extends DAO
             'id'        =>  array('required' => true,     'type' => \PDO::PARAM_INT),
             'rssid'     =>  array('required' => true,     'type' => \PDO::PARAM_INT),
             'title'     =>  array('required' => true,     'type' => \PDO::PARAM_STR), 
-            'link'      =>  array('required' => true,    'type' => DBRequest::PARAM_URL),
+            'link'      =>  array('required' => true,     'type' => DBRequest::PARAM_URL),
             'lastupd'   =>  array('required' => false,    'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
             'pubDate'   =>  array('required' => false,    'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
-            'hash'      =>  array('required' => true,    'type' => DBRequest::PARAM_HASH),
-            'author'    =>  array('required' => false,     'type' => \PDO::PARAM_STR)
+            'hash'      =>  array('required' => true,     'type' => DBRequest::PARAM_HASH),
+            'author'    =>  array('required' => false,    'type' => \PDO::PARAM_STR)
+        );
+        $this->_userRelations = array(
+            'news_relations'    => array('id'                   => 'newsid'),
+            'streams_relations' => array('news_relations.rssid' => 'rssid')
+        );
+        $this->_relations = array(
+            'news_relations'    => array('id'   => 'newsid'),
+            'news_contents'     => array('id'   => 'id'),
+            'streams_relations' => array('news_relations.rssid' => 'rssid')
         );
     }
-
 }

@@ -205,7 +205,6 @@ class View extends Singleton
                 case 201: $statusCode = 'Created'; break;
                 case 202: $statusCode = 'Accepted'; break;
                 case 203: $statusCode = 'Non-Authoritative Information'; break;
-                case 204: $statusCode = 'No Content'; break;
                 case 205: $statusCode = 'Reset Content'; break;
                 case 206: $statusCode = 'Partial Content'; break;
                 case 300: $statusCode = 'Multiple Choices'; break;
@@ -239,6 +238,12 @@ class View extends Singleton
                 case 503: $statusCode = 'Service Unavailable'; break;
                 case 504: $statusCode = 'Gateway Timeout'; break;
                 case 505: $statusCode = 'HTTP Version Not Supported'; break;
+
+                case 204: // we always return something
+                    $this->_statusCode = 200;
+                    $statusCode = 'OK';
+                    break;
+
                 case 500:
                 default:
                     $this->_statusCode = 500;

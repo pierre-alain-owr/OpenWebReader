@@ -55,7 +55,7 @@ class Utilities extends Singleton
      * @var array cache of gettext
      * @access protected
      */
-    protected $_translations = array();
+    protected $_translations;
 
     /**
      * @var boolean true if we have to write the cache translations file
@@ -72,8 +72,9 @@ class Utilities extends Singleton
      */
     protected function __construct()
     {
-        if($translations = Cache::getFromCache('translations_'.User::iGet()->getLang(), Config::iGet()->get('cacheTime')))
-            $this->_translations = $translations;
+        $this->_translations = Cache::getFromCache('translations_'.User::iGet()->getLang(), 
+                                                    Config::iGet()->get('cacheTime')) ?:
+                                array();
     }
 
     /**

@@ -115,5 +115,4 @@ class Users extends DAO
             'timezone'  => array('required' => true, 'type' => DBRequest::PARAM_TIMEZONE),
         );
     }
-
 }

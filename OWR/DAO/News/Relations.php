@@ -85,5 +85,4 @@ class Relations extends DAO
             'uid'       =>  array('required' => true, 'type' => \PDO::PARAM_INT)
         );
     }
-
 }

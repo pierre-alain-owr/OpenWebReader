@@ -80,5 +80,4 @@ class Groups extends DAO
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
     }
-
 }

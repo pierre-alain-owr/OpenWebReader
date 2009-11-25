@@ -96,6 +96,15 @@ class Streams extends DAO
             'hash'      =>  array('required' => true,    'type' => DBRequest::PARAM_HASH),
             'status'    =>  array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP, 'default' => 0)
         );
+        $this->_userRelations = array(
+            'streams_relations' => array('id'   => 'rssid')
+        );
+        $this->_relations = array(
+            'streams_relations'         => array('id'                       => 'rssid'),
+            'streams_groups'            => array('streams_relations.gid'    => 'id'),
+            'streams_relations_name'    => array('id'                    => 'rssid'),
+            'streams_contents'          => array('id'                    => 'rssid')
+        );
     }
 
     public function declareUnavailable()

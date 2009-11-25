@@ -86,5 +86,4 @@ class Tokens extends DAO
             'token_key'  => array('required' => true, 'type' => \PDO::PARAM_STR)
         );
     }
-
 }

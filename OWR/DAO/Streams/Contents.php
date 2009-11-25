@@ -78,9 +78,8 @@ class Contents extends DAO
             'rssid'     => array('required' => true, 'type' => \PDO::PARAM_INT),
             'contents'  => array('required' => true, 'type' => \PDO::PARAM_STR)
         );
-        $this->_relatedTables = array(
-            'streams'        => array('rssid'=>'id')
+        $this->_userRelations = array(
+            'streams_relations' => array('rssid'   => 'rssid')
         );
     }
-
 }

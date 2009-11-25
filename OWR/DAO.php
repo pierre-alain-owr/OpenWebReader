@@ -51,53 +51,65 @@ use OWR\DB\Result as DBResult,
 abstract class DAO implements iDAO
 {
     /**
-    * @var string the table name
-    * @access protected
-    */
+     * @var string the table name
+     * @access protected
+     */
     protected $_name = '';
 
     /**
-    * @var string the class name
-    * @access protected
-    */
+     * @var string the class name
+     * @access protected
+     */
     protected $_fullName = '';
 
     /**
-    * @var mixed the DB instance
-    * @access protected
-    */
+     * @var mixed the DB instance
+     * @access protected
+     */
     protected $_db;
 
     /**
-    * @var array the list of fields of the table
-    * @access protected
-    */
+     * @var array the list of fields of the table
+     * @access protected
+     */
     protected $_fields = array();
 
     /**
-    * @var array the list of unique fields of the table
-    * @access protected
-    */
+     * @var array the list of unique fields of the table
+     * @access protected
+     */
     protected $_uniqueFields = array();
     
     /**
-    * @var string the name of the field used to have a unique ID
-    * @access protected
-    */
+     * @var string the name of the field used to have a unique ID
+     * @access protected
+     */
     protected $_idField = '';
 
     /**
-    * @var array stored already processed dao names
-    * @access private
-    * @static
-    */
+     * @var array associative array of name => field for each relations table 
+     * @access protected
+     */
+    protected $_relations = array();
+
+    /**
+     * @var array associative array of name => field for each user's relations table 
+     * @access protected
+     */
+    protected $_userRelations = array();
+
+    /**
+     * @var array stored already processed dao names
+     * @access private
+     * @static
+     */
     static private $_daos = array();
 
     /**
-    * @var array stored already processed dao objects
-    * @access private
-    * @static
-    */
+     * @var array stored already processed dao objects
+     * @access private
+     * @static
+     */
     static private $_cachedDaos = array();
 
     /**
@@ -113,6 +125,406 @@ abstract class DAO implements iDAO
         $this->_name = strtolower(str_replace('\\', '_', substr($this->_fullName, strlen(__NAMESPACE__.'_DAO_'))));
     }
 
+    /**
+     * Gets rows from the database including related tables
+     * We will check relations tables which does not have a uid field
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $order the order clause
+     * @param string $groupby the groupby clause
+     * @param string $limit the limit clause
+     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
+     */
+    public function getAllByRelations($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
+    {
+        $uid = false;
+
+        if(is_object($args))
+        {
+            $args = Object::toArray($args);
+        }
+
+        $fetchType = 'object';
+
+        $query = '
+    SELECT '.(string) $select.' 
+        FROM '.$this->_name;
+
+        $wheres = $request = $fields = $authorized = $fullFields = array();
+        $uid = ((int) isset($args['uid']) ? $args['uid'] : User::iGet()->getUid());
+
+        foreach($this->_userRelations as $table => $relations)
+        {
+            $query .= '
+        JOIN '.$table.' ON ';
+            $joins = array();
+
+            $relatedTableFields = self::getCachedDAO($table)->getFields();
+            foreach($relatedTableFields as $field=>$def)
+            {
+                $fullFields[$field] = $table.'.'.$field;
+                $tableFields[$table.'.'.$field] = $def;
+            }
+            
+            foreach($relations as $mine => $related)
+            {
+                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
+                $fields[$table.'.uid'] = $relatedTableFields['uid'];
+                $request[$table.'.uid'] = $uid;
+                $wheres[] = $table.'.uid=?';
+            }
+            unset($relatedTableFields);
+            $query .= '('.join(' AND ', $joins).')';
+            unset($joins);
+        }
+
+        foreach($this->_relations as $table => $relations)
+        {
+            if(isset($this->_userRelations[$table])) continue; // already processed
+            $query .= '
+        JOIN '.$table.' ON ';
+            $joins = array();
+
+            if(!isset($tableFields[$table]))
+            {
+                $relatedTableFields = self::getCachedDAO($table)->getFields();
+                foreach($relatedTableFields as $field=>$def)
+                {
+                    $fullFields[$field] = $table.'.'.$field;
+                    $tableFields[$table.'.'.$field] = $def;
+                }
+            }
+
+            foreach($relations as $mine => $related)
+            {
+                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
+            }
+            unset($relatedTableFields);
+            $query .= '('.join(' AND ', $joins).')';
+            unset($joins);
+        }
+
+        foreach($this->_fields as $field=>$def)
+            $fullFields[$field] = $this->_name.'.'.$field;
+
+        if(is_array($args))
+        {
+            unset($args['uid']);
+            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
+            $fetchType = 'object';
+            unset($args['FETCH_TYPE']);
+            foreach($args as $key=>$val)
+            {
+                if(isset($fullFields[$key]))
+                {
+                    $f = $fullFields[$key];
+                    $wheres[] = $f.'=?';
+                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
+                    $request[$f] = $val;
+                }
+            }
+        }
+        elseif(isset($args) && $this->_idField)
+        {
+            $wheres[] = $this->_idField.'=?';
+            $request[$this->_idField] = $args;
+        }
+
+        $query .= ' 
+        WHERE '.join(' AND ', array_unique($wheres));
+
+        if(!empty($groupby))
+        {
+            $query .= ' 
+        GROUP BY '.(string) $order;
+        }
+
+        if(!empty($order))
+        {
+            $query .= ' 
+        ORDER BY '.(string) $order;
+        }
+
+        if(!empty($limit))
+        {
+            $query .= ' 
+        LIMIT '.(string) $limit;
+        }
+
+        $DBResults = array();
+        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
+
+        if('assoc' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        elseif('array' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
+        }
+        else
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
+        }
+        unset($DBResult);
+
+        if(empty($DBResults)) return array();
+        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
+    }
+
+    /**
+     * Gets rows from the database
+     * We will check relations tables which does not have a uid field
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $order the order clause
+     * @param string $groupby the groupby clause
+     * @param string $limit the limit clause
+     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
+     */
+    public function getByRelations($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
+    {
+        $uid = false;
+
+        if(is_object($args))
+        {
+            $args = Object::toArray($args);
+        }
+
+        $fetchType = 'object';
+
+        $query = '
+    SELECT '.(string) $select.' 
+        FROM '.$this->_name;
+
+        $wheres = $request = $fields = $authorized = array();
+        $uid = ((int) isset($args['uid']) ? $args['uid'] : User::iGet()->getUid());
+
+        foreach($this->_userRelations as $table => $relations)
+        {
+            $query .= '
+        JOIN '.$table.' ON ';
+            $joins = array();
+
+            $relatedTableFields = self::getCachedDAO($table)->getFields();
+            foreach($relatedTableFields as $field=>$def)
+            {
+                $fullFields[$field] = $table.'.'.$field;
+                $tableFields[$table.'.'.$field] = $def;
+            }
+            
+            foreach($relations as $mine => $related)
+            {
+                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
+                $fields[$table.'.uid'] = $relatedTableFields['uid'];
+                $request[$table.'.uid'] = $uid;
+                $wheres[] = $table.'.uid=?';
+            }
+            unset($relatedTableFields);
+            $query .= '('.join(' AND ', $joins).')';
+            unset($joins);
+        }
+
+        foreach($this->_fields as $field=>$def)
+            $fullFields[$field] = $this->_name.'.'.$field;
+
+        if(is_array($args))
+        {
+            unset($args['uid']);
+            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
+            $fetchType = 'object';
+            unset($args['FETCH_TYPE']);
+            foreach($args as $key=>$val)
+            {
+                if(isset($fullFields[$key]))
+                {
+                    $f = $fullFields[$key];
+                    $wheres[] = $f.'=?';
+                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
+                    $request[$f] = $val;
+                }
+            }
+        }
+        elseif(isset($args) && $this->_idField)
+        {
+            $wheres[] = $this->_idField.'=?';
+            $request[$this->_idField] = $args;
+        }
+
+        $query .= ' 
+        WHERE '.join(' AND ', array_unique($wheres));
+
+        if(!empty($groupby))
+        {
+            $query .= ' 
+        GROUP BY '.(string) $order;
+        }
+
+        if(!empty($order))
+        {
+            $query .= ' 
+        ORDER BY '.(string) $order;
+        }
+
+        if(!empty($limit))
+        {
+            $query .= ' 
+        LIMIT '.(string) $limit;
+        }
+
+        $DBResults = array();
+        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
+
+        if('assoc' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        elseif('array' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
+        }
+        else
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
+        }
+        unset($DBResult);
+
+        if(empty($DBResults)) return array();
+        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
+    }
+
+    /**
+     * Gets rows from the database including related tables
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $order the order clause
+     * @param string $groupby the groupby clause
+     * @param string $limit the limit clause
+     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
+     */
+    public function getAll($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
+    {
+        $uid = false;
+
+        if(is_object($args))
+        {
+            $args = Object::toArray($args);
+        }
+
+        $fetchType = 'object';
+
+        $query = '
+    SELECT '.(string) $select.' 
+        FROM '.$this->_name;
+
+        $wheres = $request = $fields = $authorized = $fullFields = array();
+        $uid = ((int) isset($args['uid']) ? $args['uid'] : 0);
+
+        foreach($this->_relations as $table => $relations)
+        {
+            $query .= '
+        JOIN '.$table.' ON ';
+            $joins = array();
+
+            $relatedTableFields = self::getCachedDAO($table)->getFields();
+            foreach($relatedTableFields as $field=>$def)
+            {
+                $fullFields[$field] = $table.'.'.$field;
+                $tableFields[$table.'.'.$field] = $def;
+            }
+
+            foreach($relations as $mine => $related)
+            {
+                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
+            }
+
+            if(isset($relatedTableFields['uid']) && $uid > 0)
+            {
+                $wheres[] = $table.'.uid=?';
+                $request[$table.'.uid'] = $uid;
+                $fields[$table.'.uid'] = $relatedTableFields['uid'];
+            }
+            unset($relatedTableFields);
+            $query .= '('.join(' AND ', $joins).')';
+            unset($joins);
+        }
+
+        foreach($this->_fields as $field=>$def)
+            $fullFields[$field] = $this->_name.'.'.$field;
+
+        if(is_array($args))
+        {
+            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
+            $fetchType = 'object';
+            unset($args['FETCH_TYPE']);
+            foreach($args as $key=>$val)
+            {
+                if(isset($fullFields[$key]))
+                {
+                    $f = $fullFields[$key];
+                    $wheres[] = $f.'=?';
+                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
+                    $request[$f] = $val;
+                }
+            }
+        }
+        elseif(isset($args) && $this->_idField)
+        {
+            $wheres[] = $this->_idField.'=?';
+            $request[$this->_idField] = $args;
+        }
+
+        if(!empty($wheres))
+            $query .= ' 
+        WHERE '.join(' AND ', array_unique($wheres));
+
+        if(!empty($groupby))
+        {
+            $query .= ' 
+        GROUP BY '.(string) $order;
+        }
+
+        if(!empty($order))
+        {
+            $query .= ' 
+        ORDER BY '.(string) $order;
+        }
+
+        if(!empty($limit))
+        {
+            $query .= ' 
+        LIMIT '.(string) $limit;
+        }
+
+        $DBResults = array();
+        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
+
+        if('assoc' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        elseif('array' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
+        }
+        else
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
+        }
+        unset($DBResult);
+
+        if(empty($DBResults)) return array();
+        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
+    }
 
     /**
      * Gets rows from the database
@@ -154,9 +566,9 @@ abstract class DAO implements iDAO
                 unset($args['uid']);
             }
 
-            foreach($this->_fields as $key=>$val)
+            foreach($args as $key=>$val)
             {
-                !isset($args[$key]) || (($wheres[] = $key.'=?') && ($request[$key] = $args[$key]));
+                !isset($this->_fields[$key]) || (($wheres[] = $key.'=?') && ($request[$key] = $val));
             }
         }
         elseif(isset($args) && $this->_idField)
@@ -359,7 +771,7 @@ abstract class DAO implements iDAO
                 {
                     if('uid' === $field)
                     {
-                        $this->uid = User::iGet()->getUid();
+                        $this->uid = $this->uid ?: User::iGet()->getUid();
                     }
                     else
                     {
@@ -673,13 +1085,76 @@ abstract class DAO implements iDAO
                 break;
         }
 
-        $valid = self::getCachedDAO($table)->get(array($field => $id), $field);
-
-        if(!$valid)
+        if(!self::getCachedDAO($table)->get(array($field => $id), $field))
         {
             throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
         }
 
         return $type->type;
+    }
+
+    /**
+     * Returns the types relative to the specified ids
+     * This method also checks for user rights to read them
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param array $ids array of ids to get type from
+     * @return mixed Exception on error, or the type corresponding to the id
+     * @access public
+     * @static
+     */
+    static public function getTypes(array $ids)
+    {
+        $ids = (int)$ids;
+
+        $types = DB::iGet()->getOne('
+    SELECT id,type
+        FROM objects
+        WHERE id IN ('.$ids.')');
+
+        if(!$types->count()) return false;
+        elseif(CLI)
+        {
+            return $type->getAllNext();
+        }
+
+        $ret = array();
+
+        while($types->next())
+        {
+            switch($types->type)
+            {
+                case 'streams':
+                    $field = 'rssid';
+                    $table = 'streams_relations';
+                    break;
+    
+                case 'streams_groups':
+                    $field = 'id';
+                    $table = $types->type;
+                    break;
+    
+                case 'news':
+                    $field = 'newsid';
+                    $table = 'news_relations';
+                    break;
+    
+                case 'users':
+                    if(User::iGet()->isAdmin()) $ret[$types->id] = $types->type;
+                    throw new Exception('Invalid id', Exception::E_OWR_UNAUTHORIZED);
+                    break;
+    
+                default:
+                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                    break;
+            }
+
+            if(!self::getCachedDAO($table)->get(array($field => $ids), $field))
+            {
+                throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+            }
+        }
+
+        return $ret;
     }
 }

@@ -53,7 +53,6 @@ class Logs extends Singleton
      * Writes the logs if not already done and if not empty
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $msg the message to log
      * @access public
      */
     public function __destruct()

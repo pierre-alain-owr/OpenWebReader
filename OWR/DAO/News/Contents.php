@@ -71,6 +71,9 @@ class Contents extends DAO
             'id'        =>  array('required' => true, 'type' => \PDO::PARAM_INT),
             'contents'  =>  array('required' => true, 'type' => \PDO::PARAM_STR)
         );
+        $this->_userRelations = array(
+            'news_relations'    => array('id'                   => 'newsid'),
+            'streams_relations' => array('news_relations.rssid' => 'rssid')
+        );
     }
-
 }

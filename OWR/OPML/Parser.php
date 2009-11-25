@@ -323,7 +323,7 @@ class Parser extends XMLReader
                 if(!$required['required']) continue;
                 else
                 {
-                    throw new Exception("Invalid XML : needed attribute '{$attribute}' in tag {$this->_localName}".(!is_null($this->_parentLocalName) ? " in parent tag {$this->_parentLocalName}." : '.').' for stream '.$this->_currentStream, Exception::E_OWR_WARNING);
+                    throw new Exception("Invalid XML : needed attribute '{$attribute}' in tag {$this->_localName}".(!is_null($this->_parentLocalName) ? " in parent tag {$this->_parentLocalName}." : '.').' for OPML '.$this->_currentStream, Exception::E_OWR_WARNING);
                     $node[$attribute] = '';
                 }
             }

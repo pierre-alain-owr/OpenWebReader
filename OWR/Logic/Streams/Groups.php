@@ -197,6 +197,7 @@ class Groups extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
+        $multiple = false;
 
         if(!empty($request->ids))
         {
@@ -218,6 +219,8 @@ class Groups extends Logic
 
                 $datas[] = $data;
             }
+
+            $multiple = count($datas);
         }
         elseif(!empty($request->id))
         {
@@ -241,10 +244,13 @@ class Groups extends Logic
                 $request->setResponse(new Response);
                 return $this;
             }
+
+            $multiple = !isset($datas['id']);
         }
 
         $request->setResponse(new Response(array(
-            'datas'        => $datas
+            'datas'        => $datas,
+            'multiple'     => (bool) $multiple
         )));
         return $this;
     }

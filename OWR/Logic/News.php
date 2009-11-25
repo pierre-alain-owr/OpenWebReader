@@ -40,7 +40,8 @@ use OWR\Logic as Logic,
     OWR\Exception as Exception,
     OWR\DAO as DAO,
     OWR\User as User,
-    OWR\Config as Config;
+    OWR\Config as Config,
+    OWR\Logs as Logs;
 /**
  * This class is used to add/edit/delete news
  * @package OWR
@@ -49,6 +50,7 @@ use OWR\Logic as Logic,
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
+ * @uses OWR\Logs the log object
  * @subpackage Logic
  */
 class News extends Logic
@@ -69,15 +71,13 @@ class News extends Logic
         $new = $this->_dao->get(array('hash'=>$hash), 'id,pubDate');
         if($new)
         {
-            if($pubDate <= $new->pubDate)
-            {
-                $this->insertNewsRelations($request);
-                $response = $request->getResponse();
-                if('error' === $response->getNext())
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                $request->setResponse(new Response);
-                return $this;
-            }
+            $r = new Request(array('id'=>$new->id, 'streamid'=>$request->streamid));
+            $this->insertNewsRelations($r);
+            $response = $r->getResponse();
+            if('error' === $response->getNext())
+                Logs::iGet()->log($response->getError(), $response->getStatus());
+            $request->setResponse(new Response);
+            return $this;
         }
         else $new = DAO::getDAO('news');
         
@@ -192,17 +192,16 @@ class News extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
+        $multiple = false;
 
         if(!empty($request->ids))
         {
             $datas = array();
-            $daoStreams = DAO::getCachedDAO('streams_relations');
-            $daoContents = DAO::getCachedDAO('news_contents');
 
             foreach($request->ids as $id)
             {
                 $args['id'] = $id;
-                $data = $this->_dao->get($args, 'id,rssid AS streamid,lastupd,pubDate,author,title,link', $order, $groupby, $limit);
+                $data = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, 1);
                 if(!$data)
                 {
                     $request->setResponse(new Response(array(
@@ -213,16 +212,17 @@ class News extends Logic
                     return $this;
                 }
     
-                $data['gid'] = $daoStreams->get(array('rssid' => $data['streamid']), 'gid')->gid;
-                $data['contents'] = unserialize($daoContents->get(array('id' => $data['id']), 'contents')->contents);
+                $data['contents'] = unserialize($data['contents']);
 
                 $datas[] = $data;
             }
+
+            $multiple = count($datas);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->get($args, 'id,rssid AS streamid,lastupd,pubDate,author,title,link', $order, $groupby, 1);
+            $datas = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, 1);
             if(!$datas)
             {
                 $request->setResponse(new Response(array(
@@ -233,31 +233,37 @@ class News extends Logic
                 return $this;
             }
 
-            $datas['gid'] = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas['streamid']), 'gid')->gid;
-            $datas['contents'] = unserialize(DAO::getCachedDAO('news_contents')->get(array('id' => $datas['id']), 'contents')->contents);
+            $datas['contents'] = unserialize($datas['contents']);
         }
         else
         {
-            $datas = $this->_dao->get($args, 'id,rssid AS streamid,lastupd,pubDate,author,title,link', $order, $groupby, $limit);
+            $datas = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, $limit);
             if(!$datas)
             {
                 $request->setResponse(new Response);
                 return $this;
             }
 
-            $daoStreams = DAO::getCachedDAO('streams_relations');
             $daoContents = DAO::getCachedDAO('news_contents');
-            $groups = array();
 
-            foreach($datas as $k=>$data)
+            if(!isset($datas['id']))
             {
-                $datas[$k]['gid'] = $daoStreams->get(array('rssid' => $data['streamid']), 'gid')->gid;
-                $datas[$k]['contents'] = unserialize($daoContents->get(array('id' => $data['id']), 'contents')->contents);
+                $multiple = true;
+
+                foreach($datas as $k=>$data)
+                {
+                    $datas[$k]['contents'] = unserialize($data['contents']);
+                }
+            }
+            else
+            {
+                $datas['contents'] = unserialize($datas['contents']);
             }
         }
 
         $request->setResponse(new Response(array(
-            'datas'        => $datas
+            'datas'        => $datas,
+            'multiple'     => (bool) $multiple
         )));
         return $this;
     }
@@ -276,12 +282,12 @@ class News extends Logic
         $streamid = (int) $request->streamid;
 
         if(!$request->current)
-        {
+        { // add a relation for all users
             $query = '
     SELECT uid
         FROM streams_relations
         WHERE uid NOT IN (
-            SELECT uid
+            SELECT DISTINCT(uid)
                 FROM news_relations
                 WHERE rssid='.$streamid.' AND newsid='.$id.'
         ) AND rssid='.$streamid;

@@ -47,6 +47,7 @@ use OWR\Logic as Logic,
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
+ * @uses OWR\Request a request sent to the logic
  * @subpackage Logic
  */
 class Objects extends Logic
@@ -129,11 +130,12 @@ class Objects extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
+        $multiple = false;
 
         if(!empty($request->ids))
         {
             $datas = array();
-
+            $r = new Request;
             foreach($request->ids as $id)
             {
                 $args['id'] = $id;
@@ -147,9 +149,22 @@ class Objects extends Logic
                     )));
                     return $this;
                 }
-
-                $datas[] = $data;
+                $r->id = $id;
+                parent::getCachedLogic($data['type'])->view($r, $args, $order, $groupby, $limit);
+                $response = $r->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $data = $response->getDatas();
+                    empty($data) || $datas[] = $data;
+                }
+                else
+                {
+                    $request->setResponse($response);
+                    return $this;
+                }
             }
+
+            $multiple = count($datas);
         }
         elseif(!empty($request->id))
         {
@@ -179,7 +194,8 @@ class Objects extends Logic
         }
 
         $request->setResponse(new Response(array(
-            'datas'        => $datas
+            'datas'        => $datas,
+            'multiple'     => (bool) $multiple
         )));
         return $this;
     }

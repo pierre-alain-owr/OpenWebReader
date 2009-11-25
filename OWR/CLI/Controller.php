@@ -264,7 +264,7 @@ class Controller extends MainController
      */
     protected function do_refreshstream()
     {
-        Logic::getCachedLogic('streams')->refreshAllStreams($this->_request);
+        Logic::getCachedLogic('streams')->refreshAll($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }

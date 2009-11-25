@@ -114,16 +114,12 @@ class Exception extends Exceptions
             case self::E_OWR_NOTICE:
                 break;
 
-            case self::E_OWR_BAD_REQUEST:
-                View::iGet()->setStatusCode(400, true);
-                break;
-
-            case self::E_OWR_UNAUTHORIZED:
-                View::iGet()->setStatusCode(401, true);
-                break;
-
-            case self::E_OWR_UNAVAILABLE:
-                View::iGet()->setStatusCode(503, true);
+            case 503:
+            case 409:
+            case 400:
+            case 401:
+            case 403:
+                View::iGet()->setStatusCode($errcode, true);
                 break;
 
             case E_USER_ERROR:
@@ -149,7 +145,7 @@ class Exception extends Exceptions
     {
         $msg = "[".get_called_class().':'.$this->code.(isset(self::$_type[$this->code]) ? ':'.self::$_type[$this->code] : '').'] ';
         $msg .= $this->message.' in file '.$this->file;
-        $msg .= ' on line '.$this->line."\n";//.'. Stacktrace: '.$this->getTraceAsString();
+        $msg .= ' on line '.$this->line;//.'. Stacktrace: '.$this->getTraceAsString();
 
         if(self::E_OWR_DIE === $this->code)
         {
@@ -174,7 +170,7 @@ class Exception extends Exceptions
     static public function exception_handler($exception)
     {
         $msg = '['.(isset(self::$_type[$exception->getCode()]) ? self::$_type[$exception->getCode()] : 'unknown').'] ';
-        $msg .= $exception->getMessage().' in file '.$exception->getFile().' on line '.$exception->getLine().'. ';
+        $msg .= $exception->getMessage().' in file '.$exception->getFile().' on line '.$exception->getLine();
         
         if(!DEBUG || !User::iGet()->isAdmin())
         {

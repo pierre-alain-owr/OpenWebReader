@@ -82,9 +82,8 @@ class Sessions extends DAO
         $this->_fields = array(
             'id'        => array('required' => true, 'type' => \PDO::PARAM_STR),
             'access'    => array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
-            'ip'        => array('required' => false, 'type' => DBRequest::PARAM_IP, 'default' => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'CLI'),
+            'ip'        => array('required' => false, 'type' => DBRequest::PARAM_IP, 'default' => $_SERVER['REMOTE_ADDR']),
             'data'      => array('required' => true, 'type' => \PDO::PARAM_STR)
         );
     }
-
 }

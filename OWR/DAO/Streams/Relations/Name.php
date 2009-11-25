@@ -78,10 +78,8 @@ class Name extends DAO
             'name'  => array('required' => true, 'type' => \PDO::PARAM_STR), 
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
-        $this->_relatedTables = array(
-            'streams'        => array('rssid'=>'id'),
-            'streams_relations' => array('rssid'=>'rssid')
+        $this->_userRelations = array(
+            'streams_relations' => array('id'   => 'rssid')
         );
     }
-
 }

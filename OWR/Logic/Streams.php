@@ -125,7 +125,7 @@ class Streams extends Logic
             if($news)
             {
                 $r = clone($request);
-                $r->current = true;
+                $r->current = true; // we add a news_relations only for the current user
                 $r->streamid = $streams->id;
                 if(is_array($news))
                 {
@@ -180,10 +180,21 @@ class Streams extends Logic
 
             unset($streams_name);
 
-            $request->setResponse(new Response(array(
-                'status'    => 201,
-                'datas'     => array('id' => $request->id, 'ids' => $ids)
-            )));
+            if(!$request->escape && !$request->escapeNews)
+            {
+                $request->setResponse(new Response(array(
+                    'do'        => 'ok',
+                    'tpl'       => 'menu_part_category',
+                    'datas'     => array('id'=>$request->id, 'gid'=>$request->gid, 'name'=>$request->gname, 'ids' => $ids),
+                    'status'    => 201
+                )));
+            }
+            else
+            {
+                $request->setResponse(new Response(array(
+                    'datas' => array('id' => $request->id, 'ids' => $ids)
+                )));
+            }
 
             $request->new = true;
 
@@ -460,19 +471,16 @@ class Streams extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
+        $multiple = false;
 
         if(!empty($request->ids))
         {
             $datas = array();
-            $daoGroups = DAO::getCachedDAO('streams_groups');
-            $daoStreams = DAO::getCachedDAO('streams_relations');
-            $daoNames = DAO::getCachedDAO('streams_relations_name');
-            $daoContents = DAO::getCachedDAO('streams_contents');
 
             foreach($request->ids as $id)
             {
                 $args['id'] = $id;
-                $data = $this->_dao->get($args, 'id,url,ttl,lastupd,favicon,status', $order, $groupby, $limit);
+                $data = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, 1);
                 if(!$data)
                 {
                     $request->setResponse(new Response(array(
@@ -483,18 +491,17 @@ class Streams extends Logic
                     return $this;
                 }
 
-                $data['gid'] = $daoStreams->get(array('rssid' => $data['id']), 'gid')->gid;
-                $data['gname'] = $daoGroups->get(array('gid' => $data['gid']), 'name')->name;
-                $data['name'] = $daoNames->get(array('rssid' => $data['id']), 'name')->name;
-                $data['contents'] = unserialize($daoContents->get(array('rssid' => $data['id']), 'contents')->contents);
+                $data['contents'] = unserialize($data['contents']);
 
                 $datas[] = $data;
             }
+
+            $multiple = count($datas);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->get($args, 'id,url,ttl,lastupd,favicon,status', $order, $groupby, $limit);
+            $datas = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, 1);
             if(!$datas)
             {
                 $request->setResponse(new Response(array(
@@ -505,37 +512,35 @@ class Streams extends Logic
                 return $this;
             }
 
-            $datas['gid'] = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $datas['id']), 'gid')->gid;
-            $datas['gname'] = DAO::getCachedDAO('streams_groups')->get(array('id' => $datas['gid']), 'name')->name;
-            $datas['name'] = DAO::getCachedDAO('streams_relations_name')->get(array('rssid' => $datas['id']), 'name')->name;
-            $datas['contents'] = unserialize(DAO::getCachedDAO('streams_contents')->get(array('rssid' => $datas['id']), 'contents')->contents);
+            $datas['contents'] = unserialize($datas['contents']);
         }
         else
         {
-            $datas = $this->_dao->get($args, 'id,url,ttl,lastupd,favicon,status', $order, $groupby, $limit);
+            $datas = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, $limit);
             if(!$datas)
             {
                 $request->setResponse(new Response);
                 return $this;
             }
 
-            $daoGroups = DAO::getCachedDAO('streams_groups');
-            $daoStreams = DAO::getCachedDAO('streams_relations');
-            $daoNames = DAO::getCachedDAO('streams_relations_name');
-            $daoContents = DAO::getCachedDAO('streams_contents');
-            $groups = array();
-
-            foreach($datas as $k=>$data)
+            if(!isset($datas['id']))
             {
-                $datas[$k]['gid'] = $daoStreams->get(array('rssid' => $data['id']), 'gid')->gid;
-                $datas[$k]['gname'] = $daoGroups->get(array('id' => $datas[$k]['gid']), 'name')->name;
-                $datas[$k]['name'] = $daoNames->get(array('rssid' => $data['id']), 'name')->name;
-                $datas[$k]['contents'] = unserialize($daoContents->get(array('rssid' => $data['id']), 'contents')->contents);
+                $multiple = true;
+
+                foreach($datas as $k=>$data)
+                {
+                    $datas[$k]['contents'] = unserialize($data['contents']);
+                }
+            }
+            else
+            {
+                $datas['contents'] = unserialize($datas['contents']);
             }
         }
 
         $request->setResponse(new Response(array(
-            'datas'        => $datas
+            'datas'        => $datas,
+            'multiple'     => (bool) $multiple
         )));
         return $this;
     }
@@ -1214,14 +1219,16 @@ class Streams extends Logic
      * @param mixed $request the Request instance
      * @return $this
      */
-    public function refreshAllStreams(Request $request)
+    public function refreshAll(Request $request)
     { // in cli, we refresh for all users
         if(!$request->id)
         {
+            // status = 0 means stream is alive
+            // seems obvious but in the other case it will be a timestamp of down time
             $query = '
     SELECT DISTINCT(r.id)
         FROM streams r
-        WHERE (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP() AND status=0';
+        WHERE (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP() AND status=0'; 
 
             $streams = $this->_db->getAll($query);
             if($streams->count())

@@ -36,7 +36,7 @@
  */
 namespace OWR;
 use \PDO as PDO,
-    OWR\DB\Request as Request,
+    OWR\DB\Request as DBRequest,
     OWR\DB\Result as Result,
     OWR\Interfaces\DB as iDB;
 /**
@@ -315,7 +315,7 @@ class DB extends PDO implements iDB
      * @param mixed $datas the request
      * @return mixed a Result
      */
-    public function cExecuteP($sql, Request $datas)
+    public function cExecuteP($sql, DBRequest $datas)
     {
         return $this->cExecute($sql, $datas, true);
     }
@@ -330,7 +330,7 @@ class DB extends PDO implements iDB
      * @param boolean $prepare prepare or not the query
      * @return mixed a Result
      */
-    public function cExecute($sql, Request $datas = null, $prepare = false)
+    public function cExecute($sql, DBRequest $datas = null, $prepare = false)
     {
         if(!$this->_cacheTime) return $this->execute($sql, $datas, $prepare);
         
@@ -352,7 +352,7 @@ class DB extends PDO implements iDB
      * @param mixed $datas the request
      * @return mixed an Result
      */
-    public function executeP($sql, Request $datas = null)
+    public function executeP($sql, DBRequest $datas = null)
     {
         return $this->execute($sql, $datas, true);
     }
@@ -367,7 +367,7 @@ class DB extends PDO implements iDB
      * @param boolean $prepare prepare or not the query
      * @return mixed a Result
      */
-    public function execute($sql, Request $datas = null, $prepare = false)
+    public function execute($sql, DBRequest $datas = null, $prepare = false)
     {
         return new Result($this->_executeSQL($sql, $datas, 'query', $prepare) ?: null);
     }
@@ -385,7 +385,7 @@ class DB extends PDO implements iDB
      * @param boolean $returnId if a row is inserted, returns the id
      * @return mixed the result/statement/id
      */
-    protected function _executeSQL($sql, Request $datas = null, $action = "exec", 
+    protected function _executeSQL($sql, DBRequest $datas = null, $action = "exec", 
                         $prepare = true, $returnId = false)
     {
         $sql = (string)$sql;
@@ -582,7 +582,7 @@ class DB extends PDO implements iDB
      * @param boolean $prepare prepare or not the query
      * @return mixed a Result
      */
-    public function cGetAllP($sql, Request $datas = null, $action = "query", $prepare = true)
+    public function cGetAllP($sql, DBRequest $datas = null, $action = "query", $prepare = true)
     {
         if(!$this->_cacheTime) return $this->getAllP($sql, $datas, $action);
         
@@ -617,7 +617,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a Result
      */
-    public function cGetRowP($sql, Request $datas = null, $prepared = true)
+    public function cGetRowP($sql, DBRequest $datas = null, $prepared = true)
     {
         if(!$this->_cacheTime) return $this->getRowP($sql, $datas, $prepared);
         
@@ -639,7 +639,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a Result
      */
-    public function cGetOneP($sql, Request $datas = null, $prepared = true)
+    public function cGetOneP($sql, DBRequest $datas = null, $prepared = true)
     {
         if(!$this->_cacheTime) return $this->getOneP($sql, $datas, false);
         
@@ -691,7 +691,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a Result
      */
-    public function getAllP($sql, Request $datas = null, $action = "query", $prepare = true)
+    public function getAllP($sql, DBRequest $datas = null, $action = "query", $prepare = true)
     {
         $result = new Result($this->_executeSQL($sql, $datas, $action, $prepare, false) ?: null);
         return $result;
@@ -708,7 +708,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a PDOStatement or the inserted ID
      */
-    public function get($sql, Request $datas = null, $action = "query", $returnId = false) 
+    public function get($sql, DBRequest $datas = null, $action = "query", $returnId = false) 
     {
         return $this->getP($sql, $datas, $action, false, $returnId);
     }
@@ -724,7 +724,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a PDOStatement or the inserted ID
      */
-    public function getP($sql, Request $datas = null, $action = "query", $prepare = true, $returnId = false) 
+    public function getP($sql, DBRequest $datas = null, $action = "query", $prepare = true, $returnId = false) 
     {
         return $this->_executeSQL($sql, $datas, $action, $prepare, $returnId);
     }
@@ -752,7 +752,7 @@ class DB extends PDO implements iDB
      * @param boolean $prepared prepare the query or not
      * @return mixed a Result
      */
-    public function getRowP($sql, Request $datas = null, $prepared = true)
+    public function getRowP($sql, DBRequest $datas = null, $prepared = true)
     {
         return new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ROW);
     }
@@ -767,7 +767,7 @@ class DB extends PDO implements iDB
      * @param boolean $prepared prepare the query or not
      * @return mixed a Result
      */
-    public function getOneP($sql, Request $datas = null, $prepared = true)
+    public function getOneP($sql, DBRequest $datas = null, $prepared = true)
     {
         return new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ONE);
     }
@@ -798,7 +798,7 @@ class DB extends PDO implements iDB
      * @param boolean $returnId returns the id of the inserted row
      * @return mixed the result/statement/id
      */
-    public function set($sql, Request $datas = null, $action = "exec", 
+    public function set($sql, DBRequest $datas = null, $action = "exec", 
                         $returnId = false)
     {
         return $this->_executeSQL($sql, $datas, $action, false, $returnId);
@@ -816,7 +816,7 @@ class DB extends PDO implements iDB
      * @param boolean $returnId returns the id of the inserted row
      * @return mixed the result/statement/id
      */
-    public function setP($sql, Request $datas = null, $action = "exec", $prepare = true, $returnId = false)
+    public function setP($sql, DBRequest $datas = null, $action = "exec", $prepare = true, $returnId = false)
     {
         $this->_hasSet = true;
         return $this->_executeSQL($sql, $datas, $action, true, $returnId);

@@ -321,7 +321,7 @@ class Controller extends Singleton
             }
             while($error = @ob_get_clean());
         }
-        
+
         isset($this->_view) || $this->_view = View::iGet();
 
         if(isset($_SERVER['HTTP_ACCEPT']) && 'application/json' === $_SERVER['HTTP_ACCEPT'])
@@ -690,7 +690,7 @@ class Controller extends Singleton
         switch($tpl)
         {
             case 'new_contents':
-                $request = new Request($datas);
+                $request = new Request(array('id' => $datas['id']));
                 Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
@@ -708,7 +708,7 @@ class Controller extends Singleton
             case 'new_details':
                 $datas['token'] = User::iGet()->getToken();
                 $datas['details'] = array();
-                $request = new Request($datas);
+                $request = new Request(array('id' => $datas['id']));
                 Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
@@ -862,7 +862,7 @@ class Controller extends Singleton
                 break;
                 
             case 'menu_part_stream':
-                $request = new Request($datas);
+                $request = new Request(array('id' => $datas['id']));
                 Logic::getCachedLogic('streams')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
@@ -1147,13 +1147,24 @@ class Controller extends Singleton
                         break;
                     }
                     
-                    foreach($datas as $data)
+                    if($response->isMultiple())
                     {
-                        $data['gid'] = $data['id'];
-                        $data['gname'] = $data['name'];
-                        $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
-                        unset($data['id'], $data['name']);
-                        $page .= $this->_view->get('menu_contents', $data, $xml, $cacheTime);
+                        foreach($datas as $data)
+                        {
+                            $data['gid'] = $data['id'];
+                            $data['gname'] = $data['name'];
+                            $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
+                            unset($data['id'], $data['name']);
+                            $page .= $this->_view->get('menu_contents', $data, $xml, $cacheTime);
+                        }
+                    }
+                    else
+                    {
+                        $datas['gid'] = $datas['id'];
+                        $datas['gname'] = $datas['name'];
+                        $datas['unreads'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+                        unset($datas['id'], $datas['name']);
+                        $page .= $this->_view->get('menu_contents', $datas, $xml, $cacheTime);
                     }
                 }
                 else
@@ -1197,12 +1208,22 @@ class Controller extends Singleton
                     $groups = $response->getDatas();
                     if(!empty($groups))
                     {
-                        foreach($groups as $group)
+                        if($response->isMultiple())
                         {
-                            $group['groupid'] = $group['id'];
-                            $group['gname'] = $group['name'];
-                            $group['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
-                            $page .= $this->_view->get('menu_contents', $group, $xml, $cacheTime);
+                            foreach($groups as $group)
+                            {
+                                $group['groupid'] = $group['id'];
+                                $group['gname'] = $group['name'];
+                                $group['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
+                                $page .= $this->_view->get('menu_contents', $group, $xml, $cacheTime);
+                            }
+                        }
+                        else
+                        {
+                            $groups['groupid'] = $groups['id'];
+                            $groups['gname'] = $groups['name'];
+                            $groups['unread'] = isset($this->_request->unreads[$groups['id']]) ? $this->_request->unreads[$groups['id']] : 0;
+                            $page .= $this->_view->get('menu_contents', $groups, $xml, $cacheTime);
                         }
                     }
                 }
@@ -1261,12 +1282,20 @@ class Controller extends Singleton
                 {
                     $streams = $response->getDatas();
                     if(empty($streams)) break;
-                    $args = array();
-                    foreach($streams as $stream)
+
+                    if($response->isMultiple())
                     {
-                        if(!isset($datas['groups'][$stream['gid']]))
-                            $datas['groups'][$stream['gid']] = $stream['gname'];
-                        $datas['streams'][$stream['gid']][] = $stream;
+                        foreach($streams as $stream)
+                        {
+                            if(!isset($datas['groups'][$stream['gid']]))
+                                $datas['groups'][$stream['gid']] = $stream['gname'];
+                            $datas['streams'][$stream['gid']][] = $stream;
+                        }
+                    }
+                    else
+                    {
+                        $datas['groups'][$streams['gid']] = $streams['gname'];
+                        $datas['streams'][$streams['gid']][] = $streams;
                     }
                 }
                 else
@@ -1279,7 +1308,7 @@ class Controller extends Singleton
 
             case 'edituser':
                 if(empty($datas['id']))
-                {
+                { // surely editing a new user
                     $datas['surl'] = $this->_cfg->get('surl');
                     $datas['token'] = $this->_user->getToken();
                     $datas['timezones'] = $this->_user->getTimeZones();
@@ -1287,7 +1316,7 @@ class Controller extends Singleton
                     break;
                 }
 
-                $request = new Request($datas);
+                $request = new Request(array('id' => $datas['id']));
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['token'] = $this->_user->getToken();
                 $datas['timezones'] = $this->_user->getTimeZones();
@@ -1312,13 +1341,22 @@ class Controller extends Singleton
                 $datas['surl'] = $this->_cfg->get('surl');
                 $cacheTime = 0;
                 $datas['token'] = $this->_user->getToken();
-                
+                $datas['users'] = array();
+                $datas['nbusers'] = 0;
                 Logic::getCachedLogic('users')->view($request, array(), 'login');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $datas['users'] = $response->getDatas();
-                    $datas['nbusers'] = count($datas['users']);
+                    if(!$response->isMultiple())
+                    {
+                        $datas['users'][] = $response->getDatas();
+                        $datas['nbusers'] = 1;
+                    }
+                    else
+                    {
+                        $datas['users'] = $response->getDatas();
+                        $datas['nbusers'] = count($datas['users']);
+                    }
                 }
                 else
                 {
@@ -1341,12 +1379,26 @@ class Controller extends Singleton
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $datas['news'] = $response->getDatas();
-                    foreach($datas['news'] as $k=>$new)
+                    $data = $response->getDatas();
+                    if(empty($data)) break;
+
+                    if($response->isMultiple())
                     {
-                        $ids[] = $new['id'];
-                        $datas['news'][$k]['pubDate'] = date(DATE_RSS, $new['pubDate']);
+                        $datas['news'] = $data;
+                        unset($data);
+                        foreach($datas['news'] as $k=>$new)
+                        {
+                            $ids[] = $new['id'];
+                            $datas['news'][$k]['pubDate'] = date(DATE_RSS, $new['pubDate']);
+                        }
                     }
+                    else
+                    {
+                        $ids[] = $data['id'];
+                        $data['pubDate'] = date(DATE_RSS, $data['pubDate']);
+                        $datas['news'][] = $data;
+                    }
+
                 }
                 else
                 {
@@ -1355,7 +1407,7 @@ class Controller extends Singleton
                 }
                 unset($response, $request);
                 
-                if($ids)
+                if(!empty($ids))
                 {
                     $query = '
     UPDATE news_relations
