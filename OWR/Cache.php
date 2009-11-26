@@ -54,20 +54,37 @@ class Cache
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
      * @static
-     * @param $dir a directory in cache/
+     * @param string $dir a directory in cache/
+     * @param boolean $maintenance must-we just check for the lastmtime ?
+     * @return int number of deleted files
      */
-    static public function clearCache($dir = '')
+    static public function clearCache($dir = '', $maintenance = false)
     {
         $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.(string)$dir;
         
         $nb = 0;
+
+        clearstatcache();
+
         if(!file_exists($dir)) return $nb;
 
         $cache = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+
+        if($maintenance)
+        {
+            $now = Config::iGet()->get('begintime');
+            $cacheTime = Config::iGet()->get('cacheTime');
+        }
+
         foreach($cache as $file) 
         {
             if(!$cache->isDot() && !$cache->isDir() && $cache->isWritable()) 
             {
+                if($maintenance && ($cache->getMTime() + $cacheTime < $now))
+                {
+                    continue;
+                }
+                
                 $nb += (int) unlink((string) $file);
             }
         }

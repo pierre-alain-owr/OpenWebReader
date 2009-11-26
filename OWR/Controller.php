@@ -1876,6 +1876,8 @@ class Controller extends Singleton
             $this->_cron->manage('checkstreamsavailability');
         }
 
+        Cache::clearCache('', true);
+
         return $this;
     }
 
