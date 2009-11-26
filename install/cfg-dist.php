@@ -131,6 +131,7 @@ $cfg['sessionLifeTime']         = 86400;
 
 /* server config */
 // default temporary directory
+// please keep this OUT of public web server access
 $cfg['defaultTmpDir']           = sys_get_temp_dir().DIRECTORY_SEPARATOR;
 // max upload file size, in octets, default to 5mo
 $cfg['maxUploadFileSize']       = 5120000;

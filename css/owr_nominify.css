@@ -293,7 +293,7 @@ ul.menu_actions li:hover
     background-color:#DDDDDD;
 }
 
-img.favicon_stream
+img.favicon_stream, a.favicon_stream
 {
     margin:0 3px 0 0;
 }
@@ -715,7 +715,7 @@ li.menu_part_title
 
 img.favicon, a.favicon
 {
-    margin:0 4px 0 -20px;
+    margin:-12px 8px 0 -20px;
 }
 
 a.no_favicon
@@ -813,6 +813,5 @@ div.news_ordering
 
 div.new_title
 {
-    margin-left:6px;
-    margin-right:6px;
+    margin:0 6px 0 30px;
 }
