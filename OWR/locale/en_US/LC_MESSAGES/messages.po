@@ -356,7 +356,7 @@ msgid "Email"
 msgstr "Email"
 
 msgid "Show the new"
-msgstr "Show the contents of the new"
+msgstr "Show the contents of the new (or double-click to open in a new window)"
 
 msgid "Move to page"
 msgstr "Display the page"

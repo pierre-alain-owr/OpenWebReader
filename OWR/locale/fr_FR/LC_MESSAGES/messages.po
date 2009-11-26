@@ -394,7 +394,7 @@ msgid "Email"
 msgstr "Courriel"
 
 msgid "Show the new"
-msgstr "Afficher le contenu de la nouvelle"
+msgstr "Afficher le contenu de la nouvelle (ou double-cliquer pour ouvrir dans une nouvelle fenêtre)"
 
 msgid "Move to page"
 msgstr "Afficher la page"

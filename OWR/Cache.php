@@ -96,6 +96,8 @@ class Cache
      */
     static public function clearHTMLCache()
     {
+        !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR');
+        !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US');
         return (self::clearCache('fr_FR') + self::clearCache('en_US'));
     }
 

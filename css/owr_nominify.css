@@ -159,6 +159,11 @@ table tr, table td, table th
 {
     border:none;
 }
+
+.underlined
+{
+    text-decoration:underline;
+}
 /* end generic css */
 
 div#menu
@@ -412,7 +417,7 @@ div.spacer
 .new
 {
     background-position:-285px 0px;
-    margin:0 2px 0 0;
+    margin:0 10px 0 0;
 }
 
 .link_go
@@ -621,7 +626,7 @@ a.current.hidden, a.current_stream.hidden
 input.openid
 {
     background-image:url(../images/icons.png);
-    background-position:-640px 0px;
+    background-position:-656px 0px;
     background-repeat:no-repeat;
     width:180px;
     padding-left:20px;
@@ -708,9 +713,14 @@ li.menu_part_title
     cursor:pointer;
 }
 
-img.favicon
+img.favicon, a.favicon
 {
     margin:0 4px 0 -20px;
+}
+
+a.no_favicon
+{
+    background-position:-642px 0px;
 }
 
 div.pager
@@ -796,6 +806,13 @@ div.apis
 
 div.news_ordering
 {
+    margin:25px 0 20px 0;
     font-size:small;
     text-align:center;
+}
+
+div.new_title
+{
+    margin-left:6px;
+    margin-right:6px;
 }
