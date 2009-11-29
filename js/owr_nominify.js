@@ -1223,21 +1223,23 @@ OWR.prototype = {
             this.loading(false, n);
             this.parseResponse(responseJSON, obj.arguments[1][1]);
             $('showStream_'+id).set('html', newContents);
-            newContents = newContents.replace(myRegexp, "$1");
-            $$('select[id^=move_]').each(function(item) {
-                var ok = false;
-                item.getChildren('option').each(function(item) {
-                    if(item.get('value').toInt() == id) {
-                        item.set('html', newContents);
-                        ok = true;
+            if($('stream_'+id).hasClass('groups')) {
+                newContents = newContents.replace(myRegexp, "$1");
+                $$('select[id^=move_]').each(function(item) {
+                    var ok = false;
+                    item.getChildren('option').each(function(item) {
+                        if(item.get('value').toInt() == id) {
+                            item.set('html', newContents);
+                            ok = true;
+                        }
+                    });
+                    if(!ok) {
+                        var element = new Element('option', {'value':id});
+                        element.inject(item);
+                        element.appendText(newContents);
                     }
                 });
-                if(!ok) {
-                    var element = new Element('option', {'value':id});
-                    element.inject(item);
-                    element.appendText(newContents);
-                }
-            });
+            }
             o.set('value', '');
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems($('stream_'+id)); }
         }.bindWithEvent(this,[r.onSuccess,n,newContents, obj]));
