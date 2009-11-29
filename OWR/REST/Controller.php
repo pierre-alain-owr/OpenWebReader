@@ -682,7 +682,7 @@ class Controller extends C
                         break;
                     }
 
-                    if(!is_array($news)) $news = array($news);
+                    if(!$response->isMultiple()) $news = array($news);
                 }
                 else
                 {
