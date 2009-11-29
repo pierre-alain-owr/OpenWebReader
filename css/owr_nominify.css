@@ -149,7 +149,7 @@ table tr, table td, table th
 .backgrounded
 {
     background-repeat:no-repeat;
-    background-image:url(../images/icons.png);
+    background-image:url(../images/images.php?f=icons.png);
     width:16px;
     height:16px;
     display:block;
@@ -625,7 +625,7 @@ a.current.hidden, a.current_stream.hidden
 
 input.openid
 {
-    background-image:url(../images/icons.png);
+    background-image:url(../images/images.php?f=icons.png);
     background-position:-656px 0px;
     background-repeat:no-repeat;
     width:180px;
