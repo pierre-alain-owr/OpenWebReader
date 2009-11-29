@@ -106,12 +106,12 @@ class Request extends R
 
         $path = explode('/', $_SERVER["PATH_INFO"]);
         array_shift($path);
-        if(isset($path[1]))
+        if(!empty($path[1]))
         {
             $this->do = mb_strtolower((string) array_shift($path), 'UTF-8');
             $datas['id'] = (int) array_shift($path);
         }
-        elseif(isset($path[0]))
+        elseif(!empty($path[0]))
         {
             $this->do = mb_strtolower((string) array_shift($path), 'UTF-8');
         }
