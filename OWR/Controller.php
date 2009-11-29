@@ -878,13 +878,13 @@ class Controller extends Singleton
                         break;
                     }
                     $request = new Request(array('ids' => $datas['id'], 'getContents' => false));
-                    Logic::getCachedLogic('news')->view($request, array(), $order, null, $offset);
+                    Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
                     $datas['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
                 {
                     $request = new Request(array('id' => null, 'getContents' => false));
-                    Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, null, $offset);
+                    Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
                     $datas['nbNews'] = $this->_request->unreads[0];
                 }
                 else
@@ -910,13 +910,13 @@ class Controller extends Singleton
                     $request = new Request(array('id' => null, 'getContents' => false));
                     if('streams' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, null, $offset);
+                        Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('streams_groups' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('gid' => $datas['id']), $order, null, $offset);
+                        Logic::getCachedLogic('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }

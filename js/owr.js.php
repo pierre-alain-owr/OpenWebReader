@@ -11,7 +11,7 @@ if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $
     header("HTTP/1.1 304 Not Modified");
     exit;
 }
-// unset($etag,$lastMtime);
+unset($etag,$lastMtime);
 // readfile('owr_nominify.js');
 // exit;
 // try to gzip the page
