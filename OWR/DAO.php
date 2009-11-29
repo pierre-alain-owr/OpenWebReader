@@ -36,7 +36,6 @@
 namespace OWR;
 use OWR\DB\Result as DBResult,
     OWR\DB\Request as DBRequest,
-    OWR\Object as Object,
     OWR\Interfaces\DAO as iDAO;
 /**
  * This class is used as base class for all DAO objects and defines all usefull functions
@@ -61,12 +60,6 @@ abstract class DAO implements iDAO
      * @access protected
      */
     protected $_fullName = '';
-
-    /**
-     * @var mixed the DB instance
-     * @access protected
-     */
-    protected $_db;
 
     /**
      * @var array the list of fields of the table
@@ -99,6 +92,12 @@ abstract class DAO implements iDAO
     protected $_userRelations = array();
 
     /**
+     * @var array associative array representing the SQL schema
+     * @access protected
+     */
+    static protected $_tableFields = array();
+
+    /**
      * @var array stored already processed dao names
      * @access private
      * @static
@@ -113,417 +112,69 @@ abstract class DAO implements iDAO
     static private $_cachedDaos = array();
 
     /**
+     * @var array stored results of already processed queries about id=>type
+     * @access protected
+     * @static
+     */
+    static protected $_types = array();
+
+    /**
+     * @var mixed the DB instance
+     * @access protected
+     * @static
+     */
+    static protected $_db;
+
+    /**
      * Constructor, sets the name/fullname of the instance, and set the DB obj
+     * Also it will try to fetch tablefields from cache, or generate what we need and cache it
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      */
     protected function __construct()
     {
-        $this->_db = DB::iGet(); // we assume here that the connexion has already been done, be carefull
+        isset(self::$_db) || (self::$_db  = DB::iGet()); // we assume here that the connexion has already been done, be carefull 
         $this->_fullName = get_called_class();
         $this->_name = strtolower(str_replace('\\', '_', substr($this->_fullName, strlen(__NAMESPACE__.'_DAO_'))));
-    }
 
-    /**
-     * Gets rows from the database including related tables
-     * We will check relations tables which does not have a uid field
-     *
-     * @access public
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
-     * @param string $select select fields, by default all
-     * @param string $order the order clause
-     * @param string $groupby the groupby clause
-     * @param string $limit the limit clause
-     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
-     */
-    public function getAllByRelations($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
-    {
-        $uid = false;
-
-        if(is_object($args))
+        !empty(self::$_tableFields) || (self::$_tableFields = Cache::get('tablefields'));
+        if(!self::$_tableFields || empty(self::$_tableFields[$this->_name]))
         {
-            $args = Object::toArray($args);
-        }
-
-        $fetchType = 'object';
-
-        $query = '
-    SELECT '.(string) $select.' 
-        FROM '.$this->_name;
-
-        $wheres = $request = $fields = $authorized = $fullFields = array();
-        $uid = ((int) isset($args['uid']) ? $args['uid'] : User::iGet()->getUid());
-
-        foreach($this->_userRelations as $table => $relations)
-        {
-            $query .= '
-        JOIN '.$table.' ON ';
-            $joins = array();
-
-            $relatedTableFields = self::getCachedDAO($table)->getFields();
-            foreach($relatedTableFields as $field=>$def)
+            self::$_tableFields[$this->_name] = array();
+            foreach($this->_fields as $name => $def)
             {
-                $fullFields[$field] = $table.'.'.$field;
-                $tableFields[$table.'.'.$field] = $def;
+                self::$_tableFields[$this->_name.'.'.$name] = $def;
             }
-            
-            foreach($relations as $mine => $related)
-            {
-                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
-                $fields[$table.'.uid'] = $relatedTableFields['uid'];
-                $request[$table.'.uid'] = $uid;
-                $wheres[] = $table.'.uid=?';
-            }
-            unset($relatedTableFields);
-            $query .= '('.join(' AND ', $joins).')';
-            unset($joins);
-        }
 
-        foreach($this->_relations as $table => $relations)
-        {
-            if(isset($this->_userRelations[$table])) continue; // already processed
-            $query .= '
-        JOIN '.$table.' ON ';
-            $joins = array();
-
-            if(!isset($tableFields[$table]))
+            if(!empty($this->_relations))
             {
-                $relatedTableFields = self::getCachedDAO($table)->getFields();
-                foreach($relatedTableFields as $field=>$def)
+                $node =& self::$_tableFields[$this->_name]['relations'];
+                foreach($this->_relations as $table => $rel)
                 {
-                    $fullFields[$field] = $table.'.'.$field;
-                    $tableFields[$table.'.'.$field] = $def;
+                    $node[$table] = $rel;
+                    if(!isset(self::$_tableFields[$table]))
+                    {
+                        self::getCachedDAO($table); // will init 
+                    }
                 }
             }
 
-            foreach($relations as $mine => $related)
+            if(!empty($this->_userRelations))
             {
-                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
-            }
-            unset($relatedTableFields);
-            $query .= '('.join(' AND ', $joins).')';
-            unset($joins);
-        }
-
-        foreach($this->_fields as $field=>$def)
-            $fullFields[$field] = $this->_name.'.'.$field;
-
-        if(is_array($args))
-        {
-            unset($args['uid']);
-            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
-            $fetchType = 'object';
-            unset($args['FETCH_TYPE']);
-            foreach($args as $key=>$val)
-            {
-                if(isset($fullFields[$key]))
+                $node =& self::$_tableFields[$this->_name]['userRelations'];
+                foreach($this->_userRelations as $table => $rel)
                 {
-                    $f = $fullFields[$key];
-                    $wheres[] = $f.'=?';
-                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
-                    $request[$f] = $val;
+                    $node[$table] = $rel;
+                    if(!isset(self::$_tableFields[$table]))
+                    {
+                        self::getCachedDAO($table); // will init 
+                    }
                 }
             }
+
+            Cache::write('tablefields', self::$_tableFields);
         }
-        elseif(isset($args) && $this->_idField)
-        {
-            $wheres[] = $this->_idField.'=?';
-            $request[$this->_idField] = $args;
-        }
-
-        $query .= ' 
-        WHERE '.join(' AND ', array_unique($wheres));
-
-        if(!empty($groupby))
-        {
-            $query .= ' 
-        GROUP BY '.(string) $order;
-        }
-
-        if(!empty($order))
-        {
-            $query .= ' 
-        ORDER BY '.(string) $order;
-        }
-
-        if(!empty($limit))
-        {
-            $query .= ' 
-        LIMIT '.(string) $limit;
-        }
-
-        $DBResults = array();
-        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
-
-        if('assoc' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
-        }
-        elseif('array' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
-        }
-        else
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
-        }
-        unset($DBResult);
-
-        if(empty($DBResults)) return array();
-        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
-    }
-
-    /**
-     * Gets rows from the database
-     * We will check relations tables which does not have a uid field
-     *
-     * @access public
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
-     * @param string $select select fields, by default all
-     * @param string $order the order clause
-     * @param string $groupby the groupby clause
-     * @param string $limit the limit clause
-     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
-     */
-    public function getByRelations($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
-    {
-        $uid = false;
-
-        if(is_object($args))
-        {
-            $args = Object::toArray($args);
-        }
-
-        $fetchType = 'object';
-
-        $query = '
-    SELECT '.(string) $select.' 
-        FROM '.$this->_name;
-
-        $wheres = $request = $fields = $authorized = array();
-        $uid = ((int) isset($args['uid']) ? $args['uid'] : User::iGet()->getUid());
-
-        foreach($this->_userRelations as $table => $relations)
-        {
-            $query .= '
-        JOIN '.$table.' ON ';
-            $joins = array();
-
-            $relatedTableFields = self::getCachedDAO($table)->getFields();
-            foreach($relatedTableFields as $field=>$def)
-            {
-                $fullFields[$field] = $table.'.'.$field;
-                $tableFields[$table.'.'.$field] = $def;
-            }
-            
-            foreach($relations as $mine => $related)
-            {
-                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
-                $fields[$table.'.uid'] = $relatedTableFields['uid'];
-                $request[$table.'.uid'] = $uid;
-                $wheres[] = $table.'.uid=?';
-            }
-            unset($relatedTableFields);
-            $query .= '('.join(' AND ', $joins).')';
-            unset($joins);
-        }
-
-        foreach($this->_fields as $field=>$def)
-            $fullFields[$field] = $this->_name.'.'.$field;
-
-        if(is_array($args))
-        {
-            unset($args['uid']);
-            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
-            $fetchType = 'object';
-            unset($args['FETCH_TYPE']);
-            foreach($args as $key=>$val)
-            {
-                if(isset($fullFields[$key]))
-                {
-                    $f = $fullFields[$key];
-                    $wheres[] = $f.'=?';
-                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
-                    $request[$f] = $val;
-                }
-            }
-        }
-        elseif(isset($args) && $this->_idField)
-        {
-            $wheres[] = $this->_idField.'=?';
-            $request[$this->_idField] = $args;
-        }
-
-        $query .= ' 
-        WHERE '.join(' AND ', array_unique($wheres));
-
-        if(!empty($groupby))
-        {
-            $query .= ' 
-        GROUP BY '.(string) $order;
-        }
-
-        if(!empty($order))
-        {
-            $query .= ' 
-        ORDER BY '.(string) $order;
-        }
-
-        if(!empty($limit))
-        {
-            $query .= ' 
-        LIMIT '.(string) $limit;
-        }
-
-        $DBResults = array();
-        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
-
-        if('assoc' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
-        }
-        elseif('array' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
-        }
-        else
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
-        }
-        unset($DBResult);
-
-        if(empty($DBResults)) return array();
-        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
-    }
-
-    /**
-     * Gets rows from the database including related tables
-     *
-     * @access public
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
-     * @param string $select select fields, by default all
-     * @param string $order the order clause
-     * @param string $groupby the groupby clause
-     * @param string $limit the limit clause
-     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
-     */
-    public function getAll($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
-    {
-        $uid = false;
-
-        if(is_object($args))
-        {
-            $args = Object::toArray($args);
-        }
-
-        $fetchType = 'object';
-
-        $query = '
-    SELECT '.(string) $select.' 
-        FROM '.$this->_name;
-
-        $wheres = $request = $fields = $authorized = $fullFields = array();
-        $uid = ((int) isset($args['uid']) ? $args['uid'] : 0);
-
-        foreach($this->_relations as $table => $relations)
-        {
-            $query .= '
-        JOIN '.$table.' ON ';
-            $joins = array();
-
-            $relatedTableFields = self::getCachedDAO($table)->getFields();
-            foreach($relatedTableFields as $field=>$def)
-            {
-                $fullFields[$field] = $table.'.'.$field;
-                $tableFields[$table.'.'.$field] = $def;
-            }
-
-            foreach($relations as $mine => $related)
-            {
-                $joins[] = (false === strpos($mine, '.') ? $this->_name.'.'.$mine : $mine).'='.$table.'.'.$related;
-            }
-
-            if(isset($relatedTableFields['uid']) && $uid > 0)
-            {
-                $wheres[] = $table.'.uid=?';
-                $request[$table.'.uid'] = $uid;
-                $fields[$table.'.uid'] = $relatedTableFields['uid'];
-            }
-            unset($relatedTableFields);
-            $query .= '('.join(' AND ', $joins).')';
-            unset($joins);
-        }
-
-        foreach($this->_fields as $field=>$def)
-            $fullFields[$field] = $this->_name.'.'.$field;
-
-        if(is_array($args))
-        {
-            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
-            $fetchType = 'object';
-            unset($args['FETCH_TYPE']);
-            foreach($args as $key=>$val)
-            {
-                if(isset($fullFields[$key]))
-                {
-                    $f = $fullFields[$key];
-                    $wheres[] = $f.'=?';
-                    $fields[$f] = (false === strpos('.', $key) ? $this->_fields[$key] : $tableFields[$f]);
-                    $request[$f] = $val;
-                }
-            }
-        }
-        elseif(isset($args) && $this->_idField)
-        {
-            $wheres[] = $this->_idField.'=?';
-            $request[$this->_idField] = $args;
-        }
-
-        if(!empty($wheres))
-            $query .= ' 
-        WHERE '.join(' AND ', array_unique($wheres));
-
-        if(!empty($groupby))
-        {
-            $query .= ' 
-        GROUP BY '.(string) $order;
-        }
-
-        if(!empty($order))
-        {
-            $query .= ' 
-        ORDER BY '.(string) $order;
-        }
-
-        if(!empty($limit))
-        {
-            $query .= ' 
-        LIMIT '.(string) $limit;
-        }
-
-        $DBResults = array();
-        $DBResult = $this->_db->getP($query, new DBRequest($request, $fields, true), !empty($wheres));
-
-        if('assoc' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
-        }
-        elseif('array' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
-        }
-        else
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
-        }
-        unset($DBResult);
-
-        if(empty($DBResults)) return array();
-        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
     }
 
     /**
@@ -531,7 +182,7 @@ abstract class DAO implements iDAO
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be a string (if an $_idField has been declared), or an array
+     * @param mixed $args parameters, can be a string (if an $_idField has been declared), an object or an array, optionnal
      * @param string $select select fields, by default all
      * @param string $order the order clause
      * @param string $groupby the groupby clause
@@ -540,36 +191,28 @@ abstract class DAO implements iDAO
      */
     public function get($args = null, $select = '*', $order = '', $groupby = '', $limit = '')
     {
-        $uid = false;
-
         if(is_object($args))
         {
             $args = Object::toArray($args);
         }
 
         $fetchType = 'object';
+        $wheres = $request = $fields = $joins = array();
 
         $query = '
-    SELECT '.(string) $select.' 
+    SELECT '.(string) $this->_prepareSelect($select, $joins, $wheres).' 
         FROM '.$this->_name;
-
-        $wheres = $request = array();
 
         if(is_array($args))
         {
-            isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']) && ($fetchType = $args['FETCH_TYPE']) ||
-            $fetchType = 'object';
+            if(isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']))
+                $fetchType = $args['FETCH_TYPE'];
             unset($args['FETCH_TYPE']);
-            if(isset($args['uid']))
-            {
-                $uid = $args['uid'];
-                unset($args['uid']);
-            }
 
-            foreach($args as $key=>$val)
-            {
-                !isset($this->_fields[$key]) || (($wheres[] = $key.'=?') && ($request[$key] = $val));
-            }
+            if(isset($args['uid']))
+                unset($args['uid']);
+
+            $this->_prepareWhere($args, $request, $fields, $wheres, $joins);
         }
         elseif(isset($args) && $this->_idField)
         {
@@ -577,56 +220,13 @@ abstract class DAO implements iDAO
             $request[$this->_idField] = $args;
         }
 
-
         if(isset($this->_fields['uid']))
         {
-            $request['uid'] = $uid ?: User::iGet()->getUid();
-            $wheres[] = 'uid=?';
+            $wheres[] = $this->_name.'.uid='.User::iGet()->getUid();
         }
 
-        if(!empty($wheres))
-        {
-            $query .= ' 
-        WHERE '.join(' AND ', $wheres);
-        }
-
-        if(!empty($groupby))
-        {
-            $query .= ' 
-        GROUP BY '.(string) $order;
-        }
-
-        if(!empty($order))
-        {
-            $query .= ' 
-        ORDER BY '.(string) $order;
-        }
-
-        if(!empty($limit))
-        {
-            $query .= ' 
-        LIMIT '.(string) $limit;
-        }
-
-        $DBResults = array();
-        $DBResult = $this->_db->getP($query, new DBRequest($request, $this->_fields, true), !empty($wheres));
-
-        if('assoc' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
-        }
-        elseif('array' === $fetchType)
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
-        }
-        else
-        {
-            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
-        }
-        unset($DBResult);
-
-        if(empty($DBResults)) return array();
-        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
+        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, $order, $limit), 
+                    new DBRequest($request, $fields, true), $fetchType, !empty($wheres));
     }
 
     /**
@@ -648,7 +248,7 @@ abstract class DAO implements iDAO
 
         if(empty($requestFields))
         {
-            throw new Exception('Aborting '.$this->_fullName.'::save(): no values to save, you surely have an error in your code');
+            throw new Exception('No values to save, you surely have an error in your code');
         }
 
         $wheres = array();
@@ -698,7 +298,7 @@ abstract class DAO implements iDAO
             $whereFields = array();
             foreach($wheres as $val)
             {
-                $whereFields[] = $val.'='.$this->_db->quote($this->$val);
+                $whereFields[] = $val.'='.self::$_db->quote($this->$val);
             }
             $query .= join(' AND ', $whereFields);
 
@@ -713,7 +313,11 @@ abstract class DAO implements iDAO
 
             foreach($this->_uniqueFields as $uField=>$required)
             {
-                empty($this->$uField) || (($whereFields[] = $uField) && ($whereFieldsDecl[$uField] = $this->_fields[$uField]));
+                if(!empty($this->$uField))
+                {
+                    $whereFields[] = $uField;
+                    $whereFieldsDecl[$uField] = $this->_fields[$uField];
+                }
             }
 
             if($whereFields)
@@ -734,13 +338,13 @@ abstract class DAO implements iDAO
                 {
                     if(isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
                     {
-                        $chkUniQuery .= ' AND '.$this->_idField.'!='.$this->_db->quote($this->{$this->_idField});
+                        $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
                     }
-                    $exists = $this->_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
+                    $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
                     
                     if($exists->next() && $exists->nb > 0)
                     {
-                        throw new Exception('Aborting '.$this->_fullName.'::save(): some values are not uniques', 409);
+                        throw new Exception('Some values are not uniques.', 409);
                     }
                     unset($exists);
                 }
@@ -759,7 +363,7 @@ abstract class DAO implements iDAO
             }
             else
             {
-                throw new Exception('Aborting '.$this->_fullName.'::save(): don\'t know what to save !', Exception::E_OWR_BAD_REQUEST);
+                throw new Exception('Don\'t know what to save !', Exception::E_OWR_BAD_REQUEST);
             }
         }
 
@@ -776,7 +380,7 @@ abstract class DAO implements iDAO
                     else
                     {
                         if(!isset($this->$field))
-                            throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_BAD_REQUEST);
+                            throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAD_REQUEST);
 
                         switch($decl['type'])
                         {
@@ -794,7 +398,7 @@ abstract class DAO implements iDAO
                             case DBRequest::PARAM_IP:
                             case \PDO::PARAM_STR:
                                 if(empty($this->$field))
-                                    throw new Exception('Aborting '.$this->_fullName.'::save(): missing value for required parameter : '.$field, Exception::E_OWR_BAd_REQUEST);
+                                    throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAd_REQUEST);
 
                             default:
                                 break;
@@ -810,11 +414,11 @@ abstract class DAO implements iDAO
 
         try
         {
-            $this->_db->setP($query, new DBRequest(Object::toArray($this), $requestFields, $update));
+            self::$_db->setP($query, new DBRequest(Object::toArray($this), $requestFields, $update));
         }
         catch(Exception $e)
         { // we catch here to rollback and throw another exception
-            $this->_db->rollback();
+            self::$_db->rollback();
             throw new Exception($e->getContent(), $e->getCode());
         }
 
@@ -826,7 +430,7 @@ abstract class DAO implements iDAO
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be null (deletes himself if $_idField declared), a string (if an $_idField has been declared), or an array
+     * @param mixed $args parameters, can be a string (if an $_idField has been declared), an object or an array, optionnal
      * @param string $limit the limit clause
      * @return boolean true on success
      */
@@ -840,7 +444,7 @@ abstract class DAO implements iDAO
             if(!isset($this->_fields['uid']) && $this->_idField)
             {
                 if(!isset($this->{$this->_idField}))
-                    throw new Exception('Aborting '.$this->_fullName.'::delete(): can not delete nothing !', Exception::E_OWR_BAD_REQUEST);
+                    throw new Exception('Nothing to delete !', Exception::E_OWR_BAD_REQUEST);
                 $args = $this->{$this->_idField};
             }
         }
@@ -861,11 +465,7 @@ abstract class DAO implements iDAO
                 unset($args['uid']);
             }
 
-            foreach($this->_fields as $key=>$val)
-            {
-                !isset($args[$key]) || (($wheres[] = $key.'=?') && ($request[$key] = $args[$key]) && ($requestFields[$key] = $this->_fields[$key]));
-            }
-            unset($args);
+            $this->_setParameters($args, $request, $fields, $wheres);
         }
         elseif(isset($args) && $this->_idField)
         {
@@ -876,9 +476,7 @@ abstract class DAO implements iDAO
 
         if(isset($this->_fields['uid']))
         {
-            $request['uid'] = $uid ?: ($this->uid ?: User::iGet()->getUid());
-            $wheres[] = 'uid=?';
-            $requestFields['uid'] = $this->_fields['uid'];
+            $wheres[] = 'uid='.($uid ?: ($this->uid ?: User::iGet()->getUid()));
         }
 
         if($wheres)
@@ -895,15 +493,66 @@ abstract class DAO implements iDAO
 
         try
         {
-            $this->_db->setP($query, new DBRequest($request, $requestFields), 'exec', !empty($request));
+            self::$_db->setP($query, new DBRequest($request, $requestFields), 'exec', !empty($request));
         }
         catch(Exception $e)
         { // we catch here to rollback and throw another exception
-            $this->_db->rollback();
+            self::$_db->rollback();
             throw new Exception($e->getContent(), $e->getCode());
         }
 
         return true;
+    }
+
+    /**
+     * Counts row(s) from the database
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed $args parameters, can be null, a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $groupby the groupby clause
+     * @param string $selectAdd additional fields to fetch, optionnal
+     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
+     */
+    public function count($args = null, $select = '*', $groupby='', $selectAdd = '')
+    {
+        if(is_object($args))
+        {
+            $args = Object::toArray($args);
+        }
+        $fetchType = 'object';
+        $wheres = $request = $fields = $joins = array();
+
+        $query = '
+    SELECT COUNT('.(string) $this->_prepareSelect($select, $joins, $wheres).') AS nb'.(!empty($selectAdd) ? ', '.$this->_prepareSelect($selectAdd, $joins, $wheres) : '').'
+        FROM '.$this->_name;
+
+        if(is_array($args))
+        {
+            if(isset($args['FETCH_TYPE']) && ('assoc' === $args['FETCH_TYPE'] || 'array' === $args['FETCH_TYPE']))
+                $fetchType = $args['FETCH_TYPE'];
+            unset($args['FETCH_TYPE']);
+
+            if(isset($args['uid']))
+                unset($args['uid']);
+
+            $this->_prepareWhere($args, $request, $fields, $wheres, $joins);
+        }
+        elseif(isset($args) && $this->_idField)
+        {
+            $wheres[] = $this->_idField.'=?';
+            $request[$this->_idField] = $args;
+        }
+
+        if(isset($this->_fields['uid']))
+        {
+            $fields['uid'] = $this->_fields['uid'];
+            $wheres[] = $this->_name.'.uid='.User::iGet()->getUid();
+        }
+
+        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, null, null), 
+                    new DBRequest($request, $fields, true), $fetchType, !empty($wheres));
     }
 
     /**
@@ -946,6 +595,18 @@ abstract class DAO implements iDAO
         }
 
         return false;
+    }
+
+    /**
+     * Returns the name of the table for $this
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return string the name of the table relative to $this
+     */
+    public function getTableName()
+    {
+        return (string) $this->_name;
     }
 
     /**
@@ -1050,111 +711,894 @@ abstract class DAO implements iDAO
     {
         $id = (int)$id;
 
-        $type = DB::iGet()->getOne('
+        if(!isset(self::$_types[$id]))
+        {
+            $type = DB::iGet()->cGetOne('
     SELECT type
         FROM objects
         WHERE id='.$id);
+            if(!$type->next()) return false;
+            elseif(CLI) self::$_types[$id] = $type->type;
+            else
+            {
+                switch($type->type)
+                {
+                    case 'streams':
+                        $field = 'rssid';
+                        $table = 'streams_relations';
+                        break;
+        
+                    case 'streams_groups':
+                        $field = 'id';
+                        $table = $type->type;
+                        break;
+        
+                    case 'news':
+                        $field = 'newsid';
+                        $table = 'news_relations';
+                        break;
+        
+                    case 'users':
+                        if(User::iGet()->isAdmin())
+                        {
+                            self::$_types[$id] = $type->type;
+                            return $type->type;
+                        }
+                        throw new Exception('Invalid id', Exception::E_OWR_UNAUTHORIZED);
+                        break;
+        
+                    default:
+                        throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                        break;
+                }
 
-        if(!$type->next()) return false;
-        elseif(CLI) return $type->type;
+                if(!self::getCachedDAO($table)->get(array($field => $id), $field))
+                {
+                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                }
 
-        switch($type->type)
-        {
-            case 'streams':
-                $field = 'rssid';
-                $table = 'streams_relations';
-                break;
-
-            case 'streams_groups':
-                $field = 'id';
-                $table = $type->type;
-                break;
-
-            case 'news':
-                $field = 'newsid';
-                $table = 'news_relations';
-                break;
-
-            case 'users':
-                if(User::iGet()->isAdmin()) return $type->type;
-                throw new Exception('Invalid id', Exception::E_OWR_UNAUTHORIZED);
-                break;
-
-            default:
-                throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
-                break;
+                self::$_types[$id] = $type->type;
+            }
         }
 
-        if(!self::getCachedDAO($table)->get(array($field => $id), $field))
-        {
-            throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
-        }
-
-        return $type->type;
+        return self::$_types[$id];
     }
 
     /**
-     * Returns the types relative to the specified ids
-     * This method also checks for user rights to read them
+     * Prepares the WHERE clauses for a query
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param array $ids array of ids to get type from
-     * @return mixed Exception on error, or the type corresponding to the id
-     * @access public
-     * @static
+     * @param mixed $args parameters, can be null, a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $groupby the groupby clause
+     * @param string $selectAdd additional fields to fetch, optionnal
+     * @access protected
+     * @todo clean up the code
      */
-    static public function getTypes(array $ids)
+    protected function _prepareWhere(array $args, &$request, &$fields, &$wheres, &$joins)
     {
-        $ids = (int)$ids;
-
-        $types = DB::iGet()->getOne('
-    SELECT id,type
-        FROM objects
-        WHERE id IN ('.$ids.')');
-
-        if(!$types->count()) return false;
-        elseif(CLI)
+        foreach($args as $key=>$values)
         {
-            return $type->getAllNext();
+            if(isset($this->_fields[$key]))
+            {
+                if(is_array($values))
+                {
+                    $request[$key] = array();
+                    $where = array();
+                    foreach($values as $k=>$value)
+                    {
+                        $where[] = '?';
+                        $request[$key][] =& $args[$key][$k];
+                        $fields[$key][] = $this->_fields[$key];
+                    }
+                    
+                    empty($where) || ($wheres[] = $this->_name.'.'.$key.' IN ('.join(',', $where).')');
+                }
+                else
+                {
+                    $wheres[] = $this->_name.'.'.$key.'=?';
+                    $fields[$key] = $this->_fields[$key];
+                    $request[$key] =& $args[$key];
+                }
+            }
+            elseif(false !== strpos($key, '.'))
+            {
+                list($table, $field) = array_map('trim', explode('.', $key));
+                if($table === $this->_name)
+                {
+                    if(isset($this->_fields[$field]))
+                    {
+                        if(is_array($values))
+                        {
+                            $request[$key] = array();
+                            $where = array();
+                            foreach($values as $k=>$value)
+                            {
+                                $where[] = '?';
+                                $request[$key][] =& $args[$key][$k];
+                                $fields[$key][] = $this->_fields[$key];
+                            }
+                            empty($where) || ($wheres[] = $this->_name.'.'.$key.' IN ('.join(',', $where).')');
+                        }
+                        else
+                        {
+                            $wheres[] = $table.'.'.$field.'=?';
+                            $fields[$key] = $this->_fields[$field];
+                            $request[$key] =& $args[$key];
+                        }
+                    }
+                    continue;
+                }
+
+                if(isset($this->_userRelations[$table]))
+                {
+                    if(isset(self::$_tableFields[$table.'.'.$field]))
+                    {
+                        if(is_array($values))
+                        {
+                            $request[$key] = array();
+                            $where = array();
+                            foreach($values as $k=>$value)
+                            {
+                                $where[] = '?';
+                                $request[$key][] =& $args[$key][$k];
+                                $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                            }
+                            empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                        }
+                        else
+                        {
+                            $wheres[] = $table.'.'.$field.'=?';
+                            $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                            $request[$key] =& $args[$key];
+                        }
+
+                        if(!isset($joins[$table]))
+                        {
+                            $joins[$table] = 'JOIN '.$table.' ON (';
+                            $join = array();
+                            foreach($this->_userRelations[$table] as $mine => $its)
+                            {
+                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                            }
+                            $joins[$table] .= join(' AND ', $join).')';
+                            $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                        }
+                        continue;
+                    }
+                }
+
+                if(isset($this->_relations[$table]))
+                {
+                    if(isset(self::$_tableFields[$table.'.'.$field]))
+                    {
+                        if(is_array($values))
+                        {
+                            $request[$key] = array();
+                            $where = array();
+                            foreach($values as $k=>$value)
+                            {
+                                $where[] = '?';
+                                $request[$key][] =& $args[$key][$k];
+                                $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                            }
+                            empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                        }
+                        else
+                        {
+                            $wheres[] = $table.'.'.$field.'=?';
+                            $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                            $request[$key] =& $args[$key];
+                        }
+
+                        if(!isset($joins[$table]))
+                        {
+                            $joins[$table] = 'JOIN '.$table.' ON (';
+                            $join = array();
+                            foreach($this->_relations[$table] as $mine => $its)
+                            {
+                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                            }
+                            $joins[$table] .= join(' AND ', $join).')';
+                        }
+                        continue;
+                    }
+                }
+
+                if(isset(self::$_tableFields[$table]))
+                {
+                    $relations = self::$_tableFields[$table];
+                    if(isset($relations['userRelations']))
+                    {
+                        foreach($relations['userRelations'] as $relTable => $rel)
+                        {
+                            if(isset($this->_userRelations[$relTable]))
+                            {
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_userRelations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    foreach($rel as $its => $mine)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
+                                    }
+                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(is_array($values))
+                                {
+                                    $request[$key] = array();
+                                    $where = array();
+                                    foreach($values as $k=>$value)
+                                    {
+                                        $where[] = '?';
+                                        $request[$key][] =& $args[$key][$k];
+                                        $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                                    }
+                                    empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                                }
+                                else
+                                {
+                                    $wheres[] = $table.'.'.$field.'=?';
+                                    $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                                    $request[$key] =& $args[$key];
+                                }
+                                continue 2;
+                            }
+
+                            if(isset($this->_relations[$relTable]))
+                            {
+                                if(is_array($values))
+                                {
+                                    $request[$key] = array();
+                                    $where = array();
+                                    foreach($values as $k=>$value)
+                                    {
+                                        $where[] = '?';
+                                        $request[$key][] =& $args[$key][$k];
+                                        $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                                    }
+                                    empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                                }
+                                else
+                                {
+                                    $wheres[] = $table.'.'.$field.'=?';
+                                    $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                                    $request[$key] =& $args[$key];
+                                }
+
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_relations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    $relations = self::$_tableFields[$relTable];
+                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+
+                                    if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(isset($relations['relations']))
+                    {
+                        foreach($relations['relations'] as $relTable => $rel)
+                        {
+                            if(isset($this->_userRelations[$relTable]))
+                            {
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_userRelations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    foreach($rel as $its => $mine)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
+                                    }
+                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(is_array($values))
+                                {
+                                    $request[$key] = array();
+                                    $where = array();
+                                    foreach($values as $k=>$value)
+                                    {
+                                        $where[] = '?';
+                                        $request[$key][] =& $args[$key][$k];
+                                        $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                                    }
+                                    empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                                }
+                                else
+                                {
+                                    $wheres[] = $table.'.'.$field.'=?';
+                                    $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                                    $request[$key] =& $args[$key];
+                                }
+                                continue 2;
+                            }
+
+                            if(isset($this->_relations[$relTable]))
+                            {
+                                if(is_array($values))
+                                {
+                                    $request[$key] = array();
+                                    $where = array();
+                                    foreach($values as $k=>$value)
+                                    {
+                                        $where[] = '?';
+                                        $request[$key][] =& $args[$key][$k];
+                                        $fields[$key][] = self::$_tableFields[$table.'.'.$field];
+                                    }
+                                    empty($where) || ($wheres[] = $table.'.'.$field.' IN ('.join(',', $where).')');
+                                }
+                                else
+                                {
+                                    $wheres[] = $table.'.'.$field.'=?';
+                                    $fields[$key] = self::$_tableFields[$table.'.'.$field];
+                                    $request[$key] =& $args[$key];
+                                }
+
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_relations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    $relations = self::$_tableFields[$relTable];
+                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+
+                                    if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if(!empty($this->_userRelations))
+                {
+                    foreach($this->_userRelations as $table => $relFields)
+                    {
+                        $tables[] = $table;
+                        if(isset(self::$_tableFields[$table.'.'.$key]))
+                        {
+                            if(is_array($values))
+                            {
+                                $request[$key] = array();
+                                $where = array();
+                                foreach($values as $k=>$value)
+                                {
+                                    $where[] = '?';
+                                    $request[$key][] =& $args[$key][$k];
+                                    $fields[$key][] = self::$_tableFields[$table.'.'.$key];
+                                }
+                                $wheres[] = $table.'.'.$key.' IN ('.join(',', $where).')';
+                            }
+                            else
+                            {
+                                $wheres[] = $table.'.'.$key.'=?';
+                                $fields[$key] = self::$_tableFields[$table.'.'.$key];
+                                $request[$key] =& $args[$key];
+                            }
+
+                            if(!isset($joins[$table]))
+                            {
+                                $joins[$table] = 'JOIN '.$table.' ON (';
+                                $join = array();
+                                foreach($relFields as $mine => $its)
+                                {
+                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                                }
+                                $joins[$table] .= join(' AND ', $join).')';
+                                $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                            }
+                            continue 2; // OK found the field, continue to wheres iteration
+                        }
+                    }
+                }
+
+                if(!empty($this->_relations))
+                {
+                    foreach($this->_relations as $table => $relFields)
+                    {
+                        $tables[] = $table;
+                        if(isset(self::$_tableFields[$table.'.'.$key]))
+                        {
+                            if(is_array($values))
+                            {
+                                $request[$key] = array();
+                                $where = array();
+                                foreach($values as $k=>$value)
+                                {
+                                    $where[] = '?';
+                                    $request[$key][] =& $args[$key][$k];
+                                    $fields[$key][] = self::$_tableFields[$table.'.'.$key];
+                                }
+                                $wheres[] = $table.'.'.$key.' IN ('.join(',', $where).')';
+                            }
+                            else
+                            {
+                                $wheres[] = $table.'.'.$key.'=?';
+                                $fields[$key] = self::$_tableFields[$table.'.'.$key];
+                                $request[$key] =& $args[$key];
+                            }
+
+                            if(!isset($joins[$table]))
+                            {
+                                $joins[$table] = 'JOIN '.$table.' ON (';
+                                $join = array();
+                                foreach($relFields as $mine => $its)
+                                {
+                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                                }
+                                $joins[$table] .= join(' AND ', $join).')';
+                            }
+                            continue 2; // OK found the field, continue to wheres iteration
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Fetches all results from DB, either in numerical array, associative array or object
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $query the SQL query
+     * @param mixed $request DBRequest the request
+     * @param string $fetchType can be assoc, array or object
+     * @param boolean $force used to say to the DB object that we must use prepared query
+     * @access protected
+     * @return mixed empty array or one result or an array of results
+     */
+    protected function _fetch($query, DBRequest $request, $fetchType, $force)
+    {
+        $DBResult = self::$_db->getP((string) $query, $request, (bool) $force);
+
+        $DBResults = array();
+        if('assoc' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        elseif('array' === $fetchType)
+        {
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_NUM);
+        }
+        else
+        {
+            // very handsome, thanks PDO for that
+            $DBResults = $DBResult->fetchAll(\PDO::FETCH_CLASS, $this->_fullName);
+        }
+        unset($DBResult);
+
+        if(empty($DBResults)) return array();
+        else return count($DBResults) === 1 ? $DBResults[0] : $DBResults;
+    }
+
+    /**
+     * Finalize the building of the SQL query
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $query the sql query
+     * @param array $wheres the WHERE clause fields
+     * @param array $joins the JOIN clause fields
+     * @param string $groupby the GROUP BY clause
+     * @param string $order the ORDER clause
+     * @param string $limit the LIMIT clause
+     * @access protected
+     * @todo clean up the code
+     */
+    protected function _prepareQuery($query, array $wheres, array $joins, $groupby, $order, $limit)
+    {
+        if(!empty($joins))
+        {
+            $query .='
+        '.join("\n        ", array_unique($joins));
         }
 
-        $ret = array();
-
-        while($types->next())
+        if(!empty($wheres))
         {
-            switch($types->type)
+            $query .= ' 
+        WHERE '.join(' AND ', $wheres);
+        }
+
+        if(!empty($groupby))
+        {
+            $query .= ' 
+        GROUP BY '.(string) $groupby;
+        }
+
+        if(!empty($order))
+        {
+            $query .= ' 
+        ORDER BY '.(string) $order;
+        }
+
+        if(!empty($limit))
+        {
+            $query .= ' 
+        LIMIT '.(string) $limit;
+        }
+
+        return $query;
+    }
+
+    /**
+     * Prepares the SELECT clauses for a query
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $select select fields, by default all
+     * @param array $joins the JOIN clause fields
+     * @param array $wheres the WHERE clause fields
+     * @access protected
+     * @todo clean up the code
+     */
+    protected function _prepareSelect($selects, array &$joins, array &$wheres)
+    {
+        $selects = (string) $selects;
+        if(empty($selects) || '*' === $selects) return '*';
+
+        $select = array_map('trim', explode(',', $selects));
+        $selects = array();
+
+        foreach($select as $field)
+        {
+            $alias = '';
+            if(false !== stripos($field, ' AS '))
             {
-                case 'streams':
-                    $field = 'rssid';
-                    $table = 'streams_relations';
-                    break;
-    
-                case 'streams_groups':
-                    $field = 'id';
-                    $table = $types->type;
-                    break;
-    
-                case 'news':
-                    $field = 'newsid';
-                    $table = 'news_relations';
-                    break;
-    
-                case 'users':
-                    if(User::iGet()->isAdmin()) $ret[$types->id] = $types->type;
-                    throw new Exception('Invalid id', Exception::E_OWR_UNAUTHORIZED);
-                    break;
-    
-                default:
-                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
-                    break;
+                list($field, $alias) = explode(' AS ', $field);
+                $alias = ' AS '.$alias;
             }
 
-            if(!self::getCachedDAO($table)->get(array($field => $ids), $field))
+            if(isset($this->_fields[$field]))
             {
-                throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                $selects[] = $this->_name.'.'.$field.$alias;
+            }
+            elseif(false !== strpos($field, '.'))
+            {
+                list($table, $field) = explode('.', $field);
+                if($table === $this->_name)
+                {
+                    if(isset($this->_fields[$field]))
+                    {
+                        $selects[] = $this->_name.'.'.$field.$alias;
+                    }
+                    continue;
+                }
+                
+                if(isset($this->_userRelations[$table]))
+                {
+                    if(isset(self::$_tableFields[$table.'.'.$field]))
+                    {
+                        $selects[] = $table.'.'.$field.$alias;
+                        if(!isset($joins[$table]))
+                        {
+                            $joins[$table] = 'JOIN '.$table.' ON (';
+                            $join = array();
+                            foreach($this->_userRelations[$table] as $mine => $its)
+                            {
+                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                            }
+                            $joins[$table] .= join(' AND ', $join).')';
+                            $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                        }
+                        continue;
+                    }
+                }
+
+                if(isset($this->_relations[$table]))
+                {
+                    if(isset(self::$_tableFields[$table.'.'.$field]))
+                    {
+                        $selects[] = $table.'.'.$field.$alias;
+                        if(!isset($joins[$table]))
+                        {
+                            $joins[$table] = 'JOIN '.$table.' ON (';
+                            $join = array();
+                            foreach($this->_relations[$table] as $mine => $its)
+                            {
+                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                            }
+                            $joins[$table] .= join(' AND ', $join).')';
+                        }
+                        continue;
+                    }
+                }
+
+                if(isset(self::$_tableFields[$table]))
+                {
+                    $relations = self::$_tableFields[$table];
+                    if(isset($relations['relations']))
+                    {
+                        foreach($relations['relations'] as $relTable => $rel)
+                        {
+                            if(isset($this->_userRelations[$relTable]) && isset(self::$_tableFields[$table.'.'.$field]))
+                            {
+                                $selects[] = $table.'.'.$field.$alias;
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_userRelations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    foreach($rel as $its => $mine)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
+                                    }
+                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                                }
+                                continue 2;
+                            }
+
+                            if(isset($this->_relations[$relTable]) && isset(self::$_tableFields[$table.'.'.$field]))
+                            {
+                                $selects[] = $table.'.'.$field.$alias;
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_relations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    $relations = self::$_tableFields[$relTable];
+                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+
+                                    if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(isset($relations['userRelations']))
+                    {
+                        foreach($relations['userRelations'] as $relTable => $rel)
+                        {
+                            if(isset($this->_userRelations[$relTable]) && isset(self::$_tableFields[$table.'.'.$field]))
+                            {
+                                $selects[] = $table.'.'.$field.$alias;
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_userRelations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    foreach($rel as $its => $mine)
+                                    {
+                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
+                                    }
+                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                                }
+                                continue 2;
+                            }
+
+                            if(isset($this->_relations[$relTable]) && isset(self::$_tableFields[$table.'.'.$field]))
+                            {
+                                $selects[] = $table.'.'.$field.$alias;
+                                if(!isset($joins[$relTable]))
+                                {
+                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
+                                    $join = array();
+                                    foreach($this->_relations[$relTable] as $mine => $its)
+                                    {
+                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
+                                    }
+                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                }
+
+                                if(!isset($joins[$table]))
+                                {
+                                    $joins[$table] = 'JOIN '.$table.' ON (';
+                                    $join = array();
+                                    $relations = self::$_tableFields[$relTable];
+                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+
+                                    if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
+                                    {
+                                        $relationTable = $relations['userRelations'][$table];
+                                        foreach($relationTable as $its => $mine)
+                                        {
+                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
+                                        }
+                                        $joins[$table] .= join(' AND ', $join).')';
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if(!empty($this->_userRelations))
+                {
+                    foreach($this->_userRelations as $table => $relFields)
+                    {
+                        if(isset(self::$_tableFields[$table.'.'.$field]))
+                        {
+                            $selects[] = $table.'.'.$field.$alias;
+                            if(!isset($joins[$table]))
+                            {
+                                $joins[$table] = 'JOIN '.$table.' ON (';
+                                $join = array();
+                                foreach($relFields as $mine => $its)
+                                {
+                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                                }
+                                $joins[$table] .= join(' AND ', $join).')';
+                                $wheres[] = $table.'.uid='.User::iGet()->getUid();
+                            }
+                            continue 2; // OK found the field, continue to select iteration
+                        }
+                    }
+                }
+
+                if(!empty($this->_relations))
+                {
+                    foreach($this->_relations as $table => $relFields)
+                    {
+                        if(isset(self::$_tableFields[$table.'.'.$field]))
+                        {
+                            $selects[] = $table.'.'.$field.$alias;
+                            if(!isset($joins[$table]))
+                            {
+                                $joins[$table] = 'JOIN '.$table.' ON (';
+                                $join = array();
+                                foreach($relFields as $mine => $its)
+                                {
+                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
+                                }
+                                $joins[$table] .= join(' AND ', $join).')';
+                            }
+                            continue 2; // OK found the field, continue to select iteration
+                        }
+                    }
+                }
             }
         }
 
-        return $ret;
+        return join(',', $selects); // we are done, recompoze the select string
     }
 }

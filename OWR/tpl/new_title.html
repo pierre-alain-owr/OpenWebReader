@@ -1,8 +1,8 @@
-                <div class="article_title full_rounded shadow new_container_<?php if($live){ echo 'n';}?>read" id="new_<?php echo $id.'_'.$rssid.'_'.$gid;?>" title="<?php echo $this->_utilities->_('Show the new');?>">
+                <div class="article_title full_rounded shadow new_container_<?php if($status){ echo 'n';}?>read" id="new_<?php echo $id.'_'.$streamid.'_'.$gid;?>" title="<?php echo $this->_utilities->_('Show the new');?>">
                     <div class="new_title">
                         <span class="verysmall"><?php echo $title;?></span>
-<a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');rP.clearNew(this);" class="link_go right backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
-<?php           if($live) {
+                        <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');rP.clearNew(this);" class="link_go right backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
+<?php           if($status) {
                     echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded"></a>';
                 } 
 ?>
@@ -18,5 +18,5 @@
 ?>
                     </div>
                 </div>
-                <div class="article_contents full_rounded hidden" id="new__<?php echo $id.'_'.$rssid.'_'.$gid;?>"></div>
+                <div class="article_contents full_rounded hidden" id="new__<?php echo $id.'_'.$streamid.'_'.$gid;?>"></div>
                 <div class="news_spacer"></div>

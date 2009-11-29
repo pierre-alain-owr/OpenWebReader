@@ -35,7 +35,8 @@
  * @package OWR
  */
 namespace OWR;
-use \Exception as Exceptions;
+use \Exception as Exceptions,
+    OWR\View\Utilities as Utilities;
 /**
  * This object is the exception handler
  * @package OWR
@@ -97,8 +98,6 @@ class Exception extends Exceptions
      */
     public function __construct($errstr, $errcode = self::E_OWR_DIE) 
     {
-        parent::__construct($errstr, $errcode);
-        
         switch($errcode)
         {
             case E_STRICT:
@@ -133,6 +132,8 @@ class Exception extends Exceptions
                 View::iGet()->setStatusCode(500, true);
                 break;
         }
+
+        parent::__construct($errstr, (int) $errcode);
     }
 
     /**
@@ -144,16 +145,16 @@ class Exception extends Exceptions
     public function getContent()
     {
         $msg = "[".get_called_class().':'.$this->code.(isset(self::$_type[$this->code]) ? ':'.self::$_type[$this->code] : '').'] ';
-        $msg .= $this->message.' in file '.$this->file;
-        $msg .= ' on line '.$this->line;//.'. Stacktrace: '.$this->getTraceAsString();
+        $msg .= Utilities::iGet()->_($this->message).' in file '.$this->file;
+        $msg .= ' on line '.$this->line;
 
         if(self::E_OWR_DIE === $this->code)
+            $msg .= ': '.$this->getTraceAsString();
+
+        if(!DEBUG && !User::iGet()->isAdmin())
         {
-            if(!DEBUG || !User::iGet()->isAdmin())
-            {
-                Logs::iGet()->log($msg, self::E_OWR_WARNING);
-                $msg = $this->message;
-            }
+            Logs::iGet()->log($msg, self::E_OWR_WARNING);
+            $msg = $this->message;
         }
 
         return $msg;
@@ -172,13 +173,15 @@ class Exception extends Exceptions
         $msg = '['.(isset(self::$_type[$exception->getCode()]) ? self::$_type[$exception->getCode()] : 'unknown').'] ';
         $msg .= $exception->getMessage().' in file '.$exception->getFile().' on line '.$exception->getLine();
         
-        if(!DEBUG || !User::iGet()->isAdmin())
+        if(!DEBUG && !User::iGet()->isAdmin())
         {
             Logs::iGet()->log($msg, $exception->getCode());
-            $msg = $exception->getMessage();
+            $msg = Utilities::iGet()->_($exception->getMessage());
         }
 
-        switch($exception->getCode())
+        $code = $exception->getCode();
+
+        switch($code)
         {
             case E_STRICT:
             case E_NOTICE:
@@ -191,6 +194,7 @@ class Exception extends Exceptions
             case E_USER_WARNING:
             case E_COMPILE_WARNING:
             case self::E_OWR_NOTICE:
+            case self::E_OWR_WARNING:
                 break;
 
             case self::E_OWR_BAD_REQUEST:
@@ -210,12 +214,21 @@ class Exception extends Exceptions
             case E_PARSE:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
-            case self::E_OWR_WARNING:
             case self::E_OWR_DIE:
             default:
                 View::iGet()->setStatusCode(500, true);
+                try
+                {
+                    throw new Exception($msg, $code);
+                }
+                catch(Exception $e)
+                {
+                    die($e->getContent());
+                }
                 break;
         }
+
+        Logs::iGet()->log($msg, $code);
 
         return true;
     }

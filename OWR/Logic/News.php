@@ -196,74 +196,41 @@ class News extends Logic
 
         if(!empty($request->ids))
         {
-            $datas = array();
-
-            foreach($request->ids as $id)
-            {
-                $args['id'] = $id;
-                $data = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, 1);
-                if(!$data)
-                {
-                    $request->setResponse(new Response(array(
-                        'do'        => 'error',
-                        'error'     => 'Invalid id',
-                        'status'    => Exception::E_OWR_BAD_REQUEST
-                    )));
-                    return $this;
-                }
-    
-                $data['contents'] = unserialize($data['contents']);
-
-                $datas[] = $data;
-            }
-
-            $multiple = count($datas);
+            $args['id'] = $request->ids;
+            $limit = count($request->ids);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, 1);
-            if(!$datas)
-            {
-                $request->setResponse(new Response(array(
-                    'do'        => 'error',
-                    'error'     => 'Invalid id',
-                    'status'    => Exception::E_OWR_BAD_REQUEST
-                )));
-                return $this;
-            }
-
-            $datas['contents'] = unserialize($datas['contents']);
+            $limit = 1;
         }
-        else
+
+        $datas = $this->_dao->get($args, 'id,rssid AS streamid,news.lastupd,pubDate,author,title,link,gid,status,streams_relations_name.name,streams_groups.name AS gname,favicon'.(!isset($request->getContents) || $request->getContents ? ',contents' : ''), $order, $groupby, $limit);
+        if(!$datas)
         {
-            $datas = $this->_dao->getAllByRelations($args, 'news.id,news.rssid AS streamid,lastupd,pubDate,author,title,link,gid,contents', $order, $groupby, $limit);
-            if(!$datas)
+            $request->setResponse(new Response(array(
+                'status'    => 204
+            )));
+            return $this;
+        }
+
+        if(!isset($datas['id']))
+        {
+            $multiple = true;
+            if(!isset($request->getContents) || $request->getContents)
             {
-                $request->setResponse(new Response);
-                return $this;
-            }
-
-            $daoContents = DAO::getCachedDAO('news_contents');
-
-            if(!isset($datas['id']))
-            {
-                $multiple = true;
-
-                foreach($datas as $k=>$data)
-                {
+                foreach($datas as $k => $data)
                     $datas[$k]['contents'] = unserialize($data['contents']);
-                }
             }
-            else
-            {
-                $datas['contents'] = unserialize($datas['contents']);
-            }
+        }
+        elseif(!isset($request->getContents) || $request->getContents)
+        {
+            $datas['contents'] = unserialize($datas['contents']);
         }
 
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => (bool) $multiple
+            'multiple'     => $multiple
         )));
         return $this;
     }
@@ -406,8 +373,7 @@ class News extends Logic
         elseif(!empty($request->ids) && is_array($request->ids))
         {
             $query = '
-    UPDATE news_relations nr
-        JOIN  news n ON (nr.newsid=n.id)
+    UPDATE news_relations
         SET status=0
         WHERE uid='.User::iGet()->getUid().' AND status=1 
         AND newsid IN ('.join(',', $request->ids).')';

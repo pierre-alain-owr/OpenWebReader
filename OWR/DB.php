@@ -335,11 +335,11 @@ class DB extends PDO implements iDB
         if(!$this->_cacheTime) return $this->execute($sql, $datas, $prepare);
         
         $filename = md5(serialize(func_get_args()));
-        if($contents = Cache::getFromCache('db/'.$filename, $this->_cacheTime)) return $contents;
+        if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
 
         $result = $this->execute($sql, $datas, $prepare);
         if($result)
-            Cache::writeToCache('db/'.$filename, $result);
+            Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
     }
 
@@ -395,8 +395,9 @@ class DB extends PDO implements iDB
         {
             try
             {
-                isset($this->_stmts[$sql]) || $this->_stmts[$sql] = $this->prepare($sql);
-
+                if(!isset($this->_stmts[$sql])) {
+                    $this->_stmts[$sql] = $this->prepare($sql);
+                }
                 $num = 0;
                 foreach($datas as $k=>$v)
                 {
@@ -420,26 +421,36 @@ class DB extends PDO implements iDB
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                }
-                else
-                {
                     $error = 'SQL error';
                 }
 
                 throw new Exception($error);
             }
 
-            if(!$this->_stmts[$sql]->execute() && '00000' !== (string)$this->_stmts[$sql]->errorCode())
+            try
             {
-                $error = 'SQL Error: Q="'.$sql.'", R="'.
-                        var_export($this->_stmts[$sql]->errorInfo(), true).'", D='.var_export($datas, true);
+                if(!$this->_stmts[$sql]->execute() && '00000' !== (string)$this->_stmts[$sql]->errorCode())
+                {
+                    $error = 'SQL Error: Q="'.trim($sql).'", R="'.
+                            var_export($this->_stmts[$sql]->errorInfo(), true).'", D='.var_export($datas, true);
+    
+                    if(!DEBUG && !User::iGet()->isAdmin())
+                    {
+                        Logs::iGet()->log($error, Exception::E_OWR_DIE);
+                        $error = 'SQL error';
+                    }
+    
+                    throw new Exception($error);
+                }
+            }
+            catch(\Exception $e)
+            {
+                $error = 'SQL Error: Q="'.trim($sql).'", R="'.
+                            var_export($e->getMessage(), true).'", D='.var_export($datas, true);
 
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                }
-                else
-                {
                     $error = 'SQL error';
                 }
 
@@ -461,9 +472,6 @@ class DB extends PDO implements iDB
                     if(!DEBUG && !User::iGet()->isAdmin())
                     {
                         Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                    }
-                    else
-                    {
                         $error = 'SQL error';
                     }
     
@@ -478,14 +486,11 @@ class DB extends PDO implements iDB
 
             if('query' !== $action && 'exec' !== $action)
             {
-                $error = 'SQL Error: Q="'.$sql.'", R="Unknown DB Action '.$action.'"';
+                $error = 'SQL Error: Q="'.trim($sql).'", R="Unknown DB Action '.$action.'"';
 
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                }
-                else
-                {
                     $error = 'SQL error';
                 }
 
@@ -498,14 +503,11 @@ class DB extends PDO implements iDB
             } 
             catch (\Exception $e) 
             {
-                $error = 'SQL Error: Q="'.$sql.'", R="'.$e->getMessage().'"';
+                $error = 'SQL Error: Q="'.trim($sql).'", R="'.$e->getMessage().'"';
 
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                }
-                else
-                {
                     $error = 'SQL error';
                 }
 
@@ -514,14 +516,11 @@ class DB extends PDO implements iDB
 
             if(false === $ret)
             {
-                $error = 'SQL Error: Q="'.$sql.'", R="'.$this->errorInfo().'"';
+                $error = 'SQL Error: Q="'.trim($sql).'", R="'.$this->errorInfo().'"';
 
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                }
-                else
-                {
                     $error = 'SQL error';
                 }
 
@@ -541,9 +540,6 @@ class DB extends PDO implements iDB
                     if(!DEBUG && !User::iGet()->isAdmin())
                     {
                         Logs::iGet()->log($error, Exception::E_OWR_DIE);
-                    }
-                    else
-                    {
                         $error = 'SQL error';
                     }
     
@@ -587,10 +583,10 @@ class DB extends PDO implements iDB
         if(!$this->_cacheTime) return $this->getAllP($sql, $datas, $action);
         
         $filename = md5(serialize(func_get_args()));
-        if($contents = Cache::getFromCache('db/'.$filename, $this->_cacheTime)) return $contents;
+        if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
         
         $result = new Result($this->_executeSQL($sql, $datas, $action, $prepare) ?: null);
-        Cache::writeToCache('db/'.$filename, $result);
+        Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
     }
 
@@ -622,10 +618,10 @@ class DB extends PDO implements iDB
         if(!$this->_cacheTime) return $this->getRowP($sql, $datas, $prepared);
         
         $filename = md5(serialize(func_get_args()));
-        if($contents = Cache::getFromCache('db/'.$filename, $this->_cacheTime)) return $contents;
+        if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
         
         $result = new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ROW);
-        Cache::writeToCache('db/'.$filename, $result);
+        Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
     }
 
@@ -644,10 +640,10 @@ class DB extends PDO implements iDB
         if(!$this->_cacheTime) return $this->getOneP($sql, $datas, false);
         
         $filename = md5(serialize(func_get_args()));
-        if($contents = Cache::getFromCache('db/'.$filename, $this->_cacheTime)) return $contents;
+        if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
         
         $result = new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ONE);
-        Cache::writeToCache('db/'.$filename, $result);
+        Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
     }
 

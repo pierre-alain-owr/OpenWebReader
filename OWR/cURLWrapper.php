@@ -76,13 +76,13 @@ class cURLWrapper
         {
             $time = microtime(true);
             $heads = "Accept-Charset: utf-8\n".
-                        "User-Agent: OpenWebReader/".Config::iGet()->get('version')." http://openwebreader.org - Free Web-Based Feed Aggregator\n"; // some ad :d
+                        "User-Agent: OpenWebReader/".Config::iGet()->get('version')." http://openwebreader.org - Free Feed Aggregator\n"; // some ad :d
 
             if(!$noCache)
             {
                 $cacheFilename = md5($url);
     
-                if($cache = Cache::getFromCache('curl_'.$cacheFilename))
+                if($cache = Cache::get('curl'.DIRECTORY_SEPARATOR.$cacheFilename))
                 {
                     !isset($cache['Etag']) || ($heads .= 'If-None-Match: '.$cache['Etag']."\n");
                     !isset($cache['Last-Modified']) || ($heads .= 'If-Modified-Since: '.$cache['Last-Modified']."\n");
@@ -116,7 +116,7 @@ class cURLWrapper
     
                 if(!empty($cache))
                 {
-                    Cache::writeToCache('curl_'.$cacheFilename, $cache);
+                    Cache::write('curl'.DIRECTORY_SEPARATOR.$cacheFilename, $cache);
                 }
             }
         }
@@ -143,7 +143,7 @@ class cURLWrapper
                     CURLOPT_BINARYTRANSFER  => true,
                     CURLOPT_FAILONERROR     => true,
                     CURLOPT_HTTPAUTH        => CURLAUTH_ANY,
-                    CURLOPT_USERAGENT       => 'OpenWebReader/'.Config::iGet()->get('version').' http://openwebreader.org - Free Web-Based Feed Aggregator', // some ad :d
+                    CURLOPT_USERAGENT       => 'OpenWebReader/'.Config::iGet()->get('version').' http://openwebreader.org - Free Feed Aggregator', // some ad :d
                     CURLOPT_URL             => $url,
                     CURLOPT_HTTPHEADER      => (array)"Accept-Charset: utf-8",
                     CURLOPT_SSL_VERIFYPEER  => false,
@@ -155,7 +155,7 @@ class cURLWrapper
             {
                 $cacheFilename = md5($url);
     
-                if($cache = Cache::getFromCache('curl_'.$cacheFilename))
+                if($cache = Cache::get('curl'.DIRECTORY_SEPARATOR.$cacheFilename))
                 {
                     !isset($cache['Etag']) || $opts[CURLOPT_HTTPHEADER][] = 'If-None-Match: '.$cache['Etag'];
                     !isset($cache['Last-Modified']) || $opts[CURLOPT_HTTPHEADER][] = 'If-Modified-Since: '.$cache['Last-Modified'];
@@ -200,7 +200,7 @@ class cURLWrapper
     
                 if(!empty($cache))
                 {
-                    Cache::writeToCache('curl_'.$cacheFilename, $cache);
+                    Cache::write('curl'.DIRECTORY_SEPARATOR.$cacheFilename, $cache);
                 }
             }
         }

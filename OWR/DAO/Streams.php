@@ -35,7 +35,9 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO as DAO, 
+    OWR\DB\Request as DBRequest,
+    OWR\Config as Config;
 /**
  * This object represents the table streams
  * @uses DAO extends the base class
@@ -84,32 +86,30 @@ class Streams extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_uniqueFields = array('hash' => true);
         $this->_fields = array( 
-            'url'       =>  array('required' => true, 'type' => DBRequest::PARAM_URL), 
-            'ttl'       =>  array('required' => true, 'type' => \PDO::PARAM_INT, 'default' => 30), 
-            'id'        =>  array('required' => true, 'type' => \PDO::PARAM_INT),
+            'url'       =>  array('required' => true,  'type' => DBRequest::PARAM_URL), 
+            'ttl'       =>  array('required' => true,  'type' => \PDO::PARAM_INT, 'default' => Config::iGet()->get('defaultStreamRefreshTime')), 
+            'id'        =>  array('required' => true,  'type' => \PDO::PARAM_INT),
             'lastupd'   =>  array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
             'favicon'   =>  array('required' => false, 'type' => \PDO::PARAM_STR),
-            'hash'      =>  array('required' => true,    'type' => DBRequest::PARAM_HASH),
+            'hash'      =>  array('required' => true,  'type' => DBRequest::PARAM_HASH),
             'status'    =>  array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP, 'default' => 0)
         );
         $this->_userRelations = array(
-            'streams_relations' => array('id'   => 'rssid')
+            'streams_relations'         => array('id'                       => 'rssid'),
+            'streams_relations_name'    => array('id'                       => 'rssid')
         );
         $this->_relations = array(
-            'streams_relations'         => array('id'                       => 'rssid'),
-            'streams_groups'            => array('streams_relations.gid'    => 'id'),
-            'streams_relations_name'    => array('id'                    => 'rssid'),
-            'streams_contents'          => array('id'                    => 'rssid')
+            'streams_contents'          => array('id'                       => 'rssid')
         );
+        parent::__construct();
     }
 
     public function declareUnavailable()
     {
-        if(!isset($this->{$this->_idField}))
+        if(empty($this->{$this->_idField}))
         {
             throw new Exception('Please specify the stream to set as unavailable', Exception::E_OWR_BAD_REQUEST);
         }

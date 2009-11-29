@@ -1023,7 +1023,7 @@ OWR.prototype = {
             }.bindWithEvent(this, item));
             item.addEvent('dblclick', function(e, el) {
                 $clear(timer);
-                window.open(el.getChildren('.link_go').get('href'));
+                window.open(el.getFirst().getChildren('.link_go').get('href'));
                 if(el.hasClass('new_container_nread')) {
                     this.updateNews(el.get('id').split('_')[1]);
                 }

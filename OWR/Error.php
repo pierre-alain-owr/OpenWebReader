@@ -104,6 +104,12 @@ class Error extends Exception
         $msg = '['.(isset(self::$_type[$errno]) ? self::$_type[$errno] : 'unknown').'] ';
         $msg .= $errstr.' in file '.$errfile.' on line '.$errline;
 
+        if(!DEBUG && !User::iGet()->isAdmin())
+        {
+            Logs::iGet()->log($msg, $errno);
+            $msg = $this->message;
+        }
+
         switch($errno) 
         {
             case E_STRICT:
@@ -125,7 +131,7 @@ class Error extends Exception
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
             default:
-                throw new Exception($errstr, $errno);
+                throw new Exception($msg, $errno);
                 break;
         }
 

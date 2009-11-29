@@ -71,7 +71,6 @@ class Groups extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_uniqueFields = array('name' => true);
         $this->_fields = array(
@@ -79,5 +78,9 @@ class Groups extends DAO
             'name'  => array('required' => true, 'type' => \PDO::PARAM_STR), 
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
+        $this->_userRelations = array(
+            'streams_relations' => array('id'   => 'gid')
+        );
+        parent::__construct();
     }
 }

@@ -12,7 +12,7 @@
 <?php   if(isset($error)) {
             echo '<p class="error">'.$error.'</p>';
         } ?>
-            <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
+            <input type="hidden" name="token" id="token" value="<OWR:NOCACHE NAME='token'/>"/>
             <input type="hidden" name="id" value="<?php echo isset($id) ? $id : 0;?>"/>
             <label for="login"><?php echo $this->_utilities->_('Login');?> (*) :</label>
             <br/>
@@ -59,7 +59,7 @@
             <input type="text" name="openid" size="25" id="openid" value="<?php if(isset($openid)){ echo $openid;}?>"/>
             <br/>
             <input type="submit" name="submit" value="<?php echo $this->_utilities->_('Submit');?>" />
-            <input type="button" value="<?php echo $this->_utilities->_('Cancel');?>" onclick="javascript:window.location='<?php echo OWR\Config::iGet()->makeURI('', 'token='.$token);?>';"/>
+            <input type="button" value="<?php echo $this->_utilities->_('Cancel');?>" onclick="javascript:window.location='<?php echo OWR\Config::iGet()->makeURI('', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>';"/>
             </fieldset>
         </form>
     </div>

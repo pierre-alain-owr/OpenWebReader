@@ -91,6 +91,7 @@ class Streams extends Logic
 
         $ids = array();
 
+        $cron = Cron::iGet();
         $streams = $this->_dao->get(array('hash' => $hash));
         if($streams)
         { // stream exists
@@ -205,7 +206,8 @@ class Streams extends Logic
         {
             // should NOT arrive
             // if we come here, that means that cURLWrapper got a 304 http response
-            // but the stream does not exists in DB ? surely a bug
+            // but the stream does not exists in DB ? surely a bug or DB not  up to date
+            // TODO : fix it by forcing cURLWrapper to fetch datas
             $request->setResponse(new Response(array(
                 'do'        => 'error',
                 'error'     => 'Can\'t parse the stream'
@@ -214,7 +216,10 @@ class Streams extends Logic
         }
         elseif(false === $stream)
         {
+            // no stream(s) detected
             // try auto-discovery
+            // we are getting one more HTTP request here
+            // to be re-written to cache last cURLWrapper request ?
             $index = cURLWrapper::get($request->url, array(), false);
             if(false !== $index)
             {
@@ -414,7 +419,6 @@ class Streams extends Logic
 
         try
         {
-            $cron = Cron::iGet();
             if(!$request->escape)
             {
                 $cron->manage(array('type'=>'managefavicons'));
@@ -475,72 +479,41 @@ class Streams extends Logic
 
         if(!empty($request->ids))
         {
-            $datas = array();
-
-            foreach($request->ids as $id)
-            {
-                $args['id'] = $id;
-                $data = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, 1);
-                if(!$data)
-                {
-                    $request->setResponse(new Response(array(
-                        'do'        => 'error',
-                        'error'     => 'Invalid id',
-                        'status'    => Exception::E_OWR_BAD_REQUEST
-                    )));
-                    return $this;
-                }
-
-                $data['contents'] = unserialize($data['contents']);
-
-                $datas[] = $data;
-            }
-
-            $multiple = count($datas);
+            $args['id'] = $request->ids;
+            $limit = count($request->ids);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, 1);
-            if(!$datas)
-            {
-                $request->setResponse(new Response(array(
-                    'do'        => 'error',
-                    'error'     => 'Invalid id',
-                    'status'    => Exception::E_OWR_BAD_REQUEST
-                )));
-                return $this;
-            }
-
-            $datas['contents'] = unserialize($datas['contents']);
+            $limit = 1;
         }
-        else
+
+        $datas = $this->_dao->get($args, 'id,streams_relations_name.name,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname'.(!isset($request->getContents) || $request->getContents ? ',contents' : ''), $order, $groupby, $limit);
+        if(!$datas)
         {
-            $datas = $this->_dao->getAllByRelations($args, 'streams.id,streams_relations_name.name as title,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname,streams_contents.contents', $order, $groupby, $limit);
-            if(!$datas)
-            {
-                $request->setResponse(new Response);
-                return $this;
-            }
+            $request->setResponse(new Response(array(
+                'status'    => 204
+            )));
+            return $this;
+        }
 
-            if(!isset($datas['id']))
+        if(!isset($datas['id']))
+        {
+            $multiple = true;
+            if(!isset($request->getContents) || $request->getContents)
             {
-                $multiple = true;
-
-                foreach($datas as $k=>$data)
-                {
+                foreach($datas as $k => $data)
                     $datas[$k]['contents'] = unserialize($data['contents']);
-                }
             }
-            else
-            {
-                $datas['contents'] = unserialize($datas['contents']);
-            }
+        }
+        elseif(!isset($request->getContents) || $request->getContents)
+        {
+            $datas['contents'] = unserialize($datas['contents']);
         }
 
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => (bool) $multiple
+            'multiple'     => $multiple
         )));
         return $this;
     }
@@ -649,6 +622,7 @@ class Streams extends Logic
         $streams_contents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$request->id));
         $streams->lastupd = (int)$request->begintime;
 
+        $cron = Cron::iGet();
         if('' === ($stream = $this->_parse($streams->url, $streams_contents->src)))
         { // 304 not changed
             $reader = new StreamReader(array('channel' => unserialize($streams_contents->contents)));
@@ -656,6 +630,22 @@ class Streams extends Logic
             $streams->ttl = $reader->get('ttl');
             unset($reader);
             $streams->save();
+            try
+            {
+                $cron->manage(array('type'=>'refreshstream','ttl'=>$streams->ttl));
+            }
+            catch(Exception $e)
+            {
+                switch($e->getCode())
+                {
+                    case Exception::E_OWR_NOTICE:
+                    case Exception::E_OWR_WARNING:
+                        Logs::iGet()->log($e->getContent(), $e->getCode());
+                        break;
+                    default: throw new Exception($e->getContent(), $e->getCode());
+                        break;
+                }
+            }
             $request->setResponse(new Response);
             return $this;
         }
@@ -731,7 +721,7 @@ class Streams extends Logic
 
         try
         {
-            Cron::iGet()->manage(array('type'=>'refreshstream','ttl'=>$ttl));
+            $cron->manage(array('type'=>'refreshstream','ttl'=>$ttl));
         }
         catch(Exception $e)
         {
@@ -865,11 +855,14 @@ class Streams extends Logic
             if($streams->count())
             {
                 $threads = Threads::iGet();
-                $dao = $this->_dao;
                 while($streams->next())
                 {
                     $threads->add(array('do'=>'checkstreamsavailability', 'id'=>$streams->id));
                 }
+
+                $request->setResponse(new Response(array(
+                    'status'    => 202
+                )));
             }
             
             $request->setResponse(new Response);
@@ -883,7 +876,7 @@ class Streams extends Logic
 
         if($streams->count())
         {
-            $dao = $this->_dao;
+            $dao = parent::getDAO('streams');
             while($streams->next())
             {
                 try
@@ -928,7 +921,7 @@ class Streams extends Logic
      */
     public function manageFavicons(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             $streams = $this->_dao->get(array('favicon'=>''), 'id, url');
             if(!$streams)
@@ -944,7 +937,9 @@ class Streams extends Logic
                 $threads->add(array('do'=>'managefavicons', 'id'=>$stream->id));
             }
 
-            $request->setResponse(new Response);
+            $request->setResponse(new Response(array(
+                'status'    => 202
+            )));
             return $this;
         }
 
@@ -1168,7 +1163,9 @@ class Streams extends Logic
             }
             
             unset($rss);
-            $request->setResponse(new Response);
+            $request->setResponse(new Response(array(
+                'status'    => 202
+            )));
             return $this;
         }
         else
@@ -1182,11 +1179,12 @@ class Streams extends Logic
             elseif('streams_groups' === $table)
             {
                 $query = '
-    SELECT DISTINCT(r.id)
+    SELECT r.id
         FROM streams r
         JOIN streams_relations rel ON (r.id=rel.rssid)
         WHERE rel.gid='.$request->id.' AND rel.uid='.User::iGet()->getUid().' 
-        AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()';
+        AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
+        GROUP BY r.id';
                 
                 $rss = $this->_db->getAll($query);
                 if($rss->count())
@@ -1199,7 +1197,9 @@ class Streams extends Logic
                 }
 
                 unset($rss);
-                $request->setResponse(new Response);
+                $request->setResponse(new Response(array(
+                    'status'    => 202
+                )));
             }
             else $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -1226,7 +1226,7 @@ class Streams extends Logic
             // status = 0 means stream is alive
             // seems obvious but in the other case it will be a timestamp of down time
             $query = '
-    SELECT DISTINCT(r.id)
+    SELECT r.id
         FROM streams r
         WHERE (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP() AND status=0'; 
 
@@ -1238,6 +1238,11 @@ class Streams extends Logic
                 {
                     $threads->add(array('do'=>'refreshstream', 'id'=>$streams->id));
                 }
+
+                $request->setResponse(new Response(array(
+                    'status'    => 202
+                )));
+                return $this;
             }
         }
         else
@@ -1247,10 +1252,11 @@ class Streams extends Logic
             if('streams' === $table)
             {
                 $streams = $this->_db->getOne('
-    SELECT DISTINCT(r.id), uid
+    SELECT r.id, uid
         FROM streams r
         JOIN streams_relations rel ON (r.id=rel.rssid)
-        WHERE r.id='.$request->id.' AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()');
+        WHERE r.id='.$request->id.' AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
+        GROUP BY r.id');
                 if($streams->next())
                 {
                     User::iGet()->setUid($streams->uid);
@@ -1276,10 +1282,11 @@ class Streams extends Logic
             elseif('streams_groups' === $table)
             {
                 $query = '
-    SELECT DISTINCT(r.id)
+    SELECT r.id
         FROM streams r
         JOIN streams_relations rel ON (r.id=rel.rssid)
-        WHERE rel.gid='.$request->id.' AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()';
+        WHERE rel.gid='.$request->id.' AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
+        GROUP BY r.id';
                 
                 $streams = $this->_db->getAll($query);
                 if($streams->count())
@@ -1289,6 +1296,11 @@ class Streams extends Logic
                     {
                         $threads->add(array('do'=>'refreshstream', 'id'=>$streams->id));
                     }
+
+                    $request->setResponse(new Response(array(
+                        'status'    => 202
+                    )));
+                    return $this;
                 }
 
                 unset($streams);
@@ -1387,6 +1399,7 @@ class Streams extends Logic
         $streamsGroupsLogic = parent::getCachedLogic('streams_groups');
         $r = clone($request);
         $sr = clone($request);
+        $sr->delay = true;
 
         $gid = (0 !== $request->gid && ($gidRoot !== $request->gid)) ? $request->gid : 0;
 

@@ -72,7 +72,7 @@ class Utilities extends Singleton
      */
     protected function __construct()
     {
-        $this->_translations = Cache::getFromCache('translations_'.User::iGet()->getLang(), 
+        $this->_translations = Cache::get('translations_'.User::iGet()->getLang(), 
                                                     Config::iGet()->get('cacheTime')) ?:
                                 array();
     }
@@ -87,7 +87,7 @@ class Utilities extends Singleton
     public function __destruct()
     {
         if($this->_transChanged && !empty($this->_translations))
-            Cache::writeToCache('translations_'.User::iGet()->getLang(), $this->_translations);
+            Cache::write('translations_'.User::iGet()->getLang(), $this->_translations);
     }
 
     /**
@@ -117,20 +117,23 @@ class Utilities extends Singleton
                     $list .= ' (';
                     foreach($value['attributes'] as $k=>$v)
                     {
-                        $list .= htmlentities($key, ENT_COMPAT, 'UTF-8').'='.htmlentities(is_array($value['contents']) ? join(',', $value['contents']) : $value['contents'], ENT_COMPAT, 'UTF-8', false).';';
+                        $list .= htmlentities($key, ENT_COMPAT, 'UTF-8').'='.htmlentities(is_array($v) ? join(',', $v) : $v, ENT_COMPAT, 'UTF-8', false).';';
                     }
                     $list .= ')';
                 }
                 $list .= ' : ';
-                if(is_array($value['contents']))
+                if(!empty($value['contents']))
                 {
-                    $list .= '<li'.(!empty($LIclass) ? ' class="'.$LIclass.'"' : '').'>';
-                    $list .= $this->makeList($value['contents'], $ULclass, $LIclass);
-                    $list .= '</li>';
-                }
-                else
-                {
-                    $list .= htmlentities($value['contents'], ENT_COMPAT, 'UTF-8', false);
+                    if(is_array($value['contents']))
+                    {
+                        $list .= '<li'.(!empty($LIclass) ? ' class="'.$LIclass.'"' : '').'>';
+                        $list .= $this->makeList($value['contents'], $ULclass, $LIclass);
+                        $list .= '</li>';
+                    }
+                    else
+                    {
+                        $list .= htmlentities($value['contents'], ENT_COMPAT, 'UTF-8', false);
+                    }
                 }
                 $list .= '</li>';
             }

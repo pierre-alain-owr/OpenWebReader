@@ -89,14 +89,15 @@ class View extends Singleton
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $tpl the template name
      * @param array $datas the datas
-     * @param boolean $xml is it XML ?
      * @param int $cacheTime cache time in seconds
+     * @param array $noCacheDatas the datas that are not cached but replaced on-the-fly
      * @return string the template rendered
      */
-    public function get($tpl, array $datas = array(), $xml = false, $cacheTime = 0)
+    public function get($tpl, array $datas = array(), $cacheTime = 0, array $noCacheDatas = array())
     {
         $t = microtime(true);
         $cacheTime = (int) $cacheTime;
+
         if($cacheTime > 0)
         {
             $cachedTpl = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.User::iGet()->getLang().DIRECTORY_SEPARATOR.md5($tpl.serialize($datas));
@@ -112,10 +113,9 @@ class View extends Singleton
 
         if(!isset($contents))
         {
-            $fulltpl = HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
             extract($datas, EXTR_SKIP);
             ob_start();
-            include $fulltpl;
+            include HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
             $contents = ob_get_clean();
             
             if($cacheTime > 0)
@@ -131,6 +131,14 @@ class View extends Singleton
             }
         }
         
+        if(!empty($noCacheDatas))
+        {
+            foreach($noCacheDatas as $name => $value)
+            {
+                $contents = str_replace('<OWR:NOCACHE NAME=\''.$name.'\'/>', $value, $contents);
+            }
+        }
+
         self::$_renderingTime += (float)microtime(true) - $t;
         
         return $contents;

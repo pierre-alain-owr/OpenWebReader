@@ -4,7 +4,7 @@
 <?php       if($status > 0) {
                 echo '<div class="icon_unavailable_feed left backgrounded" title="'.$this->_utilities->_('Set unavailable on').' '.$unavailable.'"></div>';
             } ?>
-            <a href="javascript:;" class="anchor" onclick="rP.showStream(<?php echo $id;?>);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php echo $name;?> (<span id="unread_<?php echo $id;?>"><?php echo $unread;?></span>)</a>
+            <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $id;?>);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php echo $name;?> (<span id="unread_<?php echo $id;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
 <?php       if(!empty($favicon)) {
                 echo '<img src="'.$favicon.'" class="favicon_stream right" width="16px" height="16px" alt="" title="'.$this->_utilities->_('Favicon of').' '.$name.'" />';
             } else { ?>
@@ -24,15 +24,7 @@
             <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete this stream');?>"></a>
         </div>
         <div class="spacer"></div>
-        <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);">
-<?php   if(empty($groups)) {
-            echo '<option value="0">'.$this->_utilities->_('No category (root)').'</option>';
-        }else{
-            foreach($groups as $ids => $name) {
-                echo '<option value="'.$ids.'"'.((int)$ids === (int)$groupid ? ' selected="selected"' : '').'>'.('Root' === $name ? $this->_utilities->_('No category (root)') : htmlentities($name, ENT_COMPAT, 'UTF-8')).'</option>';
-            }
-        } ?>
-        </select>
+        <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);"><OWR:NOCACHE NAME='groups_select'/></select>
         <input type="text" name="name" class="hidden left" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
         <div class="spacer"></div>
         <ul class="stream_more" id="streamContainer_<?php echo $id;?>"></ul>

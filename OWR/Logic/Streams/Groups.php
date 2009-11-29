@@ -197,60 +197,30 @@ class Groups extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
-        $multiple = false;
 
         if(!empty($request->ids))
         {
-            $datas = array();
-
-            foreach($request->ids as $id)
-            {
-                $args['id'] = $id;
-                $data = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
-                if(!$data)
-                {
-                    $request->setResponse(new Response(array(
-                        'do'        => 'error',
-                        'error'     => 'Invalid id',
-                        'status'    => Exception::E_OWR_BAD_REQUEST
-                    )));
-                    return $this;
-                }
-
-                $datas[] = $data;
-            }
-
-            $multiple = count($datas);
+            $args['id'] = $request->ids;
+            $limit = count($request->ids);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
-            if(!$datas)
-            {
-                $request->setResponse(new Response(array(
-                    'do'        => 'error',
-                    'error'     => 'Invalid id',
-                    'status'    => Exception::E_OWR_BAD_REQUEST
-                )));
-                return $this;
-            }
+            $limit = 1;
         }
-        else
-        {
-            $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
-            if(!$datas)
-            {
-                $request->setResponse(new Response);
-                return $this;
-            }
 
-            $multiple = !isset($datas['id']);
+        $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
+        if(!$datas)
+        {
+            $request->setResponse(new Response(array(
+                'status'    => 204
+            )));
+            return $this;
         }
 
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => (bool) $multiple
+            'multiple'     => !isset($datas['id'])
         )));
         return $this;
     }

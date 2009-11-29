@@ -1,9 +1,11 @@
-<?php echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n"; // for short open tags ?>
+<?php 
+echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n"; // for short open tags 
+?>
 <opml version="1.0">
     <head>
         <title>OpenWebReader Feeds List</title>
-        <dateCreated><?php echo $dateCreated;?></dateCreated>
-        <dateModified><?php echo $dateCreated;?></dateModified>
+        <dateCreated><OWR:NOCACHE NAME='dateCreated'/></dateCreated>
+        <dateModified><OWR:NOCACHE NAME='dateCreated'/></dateModified>
         <ownerName><?php echo $userlogin;?></ownerName>
     </head>
     <body>

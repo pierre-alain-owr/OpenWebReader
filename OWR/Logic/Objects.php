@@ -130,72 +130,48 @@ class Objects extends Logic
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
-        $multiple = false;
 
         if(!empty($request->ids))
         {
-            $datas = array();
-            $r = new Request;
-            foreach($request->ids as $id)
-            {
-                $args['id'] = $id;
-                $data = $this->_dao->get($args, '*', $order, $groupby, $limit);
-                if(!$data)
-                {
-                    $request->setResponse(new Response(array(
-                        'do'        => 'error',
-                        'error'     => 'Invalid id',
-                        'status'    => Exception::E_OWR_BAD_REQUEST
-                    )));
-                    return $this;
-                }
-                $r->id = $id;
-                parent::getCachedLogic($data['type'])->view($r, $args, $order, $groupby, $limit);
-                $response = $r->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $data = $response->getDatas();
-                    empty($data) || $datas[] = $data;
-                }
-                else
-                {
-                    $request->setResponse($response);
-                    return $this;
-                }
-            }
-
-            $multiple = count($datas);
+            $args['id'] = $request->ids;
+            $limit = count($request->ids);
         }
         elseif(!empty($request->id))
         {
             $args['id'] = $request->id;
-            $datas = $this->_dao->get($args, '*', $order, $groupby, $limit);
-            if(!$datas)
-            {
-                $request->setResponse(new Response(array(
-                    'do'        => 'error',
-                    'error'     => 'Invalid id',
-                    'status'    => Exception::E_OWR_BAD_REQUEST
-                )));
-                return $this;
-            }
-
-            parent::getCachedLogic($datas['type'])->view($request, $args, $order, $groupby, $limit);
-            return $this;
+            $limit = 1;
         }
-        else
+
+        $types = $this->_dao->get($args, '*', $order, $groupby, $limit);
+        if(!$types)
         {
             $request->setResponse(new Response(array(
-                'do'        => 'error',
-                'error'     => 'Missing id',
-                'status'    => Exception::E_OWR_BAD_REQUEST
+                'status'    => 204
             )));
             return $this;
         }
 
+        $r = new Request(array('id' => null));
+        foreach($types as $type)
+        {
+            $r->id = $type['id'];
+            parent::getCachedLogic($type['type'])->view($r, $args, $order, $groupby, 1);
+            $response = $r->getResponse();
+            if('error' !== $response->getNext())
+            {
+                $data = $response->getDatas();
+                empty($data) || $datas[] = $data;
+            }
+            else
+            {
+                $request->setResponse($response);
+                return $this;
+            }
+        }
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => (bool) $multiple
+            'multiple'     => !isset($types['id'])
         )));
         return $this;
     }

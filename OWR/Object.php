@@ -225,17 +225,7 @@ class Object
      */
     public function asArray()
     {
-        $arr = array();
-
-        foreach($this as $k=>$v)
-        {
-            if(is_object($v))
-                $arr[$k] = self::toArray($v);
-            else
-                $arr[$k] = $v;
-        }
-
-        return $arr;
+        return self::toArray($this);
     }
 
     /**

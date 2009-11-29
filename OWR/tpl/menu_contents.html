@@ -1,7 +1,7 @@
                         <li id="stream_<?php echo $groupid;?>" class="groups">
                             <div class="groupname">
                                 <a href="javascript:;" class="backgrounded current left hidden" onclick="rP.showStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Show the news for this category');?>" id="current_<?php echo $groupid;?>"></a>
-                                <a href="javascript:;" class="<?php if($unread > 0){ echo 'bold';}?> anchor" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><?php echo $unread;?></span>)</a>
+                                <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
                                 <div class="icon_category right backgrounded"></div>
                             </div>
                             <div class="spacer"></div>

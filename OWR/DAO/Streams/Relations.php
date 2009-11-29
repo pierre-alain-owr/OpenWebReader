@@ -71,12 +71,19 @@ class Relations extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_uniqueFields = array('rssid'=>true);
         $this->_fields = array(
             'gid'    => array('required' => true, 'type' => \PDO::PARAM_INT), 
             'rssid' => array('required' => true, 'type' => \PDO::PARAM_INT), 
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
+        $this->_relations = array(
+            'streams'           => array('rssid'    => 'id'),
+        );
+        $this->_userRelations = array(
+            'streams_groups'    => array('gid'      => 'id'),
+            'news_relations'    => array('rssid'    => 'rssid')
+        );
+        parent::__construct();
     }
 }

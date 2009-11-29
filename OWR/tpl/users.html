@@ -1,6 +1,6 @@
 <div class="users">
-    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token='.$token);?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
-    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token='.$token);?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
     <div class="spacer"></div>
     <table id="users" class="users">
         <caption><?php echo $this->_utilities->_('Users list');?> <span class="small">(<?php echo $nbusers;?>)</span></caption>
@@ -31,13 +31,13 @@
                 </td>
                 <td class="actions full_rounded">
                     <a class="icon_user_delete right backgrounded opac" href="javascript:;" onclick="rP.deleteUser(<?php echo $user['id'];?>);" title="<?php echo $this->_utilities->_('Delete');?>"></a>
-                    <a class="icon_user_edit right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id='.$user['id'].'&amp;token='.$token);?>" title="<?php echo $this->_utilities->_('Edit');?>"></a>
+                    <a class="icon_user_edit right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id='.$user['id'].'&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit');?>"></a>
                 </td>
             </tr>
 <?php   } ?>
         </tbody>
     </table>
     <div class="spacer"></div>
-    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token='.$token);?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
-    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token='.$token);?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
 </div>

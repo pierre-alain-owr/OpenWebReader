@@ -9,7 +9,7 @@
                                     <a href="javascript:;" class="rename backgrounded left opac" onclick="rP.renameStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Rename this category');?>"></a>
                                     <input type="text" name="name" class="hidden left" id="rename_<?php echo $groupid;?>" onchange="rP.inputRename(this);"/>
                                     <a href="javascript:;" class="delete backgrounded left opac" onclick="rP.deleteStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Delete this category and all sub-streams');?>" id="delete_<?php echo $groupid;?>"></a>
-                                    <a href="javascript:;" class="anchor backgrounded left opac" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><?php echo $unread;?></span>)</a>
+                                    <a href="javascript:;" class="anchor backgrounded left opac" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
                                 </div>
                             </div>
                             <div class="spacer"></div>

@@ -101,6 +101,19 @@ interface DAO
     public function delete($args = null, $limit='');
 
     /**
+     * Counts row(s) from the database
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param mixed $args parameters, can be null, a string (if an $_idField has been declared), or an array
+     * @param string $select select fields, by default all
+     * @param string $groupby the groupby clause
+     * @param string $selectAdd additional fields to fetch, optionnal
+     * @return mixed null if any, an object of the current DAO name if only one DBResult, or an array if more
+     */
+    public function count($args = null, $select = '*', $groupby='', $selectAdd = '');
+
+    /**
      * Populates values into this object
      *
      * @access public

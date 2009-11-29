@@ -548,11 +548,11 @@ p.stream_description
     line-height:15px;
 }
 
-div#login, div#loginOpenID
+div#login
 {
     font-size:80%;
     width:280px;
-    margin:8% 40% 0 40%;
+    margin:10% 0% 0 40%;
     padding:5px;
     background-color:#BBBBBB;
     border:none;

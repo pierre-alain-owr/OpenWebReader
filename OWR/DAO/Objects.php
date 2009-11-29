@@ -67,12 +67,12 @@ class Objects extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_fields = array(
-            'id'    =>  array('required' => false, 'type' => \PDO::PARAM_INT, 'default' => null),
+            'id'    =>  array('required' => false, 'type' => DBRequest::PARAM_NULL, 'default' => null),
             'type'  =>  array('required' => true, 'type' => \PDO::PARAM_STR)
         );
+        parent::__construct();
     }
 
     /**
@@ -100,8 +100,8 @@ class Objects extends DAO
                 break;
         }
 
-        return (int) $this->_db->setP('
+        return (int) parent::$_db->setP('
     INSERT INTO objects 
-        SET type=?', new DBRequest(array('type'=>$type), array('type' => $this->_fields['type'])), 'exec', true, true);
+        SET id=?, type=?', new DBRequest(array('type'=>$type), array('id' => $this->_fields['id'], 'type' => $this->_fields['type'])), 'exec', true, true);
     }
 }

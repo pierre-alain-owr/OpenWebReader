@@ -180,8 +180,6 @@ class Controller extends Singleton
             $this->_user = User::iGet();
             $this->_user->reg(); // populate into the session
         }
-
-        $this->_cron = Cron::iGet();
     }
     
     /**
@@ -205,7 +203,7 @@ class Controller extends Singleton
 
         try 
         {
-            if(isset($this->_request->identifier) || 'verifyopenid' === $this->_request->do)
+            if(!empty($this->_request->identifier) || 'verifyopenid' === $this->_request->do)
             { // openid, add it to include_path
                 ini_set('include_path', HOME_PATH.'libs'.DIRECTORY_SEPARATOR.
                         'openID'.DIRECTORY_SEPARATOR.PATH_SEPARATOR.ini_get('include_path'));
@@ -213,7 +211,7 @@ class Controller extends Singleton
 
             if(!$this->_user->isLogged())
             {
-                if($this->_request->tlogin && $this->_request->key)
+                if(!empty($this->_request->tlogin) && !empty($this->_request->key))
                 {
                     switch($this->_request->do)
                     { // atm only getting stream is allowed, but for the future ..
@@ -227,7 +225,7 @@ class Controller extends Singleton
                    
                     $this->do_login(true);
                 }
-                elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login')
+                elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login' && $this->_request->do !== 'verifyopenid')
                 {
                     $this->_user->regenerateToken();
                     $this->redirect('login');
@@ -238,7 +236,7 @@ class Controller extends Singleton
                 $token = $this->_user->getToken();
                 // check HTTP User-Agent and token
                 if(($this->_user->getAgent() !== md5($token.$_SERVER['HTTP_USER_AGENT'])) ||
-                    $this->_request->token !== $token)
+                    empty($this->_request->token) || $this->_request->token !== $token)
                 {
                     if($this->_request->do !== 'logout')
                     { // for external action, there's no tokens set
@@ -263,17 +261,17 @@ class Controller extends Singleton
                 // to not have '?clear(db|html)cache' in the url
                 if(!empty($this->_request->clearcache))
                 {
-                    Cache::clearCache();
+                    Cache::clear();
                     $this->redirect();
                 }
                 elseif(!empty($this->_request->clearhtmlcache))
                 {
-                    Cache::clearHTMLCache();
+                    Cache::clearHTML();
                     $this->redirect();
                 }
                 elseif(!empty($this->_request->cleardbcache))
                 {
-                    Cache::clearDBCache();
+                    Cache::clearDB();
                     $this->redirect();
                 }
             }
@@ -683,19 +681,19 @@ class Controller extends Singleton
         isset($this->_view) || $this->_view = View::iGet();
 
         $cacheTime = $this->_cfg->get('cacheTime');
-
-        $xml = $empty = false;
+        $noCacheDatas = array();
+        $empty = false;
         $page = '';
 
         switch($tpl)
         {
             case 'new_contents':
                 $request = new Request(array('id' => $datas['id']));
-                Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
+                Logic::getCachedLogic('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $page .= $this->_view->get('new_contents', $response->getDatas(), $xml, $cacheTime);
+                    $page .= $this->_view->get('new_contents', $response->getDatas(), $cacheTime);
                 }
                 else
                 {
@@ -706,10 +704,9 @@ class Controller extends Singleton
             break;
 
             case 'new_details':
-                $datas['token'] = User::iGet()->getToken();
                 $datas['details'] = array();
                 $request = new Request(array('id' => $datas['id']));
-                Logic::getCachedLogic('news')->view($request, array(), 'pubDate DESC, lastupd DESC');
+                Logic::getCachedLogic('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -747,120 +744,76 @@ class Controller extends Singleton
                 
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
-                
-                $datas['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+
+                $noCacheDatas['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
                 $tpl = 'menu_contents';
                 break;
 
-//             case 'menu_part_group':
-//                 $streams = DAO::getDAO('streams_relations')->get(array('gid' => $datas['id']), 'rssid');
-//                 if(!$streams)
-//                 {
-//                     $empty = true;
-//                     break;
-//                 }
-// 
-//                 $request = new Request(array('id'=>null));
-//                 Logic::getCachedLogic('streams_groups')->view($request);
-//                 $response = $request->getResponse();
-//                 $groups = array();
-//                 if('error' !== $response->getNext())
-//                 {
-//                     $g = $response->getDatas();
-//                     foreach($g as $k=>$group)
-//                     {
-//                         $groups[$group['id']] = $group['name'];
-//                     }
-//                 }
-//                 else
-//                 {
-//                     Logs::iGet()->log($response->getError(), $response->getStatus());
-//                     $empty = true;
-//                     break;
-//                 }
-//                 unset($response, $g);
-// 
-//                 foreach($streams as $stream)
-//                 {
-//                     $request->id = $stream->rssid;
-//                     Logic::getCachedLogic('streams')->view($request);
-//                     $response = $request->getResponse();
-//                     if('error' !== $response->getNext())
-//                     {
-//                         $stream = $response->getDatas();
-//                         $stream['groups'] = $groups;
-//                         $stream['unread'] = (isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0);
-//                         if($stream['status'] > 0) 
-//                         {
-//                             $stream['unavailable'] = $this->_getDate($stream['status']);
-//                         }
-//                         $stream['groupid'] = $stream['gid'];
-//                         $page .= $this->_view->get('menu_streams', $stream, $xml, $cacheTime);
-//                     }
-//                     else
-//                     {
-//                         Logs::iGet()->log($response->getError(), $response->getStatus());
-//                         $empty = true;
-//                     }
-//                     unset($response);
-//                 }
-//                 unset($streams, $request);
-//                 break;
-
             case 'menu_part_group':
-                $query = '
-    SELECT DISTINCT(r.id), rr.gid AS groupid, r.url, rc.contents, r.lastupd, r.ttl, rrn.name, r.favicon, r.status
-        FROM streams r
-        JOIN streams_contents rc ON (r.id=rc.rssid)
-        JOIN streams_relations rr ON (rr.rssid=r.id)
-        JOIN streams_relations_name rrn ON (rrn.rssid=rr.rssid AND rrn.uid=rr.uid)
-        WHERE rr.uid='.$this->_user->getUid().' AND rr.gid='.(int) $datas['id'].'
-        ORDER BY name';
-                $streams = $this->_db->getAll($query);
-                if(!$streams->count())
+                $streams = DAO::getDAO('streams_relations')->get(array('gid' => $datas['id']), 'rssid');
+                if(!$streams)
                 {
                     $empty = true;
                     break;
                 }
-                
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
-
-                $query = '
-    SELECT name, id
-        FROM streams_groups
-        WHERE uid='.$this->_user->getUid().'
-        ORDER BY name';
-                
-                $groups = $this->_db->getAll($query);
-                if(!$groups->count())
+                if(is_object($streams))
+                    $streams = array($streams);
+                $request = new Request(array('id'=>null));
+                Logic::getCachedLogic('streams_groups')->view($request);
+                $response = $request->getResponse();
+                $groups = array();
+                if('error' !== $response->getNext())
                 {
+                    $groups = $response->getDatas();
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
                     $empty = true;
                     break;
                 }
-
-                $streams->groups = array();
-                while($groups->next())
+                unset($response, $g);
+                $request->getContents = false;
+                foreach($streams as $s)
                 {
-                    $streams->groups->{$groups->id} = $groups->name;
-                }
-                unset($groups);
-                
-                $streams->groups = $streams->groups->asArray(); // force array
-
-                while($streams->next())
-                {
-                    $streams->contents = (array) unserialize($streams->contents);
-                    $streams->unread = (isset($this->_request->unreads[$streams->id]) ? $this->_request->unreads[$streams->id] : 0);
-                    if($streams->status > 0) 
+                    $request->id = $s->rssid;
+                    Logic::getCachedLogic('streams')->view($request);
+                    $response = $request->getResponse();
+                    if('error' !== $response->getNext())
                     {
-                        $streams->unavailable = $this->_getDate($streams->status);
+                        $stream = $response->getDatas();
+                        $stream['groups'] = $groups;
+                        if($stream['status'] > 0) 
+                        {
+                            $stream['unavailable'] = $this->_getDate($stream['status']);
+                        }
+
+                        if(!isset($groups_select[$stream['gid']]))
+                            $groups_select[$stream['gid']] = $this->_view->get('menu_selects', array(
+                                                                        'gid' => $stream['gid'],
+                                                                        'groups' => $groups),
+                                                                        $cacheTime
+                                                        );
+                        $unread = isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0;
+                        $page .= $this->_view->get('menu_streams', $stream, $cacheTime, array(
+                                    'unread'    => $unread,
+                                    'bold'      => $unread > 0 ? 'bold ' : '',
+                                    'groups_select'     => $groups_select[$stream['gid']]
+                                    ));
                     }
-                    $page .= $this->_view->get('menu_streams', $streams->asArray(), $xml, $cacheTime);
+                    else
+                    {
+                        Logs::iGet()->log($response->getError(), $response->getStatus());
+                        $empty = true;
+                    }
+                    unset($response);
                 }
-                unset($streams);
+                unset($streams, $request);
                 break;
-                
+
             case 'menu_part_stream':
                 $request = new Request(array('id' => $datas['id']));
                 Logic::getCachedLogic('streams')->view($request);
@@ -869,7 +822,7 @@ class Controller extends Singleton
                 {
                     $datas['stream'] = $response->getDatas();
                     unset($datas['stream']['title']);
-                    $datas['stream']['contents']['nextRefresh'] = $this->_getDate($this->_request->begintime + $datas['stream']['ttl']);
+                    $datas['stream']['contents']['nextRefresh'] = $this->_getDate($datas['stream']['lastupd'] + $datas['stream']['ttl']);
                     $datas['stream']['contents']['id'] = $datas['stream']['id'];
                     $datas['stream']['contents']['url'] = $datas['stream']['url'];
                 }
@@ -885,11 +838,37 @@ class Controller extends Singleton
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
 
-                $cache = false;
-                
                 $ids = null;
                 $uid = $this->_user->getUid();
-                $order = !empty($datas['sort']) ? $datas['sort'].' '.$datas['dir'] : 'n.pubDate DESC, n.lastupd DESC';
+
+                if(!empty($datas['sort']))
+                {
+                    $order = $datas['sort'].' '.$datas['dir'];
+                    if('news.pubDate' !== $datas['sort'])
+                        $order .= ',news.pubDate DESC';
+                }
+                else
+                {
+                    $order = 'news.pubDate DESC';
+                }
+
+                $offset = 0;
+
+                if(isset($datas['offset']))
+                {
+                    $datas['offset'] = (int)$datas['offset'];
+                    
+                    if($datas['offset'] > 0)
+                    {
+                        $offset = (int)($datas['offset']*10);
+                    }
+                }
+                else
+                {
+                    $datas['offset'] = 0;
+                }
+
+                $offset = $offset.',10'; // TODO : change this limit by the user defined one
 
                 if(isset($datas['id']) && is_array($datas['id']))
                 {
@@ -898,70 +877,14 @@ class Controller extends Singleton
                         $empty = true;
                         break;
                     }
-                    array_walk($datas['id'], 'intval');
-                    
-                    $query = '
-    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live, nr.rssid
-        FROM news_relations nr
-        JOIN news n ON (nr.newsid=n.id)
-        WHERE uid='.$uid.' AND n.id IN ('.join(',', $datas['id']).')
-        ORDER BY '.$order;
-
-                    if(isset($datas['offset']))
-                    {
-                        $datas['offset'] = (int)$datas['offset'];
-                        
-                        if($datas['offset'] > 0)
-                        {
-                            $offset = (int)($datas['offset']*10);
-                            $query .= "
-                        LIMIT {$offset},10";
-                        }
-                        else
-                        {
-                            $query .= '
-                        LIMIT 10';
-                        }
-                    }
-                    else
-                    {
-                        $query .= '
-                        LIMIT 10';
-                    }
-
+                    $request = new Request(array('ids' => $datas['id'], 'getContents' => false));
+                    Logic::getCachedLogic('news')->view($request, array(), $order, null, $offset);
                     $datas['nbNews'] = count($datas['id']);
                 }
-                elseif(!isset($datas['id']) || !$datas['id'])
+                elseif(empty($datas['id']))
                 {
-                    $query = '
-    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
-        FROM news_relations nr
-        JOIN news n ON (nr.newsid=n.id)
-        WHERE uid='.$uid.' AND status=1
-        ORDER BY '.$order;
-
-                    if(isset($datas['offset']))
-                    {
-                        $datas['offset'] = (int)$datas['offset'];
-                        
-                        if($datas['offset'] > 0)
-                        {
-                            $offset = (int)($datas['offset']*10);
-                            $query .= "
-                        LIMIT {$offset},10";
-                        }
-                        else
-                        {
-                            $query .= '
-                        LIMIT 10';
-                        }
-                    }
-                    else
-                    {
-                        $query .= '
-                        LIMIT 10';
-                    }
-
+                    $request = new Request(array('id' => null, 'getContents' => false));
+                    Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, null, $offset);
                     $datas['nbNews'] = $this->_request->unreads[0];
                 }
                 else
@@ -983,83 +906,19 @@ class Controller extends Singleton
                                 break;
                         }
                     }
-                    
+
+                    $request = new Request(array('id' => null, 'getContents' => false));
                     if('streams' === $table)
                     {
-                        $query = '
-    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
-        FROM news_relations nr
-        JOIN news n ON (nr.newsid=n.id)
-        WHERE nr.uid='.$uid.' AND nr.rssid='.(int)$datas['id'].'
-        ORDER BY '.$order;
-    
-                        if(isset($datas['offset']))
-                        {
-                            $datas['offset'] = (int)$datas['offset'];
-                            
-                            if($datas['offset'] > 0)
-                            {
-                                $offset = (int)($datas['offset']*10);
-                                $query .= "
-                            LIMIT {$offset},10";
-                            }
-                            else
-                            {
-                                $query .= '
-                            LIMIT 10';
-                            }
-                        }
-                        else
-                        {
-                            $query .= '
-                            LIMIT 10';
-                        }
-    
-                        $nbNews = $this->_db->getOne('
-    SELECT COUNT(newsid) AS nb
-        FROM news_relations
-        WHERE uid='.$uid.' AND rssid='.(int)$datas['id']);
-                        $datas['nbNews'] = $nbNews->next() ? $nbNews->nb : 0;
+                        Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, null, $offset);
+                        $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('streams_groups' === $table)
                     {
-                        $query = '
-    SELECT n.id, n.rssid, n.title, n.link, n.pubDate, n.author, nr.status live
-        FROM news_relations nr
-        JOIN news n ON (nr.newsid=n.id)
-        JOIN streams_relations sr ON (sr.rssid=n.rssid AND sr.uid='.$uid.')
-        JOIN streams_groups rg ON (sr.gid=rg.id AND sr.uid='.$uid.')
-        WHERE nr.uid='.$uid.' AND rg.id='.(int)$datas['id'].'
-        ORDER BY '.$order;
-    
-                        if(isset($datas['offset']))
-                        {
-                            $datas['offset'] = (int)$datas['offset'];
-                            
-                            if($datas['offset'] > 0)
-                            {
-                                $offset = (int)($datas['offset']*10);
-                                $query .= "
-                            LIMIT {$offset},10";
-                            }
-                            else
-                            {
-                                $query .= '
-                            LIMIT 10';
-                            }
-                        }
-                        else
-                        {
-                            $query .= '
-                            LIMIT 10';
-                        }
-    
-                        $nbNews = $this->_db->getOne('
-    SELECT COUNT(DISTINCT(n.newsid)) AS nb
-        FROM news_relations n
-        JOIN streams_relations s ON (n.rssid=s.rssid AND s.uid=n.uid)
-        WHERE n.uid='.$uid.' AND s.gid='.(int)$datas['id']);
-                        $datas['nbNews'] = $nbNews->next() ? $nbNews->nb : 0;
+                        Logic::getCachedLogic('news')->view($request, array('gid' => $datas['id']), $order, null, $offset);
+                        $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     else
                     {
@@ -1069,111 +928,46 @@ class Controller extends Singleton
                     }
                 }
 
-                $ids = $this->_db->execute($query);
-                if(!$ids->count())
-                {
-                    $empty = true;
-                    break;
-                }
-
-                $pager = array('nbNews'=>$datas['nbNews'],
-                                'offset' => (int)$this->_request->offset,
-                                'sort'  => !empty($datas['sort']) ? $datas['sort'] : null,
-                                'dir'   => !empty($datas['dir']) ? $datas['dir'] : null);
-                $pager = $this->_view->get('news_tools', $pager, $xml, $cacheTime);
-                $page .= $pager;
-                $streams = $groups = array();
-
-                // get the related streams and groups
-                while($ids->next())
-                {
-                    if(!isset($streams[$ids->rssid]))
-                    {
-                        $query = '
-    SELECT s.favicon, srn.name, sr.gid
-        FROM streams s
-        JOIN streams_relations sr ON (s.id=sr.rssid AND sr.uid='.$uid.')
-        JOIN streams_relations_name srn ON (s.id=srn.rssid AND srn.uid='.$uid.')
-        WHERE s.id='.$ids->rssid;
-                        $stream = $this->_db->execute($query);
-                        if($stream->next())
-                        {
-                            $streams[$ids->rssid] = $stream;
-                            if(!isset($groups[$stream->gid]))
-                            {
-                                $query = '
-    SELECT name AS gname
-        FROM streams_groups
-        WHERE id='.$stream->gid.' AND uid='.$uid;
-                                $group = $this->_db->execute($query);
-                                $group->next();
-                                $groups[$stream->gid] = $group;
-                            }
-                        }
-                        else
-                        {
-                            Logs::iGet()->log("Can't get related streams/groups");
-                            break;
-                        }
-                    }
-                    $ids->name = $streams[$ids->rssid]->name;
-                    $ids->favicon = $streams[$ids->rssid]->favicon;
-                    $ids->gname = $groups[$streams[$ids->rssid]->gid]->gname;
-                    $ids->gid = $streams[$ids->rssid]->gid;
-                    if(isset($datas['searchResults'][$ids->id]))
-                        $ids->search_result = (float)$datas['searchResults'][$ids->id];
-                    $ids->pubDate = $this->_getDate($ids->pubDate);
-                    $page .= $this->_view->get('new_title', $ids->asArray(), $xml, $cacheTime);
-                }
-                
-                unset($ids, $groups, $streams);
-
-                $page .= $pager;
-                unset($pager);
-            break;
-
-            case 'menu':
-                $request = new Request($datas);
-                Logic::getCachedLogic('streams_groups')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    if(empty($this->_request->unreads))
-                        $this->do_getunread(true);
-                    $datas = $response->getDatas();
-                    if(empty($datas))
+                    $news = $response->getDatas();
+                    if(empty($news))
                     {
                         $empty = true;
                         break;
                     }
-                    
-                    if($response->isMultiple())
-                    {
-                        foreach($datas as $data)
-                        {
-                            $data['gid'] = $data['id'];
-                            $data['gname'] = $data['name'];
-                            $data['unreads'] = isset($this->_request->unreads[$data['gid']]) ? $this->_request->unreads[$data['gid']] : 0;
-                            unset($data['id'], $data['name']);
-                            $page .= $this->_view->get('menu_contents', $data, $xml, $cacheTime);
-                        }
-                    }
-                    else
-                    {
-                        $datas['gid'] = $datas['id'];
-                        $datas['gname'] = $datas['name'];
-                        $datas['unreads'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
-                        unset($datas['id'], $datas['name']);
-                        $page .= $this->_view->get('menu_contents', $datas, $xml, $cacheTime);
-                    }
+
+                    if(!is_array($news)) $news = array($news);
                 }
                 else
                 {
                     Logs::iGet()->log($response->getError(), $response->getStatus());
                     $empty = true;
+                    break;
                 }
-                unset($response, $request);
-                break;
+                unset($response, $request, $result);
+
+                $pager = array('nbNews'     => (int) $datas['nbNews'],
+                                'offset'    => $datas['offset'],
+                                'sort'      => !empty($datas['sort']) ? $datas['sort'] : null,
+                                'dir'       => !empty($datas['dir']) ? $datas['dir'] : null);
+
+                $pager = $this->_view->get('news_tools', $pager, $cacheTime);
+                $page .= $pager;
+
+                foreach($news as $new)
+                {
+                    if(isset($datas['searchResults'][$new['id']]))
+                        $new['search_result'] = (float) $datas['searchResults'][$new['id']];
+                    $new['pubDate'] = $this->_getDate($new['pubDate']);
+                    $page .= $this->_view->get('new_title', $new, $cacheTime);
+                }
+                unset($news);
+
+                $page .= $pager;
+                unset($pager);
+            break;
 
             case 'index':
                 if(empty($this->_request->unreads))
@@ -1183,26 +977,29 @@ class Controller extends Singleton
                 $ulang = $this->_user->getLang();
                 $uid = $this->_user->getUid();
                 $page .= $this->_view->get('header', array(
-                                                            'surl'=>$surl, 
-                                                            'xmlLang'=>$this->_user->getXMLLang(),
-                                                            'token' => $token), 
-                                                        $xml, 0);
+                                                        'surl'      =>$surl, 
+                                                        'xmlLang'   =>$this->_user->getXMLLang(),
+                                                    ), 
+                                                    $cacheTime,
+                                                    array(
+                                                        'token' => $token
+                                                    ));
 
                 $page .= $this->_view->get('board', array(
-                                                            'userlogin'=>$this->_user->getLogin(),
-                                                            'lang'=>$ulang,
-                                                            'surl'=>$surl,
-                                                            'token'=> $token), 
-                                                        $xml, 0);
-
-                $page .= $this->_view->get('menu_header', array('unread'=>$this->_request->unreads[0]), 
-                                                        $xml, $cacheTime);
+                                                        'lang' => $ulang,
+                                                        'surl' => $surl,
+                                                    ), 
+                                                    $cacheTime,
+                                                    array(
+                                                        'userlogin' => htmlentities($this->_user->getLogin(), ENT_COMPAT, 'UTF-8'),
+                                                        'token'     => $token
+                                                    ));
 
                 $request = new Request(array('id'=>null));
                 Logic::getCachedLogic('streams_groups')->view($request);
                 $response = $request->getResponse();
                 $groups = array();
-
+                $tmpPage = '';
                 if('error' !== $response->getNext())
                 {
                     $groups = $response->getDatas();
@@ -1214,16 +1011,18 @@ class Controller extends Singleton
                             {
                                 $group['groupid'] = $group['id'];
                                 $group['gname'] = $group['name'];
-                                $group['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
-                                $page .= $this->_view->get('menu_contents', $group, $xml, $cacheTime);
+                                $noCacheDatas['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
+                                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
+                                $tmpPage .= $this->_view->get('menu_contents', $group, $cacheTime, $noCacheDatas);
                             }
                         }
                         else
                         {
                             $groups['groupid'] = $groups['id'];
                             $groups['gname'] = $groups['name'];
-                            $groups['unread'] = isset($this->_request->unreads[$groups['id']]) ? $this->_request->unreads[$groups['id']] : 0;
-                            $page .= $this->_view->get('menu_contents', $groups, $xml, $cacheTime);
+                            $noCacheDatas['unread'] = isset($this->_request->unreads[$groups['id']]) ? $this->_request->unreads[$groups['id']] : 0;
+                            $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
+                            $tmpPage .= $this->_view->get('menu_contents', $groups, $cacheTime, $noCacheDatas);
                         }
                     }
                 }
@@ -1233,48 +1032,53 @@ class Controller extends Singleton
                     $empty = true;
                 }
                 unset($response, $request);
-
+                $page .= $this->_view->get('menu_header', array(), $cacheTime, 
+                                            array(
+                                                'unread' => $this->_request->unreads[0], 
+                                                'bold' => $this->_request->unreads[0] > 0 ? ' class="bold"' : ''
+                                            ));
+                $page .= $tmpPage;
+                unset($tmpPage);
                 $page .= $this->_view->get('menu_footer', array(
-                    'groups'            => $groups, 
-                    'uid'               => $uid, 
-                    'userrights'        => $this->_user->getRights(),
-                    'surl'              => $surl,
-                    'token'             => $token,
-                    'maxuploadfilesize' => $this->_cfg->get('maxUploadFileSize')), 
-                    $xml, 0);
-                unset($groups);
-                $page .= $this->_view->get('contents_header', array(), $xml, $cacheTime);
-                $page .= $this->_getPage('news', $datas, true);
-                $page .= $this->_view->get('contents_footer', array(), $xml, $cacheTime);
-
-                $query = '
-    SELECT MIN(ttl) AS ttl
-        FROM streams s
-        JOIN streams_relations sr ON (s.id=sr.rssid)
-        WHERE sr.uid='.$this->_user->getUid();
-                $ttl = $this->_db->getOne($query);
-                $ttl->next();
-                $ttl = $ttl->ttl ?: $this->_cfg->get('defaultStreamRefreshTime');
-                $page .= $this->_view->get('footer', array(
-                                                        'ttl'=>$ttl*60*1000, 
-                                                        'lang'=>$ulang,
-                                                        'surl'=>$surl,
-                                                        'uid'=>$uid,
-                                                        'token'=>$token,
-                                                        'opensearch'=>(isset($datas['opensearch']) ? $datas['opensearch'] : 0)
+                                                            'groups'            => $groups, 
+                                                            'userrights'        => $this->_user->getRights(),
+                                                            'surl'              => $surl,
+                                                            'maxuploadfilesize' => $this->_cfg->get('maxUploadFileSize')
                                                         ), 
-                                                        $xml, 0);
+                                                        $cacheTime,
+                                                        array(
+                                                            'token'             => $token,
+                                                            'uid'               => $uid,
+                                                            'groups_select'     => $this->_view->get('menu_selects', array(
+                                                                        'gid' => 0,
+                                                                        'groups' => $groups),
+                                                                        $cacheTime
+                                                        )));
+                unset($groups);
+                $page .= $this->_view->get('contents_header', array(), $cacheTime);
+                $page .= $this->_getPage('news', $datas, true);
+                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
+                $page .= $this->_view->get('footer', array(
+                                                        'lang'=>$ulang,
+                                                        'surl'=>$surl
+                                                        ), 
+                                                        $cacheTime,
+                                                    array(
+                                                        'token'=>$token,
+                                                        'ttl'=>$this->_cfg->get('defaultMinStreamRefreshTime')*60*1000,
+                                                        'opensearch'=>(isset($datas['opensearch']) ? $datas['opensearch'] : 0)
+                                                    ));
                 break;
 
             case 'getopensearch':
-                $xml = true;
                 $datas['surl'] = $this->_cfg->get('surl');
                 break;
 
             case 'opml':
                 $datas['userlogin'] = $this->_user->getLogin();
+                $noCacheDatas['dateCreated'] = $datas['dateCreated'];
+                unset($datas['dateCreated']);
                 $datas['streams'] = array();
-                $xml = true;
                 $request = new Request(array('id'=>null));
                 Logic::getCachedLogic('streams')->view($request);
                 $response = $request->getResponse();
@@ -1307,10 +1111,10 @@ class Controller extends Singleton
                 break;
 
             case 'edituser':
+                $noCacheDatas['token'] = $this->_user->getToken();
                 if(empty($datas['id']))
                 { // surely editing a new user
                     $datas['surl'] = $this->_cfg->get('surl');
-                    $datas['token'] = $this->_user->getToken();
                     $datas['timezones'] = $this->_user->getTimeZones();
                     $datas['userrights'] = $this->_user->getRights();
                     break;
@@ -1318,10 +1122,8 @@ class Controller extends Singleton
 
                 $request = new Request(array('id' => $datas['id']));
                 $datas['surl'] = $this->_cfg->get('surl');
-                $datas['token'] = $this->_user->getToken();
                 $datas['timezones'] = $this->_user->getTimeZones();
                 $datas['userrights'] = $this->_user->getRights();
-                $cacheTime = 0;
                 Logic::getCachedLogic('users')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
@@ -1339,8 +1141,7 @@ class Controller extends Singleton
             case 'users':
                 $request = new Request($datas);
                 $datas['surl'] = $this->_cfg->get('surl');
-                $cacheTime = 0;
-                $datas['token'] = $this->_user->getToken();
+                $noCacheDatas['token'] = $this->_user->getToken();
                 $datas['users'] = array();
                 $datas['nbusers'] = 0;
                 Logic::getCachedLogic('users')->view($request, array(), 'login');
@@ -1367,7 +1168,6 @@ class Controller extends Singleton
                 break;
 
             case 'rss':
-                $xml = true;
                 $request = new Request(array('id'=>null));
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['userlogin'] = $this->_user->getLogin();
@@ -1418,11 +1218,10 @@ class Controller extends Singleton
                 break;
             
             case 'login':
-                $cacheTime = 0;
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['xmlLang'] = $this->_user->getXMLLang();
-                $datas['token'] = $this->_user->getToken();
-                $datas['back'] = $this->_request->back;
+                $noCacheDatas['token'] = $this->_user->getToken();
+                $noCacheDatas['back'] = $this->_request->back;
                 break;
 
             default: 
@@ -1439,9 +1238,9 @@ class Controller extends Singleton
         elseif(!$empty)
         {
             if($return) 
-                return $this->_view->get($tpl, $datas, $xml, $cacheTime);
+                return $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
             else 
-                $this->_request->page .= $this->_view->get($tpl, $datas, $xml, $cacheTime);
+                $this->_request->page .= $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
         }
     }
 
@@ -1463,7 +1262,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_redirectoperator()
+    protected function do_redirectOperator()
     {
         if(!$this->_request->id)
             throw new Exception('Missing id', Exception::E_OWR_BAD_REQUEST);
@@ -1487,7 +1286,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getrss()
+    protected function do_getRSS()
     {
         isset($this->_view) || $this->_view = View::iGet();
         $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
@@ -1502,7 +1301,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getlastnews()
+    protected function do_getLastNews()
     {
         return $this->do_getunread(true);
     }
@@ -1514,7 +1313,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getnewdetails()
+    protected function do_getNewDetails()
     {
         $this->_getPage('new_details', array('id' => $this->_request->id));
         return $this;
@@ -1527,7 +1326,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getmenupartgroup()
+    protected function do_getMenuPartGroup()
     {
         $this->_getPage('menu_part_group', array('id'=>$this->_request->id));
         return $this;
@@ -1539,7 +1338,7 @@ class Controller extends Singleton
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
      */
-    protected function do_getmenupartstream()
+    protected function do_getMenuPartStream()
     {
         $this->_getPage('menu_part_stream', array('id'=>$this->_request->id));
         return $this;
@@ -1552,7 +1351,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getstream()
+    protected function do_getStream()
     {
         if(0 < $this->_request->id)
         {
@@ -1578,14 +1377,11 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getlivenews()
+    protected function do_getLiveNews()
     {
         if(!$this->_request->id)
         {
-            $query = '
-    SELECT COUNT(newsid) AS nb
-        FROM news_relations
-        WHERE status=1 AND uid='.$this->_user->getUid();
+            $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1));
         }
         else
         {
@@ -1593,84 +1389,59 @@ class Controller extends Singleton
             
             if('streams' === $type)
             {
-                $query = '
-    SELECT COUNT(newsid) AS nb
-        FROM news_relations
-        WHERE status=1 AND uid='.$this->_user->getUid().' AND rssid='.$this->_request->id;
+                $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'rssid' => $this->_request->id));
             }
             elseif('streams_groups' === $type)
             {
-                $query = '
-    SELECT COUNT(nr.newsid) AS nb
-        FROM news_relations nr
-        JOIN streams_relations rr ON (nr.rssid=rr.rssid)
-        WHERE status=1 AND nr.uid='.$this->_user->getUid().' AND rr.gid='.$this->_request->id;
+                $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'gid' => $this->_request->id));
             }
             else throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
         }
-        
-        $nb = $this->_db->getOne($query);
-        $this->_request->page = $nb->next() ? $nb->nb : 0;
+
+        $this->_request->page = $nb ? $nb->nb : 0;
         return $this;
     }
     
     /**
      * Renders or sets the unreads news count
-     * This action NEEDS to be fast (called almost every page rendering)
-     * So we don't use DAO, wins a few ms
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param boolean $return $return sets instead of rendering
      * @access protected
      * @return $this
      */
-    protected function do_getunread($return=false)
+    protected function do_getUnread($return=false)
     {
         $unreads = array();
         $unreads[0] = 0;
-        $query = '
-    SELECT COUNT(newsid) AS unread, rssid
-        FROM news_relations
-        WHERE uid='.$this->_user->getUid().' AND status=1
-        GROUP BY rssid';
-        $unreadObj = $this->_db->get($query);
-
-        if($unreadObj)
-        {
-            while($unread = $unreadObj->fetch(\PDO::FETCH_ASSOC))
-            {
-                $unreads[$unread['rssid']] = $unread['unread'];
-                $unreads[0] += $unread['unread'];
-            }
-            $unreadObj->closeCursor();
-        }
-        unset($unreadObj);
-
-        $query = '
-    SELECT COUNT(nr.newsid) AS unread, rr.gid
-        FROM news_relations nr
-        JOIN streams_relations rr ON (nr.rssid=rr.rssid)
-        WHERE nr.uid='.$this->_user->getUid().' AND nr.status=1
-        GROUP BY rr.gid';
-        
-        $unreadObj = $this->_db->get($query);
-
-        if($unreadObj)
-        {
-            while($unread = $unreadObj->fetch(\PDO::FETCH_ASSOC))
-            {
-                $unreads[$unread['gid']] = $unread['unread'];
-            }
-            $unreadObj->closeCursor();
-        }
-        unset($unreadObj);
 
         $this->_request->unreads = array();
+        $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'FETCH_TYPE' => 'array'), 'newsid', 'rssid', 'rssid,gid');
+        if($nb)
+        {
+            if(count($nb) > 3)
+            {
+                foreach($nb as $count)
+                {
+                    $unreads[0] += $count[0];
+                    $unreads[$count[1]] = $count[0];
+                    isset($unreads[$count[2]]) || ($unreads[$count[2]] = 0);
+                    $unreads[$count[2]] += $count[0];
+                }
+            }
+            else
+            {
+                $unreads[0] += $nb[0];
+                $unreads[$nb[1]] = $nb[0];
+                $unreads[$nb[2]] = $nb[0];
+            }
+        }
 
         if(!$return)
             $this->_request->page = $unreads;
         else
             $this->_request->unreads = $unreads;
+
         return $this;
     }
 
@@ -1694,7 +1465,7 @@ class Controller extends Singleton
      * @access protected.
      * @return $this
      */
-    protected function do_getusers()
+    protected function do_getUsers()
     {
         if(!$this->_user->isAdmin())
             throw new Exception('You don\'t have the rights to do that.', Exception::E_OWR_UNAUTHORIZED);
@@ -1710,7 +1481,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getopensearch()
+    protected function do_getOpenSearch()
     {
         isset($this->_view) || $this->_view = View::iGet();
         $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
@@ -1726,7 +1497,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getnewcontents()
+    protected function do_getNewContents()
     {
         if(!$this->_request->id)
             throw new Exception('An id is required', Exception::E_OWR_BAD_REQUEST);
@@ -1766,7 +1537,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_getopml()
+    protected function do_getOPML()
     {
         isset($this->_view) || $this->_view = View::iGet();
         if(!empty($this->_request->dl))
@@ -1810,8 +1581,9 @@ class Controller extends Singleton
         WHERE id IN (
             SELECT id FROM streams
                 WHERE id NOT IN (
-                    SELECT DISTINCT(rssid)
+                    SELECT rssid
                         FROM streams_relations
+                        GROUP BY rssid
                 )
         )';
         $this->_db->set($query);
@@ -1833,7 +1605,9 @@ class Controller extends Singleton
         WHERE id IN (
             SELECT id FROM streams
                 WHERE id NOT IN (
-                    SELECT DISTINCT(rssid) FROM streams_relations))';
+                    SELECT rssid
+                        FROM streams_relations
+                        GROUP BY rssid))';
         
         $this->_db->set($query);
 
@@ -1864,19 +1638,16 @@ class Controller extends Singleton
 
         // we check we have at least one stream
         // if there are none, we remove the crontab if not already empty
-        $query = '
-    SELECT COUNT(id) AS nb
-        FROM streams';
-        $res = $this->_db->getOne($query);
-        $res->next();
-        if((int) $res->nb === 0)
+        $nb = DAO::getCachedDAO('streams')->count(array(), 'id');
+        if((int) $nb->nb === 0)
         {
+            isset($this->_cron) || $this->_cron = Cron::iGet();
             $this->_cron->manage('refreshstream');
             $this->_cron->manage('managefavicons');
             $this->_cron->manage('checkstreamsavailability');
         }
 
-        Cache::clearCache('', true);
+        Cache::clear('', true);
 
         return $this;
     }
@@ -1888,53 +1659,21 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_verifyopenid()
+    protected function do_verifyOpenID()
     {// openid login
-        if(!empty($this->_request->identifier))
+        class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
+        $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
+        $consumer = new \Auth_OpenID_Consumer($store);
+
+        $result = $consumer->complete($this->_cfg->get('openIDReturn'));
+        if($result->status != Auth_OpenID_SUCCESS)
         {
-            $this->_user->checkToken();
-            $login = $this->_request->identifier;
-            if(0 !== mb_strpos($login, 'http://', 0, 'UTF-8'))
-                $login = 'http://'.$login;
-            if('/' !== mb_substr($login, -1, 1, 'UTF-8'))
-                    $login .= '/'; 
-
-            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
-            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
-            $consumer = new \Auth_OpenID_Consumer($store);
-            $authRequest = $consumer->begin($login);
-            $sreg = \Auth_OpenID_SRegRequest::build(array('nickname'), array('fullname', 'email'));
-            $authRequest->addExtension($sreg);
-            $redirectURL = $authRequest->redirectURL($this->_cfg->get('openIDUrl'), $this->_cfg->get('openIDReturn').'&token='.$this->_user->getToken().
-                (isset($this->_request->back) ? '&back='.urlencode($this->_request->back) : ''));
-            if($redirectURL != null)
-            {
-                header('Location: '.$redirectURL); // Redirection vers l'OP
-                exit;
-            }
-
-            throw new Exception('Internal error while redirecting to your OP');
-        }
-        elseif(isset($this->_request->try))
-        {
-            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
-            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
-            $consumer = new \Auth_OpenID_Consumer($store);
-
-            $result = $consumer->complete($this->_cfg->get('openIDReturn'));
-            if($result->status != Auth_OpenID_SUCCESS)
-            {
-                unset($result);
-                $this->redirect('logout');
-            }
-
-            $this->do_login(false, $result->getDisplayIdentifier());
             unset($result);
+            $this->redirect('logout');
         }
-        else
-        {
-            $this->_getPage('login');
-        }
+
+        $this->do_login(false, $result->getDisplayIdentifier());
+        unset($result);
 
         return $this;
     }
@@ -1946,7 +1685,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_opensearch()
+    protected function do_openSearch()
     {
         if(empty($this->_request->oskeywords))
         {
@@ -2041,7 +1780,9 @@ class Controller extends Singleton
         }
         else
         {
-            View::iGet()->setStatusCode(204); // no content
+            Logs::iGet()->log('No results found. Try again by simplifying the request.', 204);
+            $datas['sort'] = $this->_request->sort ?: '';
+            $datas['dir'] = $this->_request->dir ?: '';
         }
         return $this;
     }
@@ -2057,7 +1798,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_changelang()
+    protected function do_changeLang()
     {
         Logic::getCachedLogic('users')->changeLang($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -2075,9 +1816,9 @@ class Controller extends Singleton
      */
     protected function do_login($auto=false, $openid=null)
     {
-        $exists = DAO::getCachedDAO('users')->get(null, 'COUNT(id) AS nb');
+        $exists = DAO::getCachedDAO('users')->get(null, 'id', null, null, 1);
         
-        if(!$exists || !$exists->nb)
+        if(!$exists)
         {
             $this->_user->reset();
             $this->_getPage('edituser', array('id'=>0));
@@ -2085,7 +1826,7 @@ class Controller extends Singleton
         }
         unset($exists);
         
-        if(!$auto && empty($_POST) && !isset($openid))
+        if(!$auto && empty($_POST) && !isset($openid) && empty($this->_request->identifier))
         {
             $datas = array();
             if(isset($this->_request->timeout)) $datas['error'] = 'Session timeout';
@@ -2119,6 +1860,31 @@ class Controller extends Singleton
                 return $this;
             }
             $this->_user->openIdAuth($openid);
+        }
+        elseif(!empty($this->_request->identifier))
+        {
+            $this->_user->checkToken();
+            $login = $this->_request->identifier;
+            if(0 !== mb_strpos($login, 'http://', 0, 'UTF-8'))
+                $login = 'http://'.$login;
+            if('/' !== mb_substr($login, -1, 1, 'UTF-8'))
+                    $login .= '/'; 
+
+            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
+            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
+            $consumer = new \Auth_OpenID_Consumer($store);
+            $authRequest = $consumer->begin($login);
+            $sreg = \Auth_OpenID_SRegRequest::build(array('nickname'), array('fullname', 'email'));
+            $authRequest->addExtension($sreg);
+            $redirectURL = $authRequest->redirectURL($this->_cfg->get('openIDUrl'), $this->_cfg->get('openIDReturn').'&token='.$this->_user->getToken().
+                (!empty($this->_request->back) ? '&back='.urlencode($this->_request->back) : ''));
+            if($redirectURL != null)
+            {
+                header('Location: '.$redirectURL); // Redirection vers l'OP
+                exit;
+            }
+
+            throw new Exception('Internal error while redirecting to your OP');
         }
         else
         {
@@ -2294,7 +2060,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_editstream($url = null, $escapeNews = false)
+    protected function do_editStream($url = null, $escapeNews = false)
     {
         $this->_request->url = $url ?: $this->_request->url;
         $this->_request->escapeNews = $escapeNews;
@@ -2314,7 +2080,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_editstreamgroup($name = null)
+    protected function do_editStreamGroup($name = null)
     {
         $this->_request->name = $name ?: $this->_request->name;
         $this->_request->new = false;
@@ -2345,7 +2111,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_editopml($url = null)
+    protected function do_editOPML($url = null)
     {
         $this->_isFrame = true;
         $this->_request->url = $url ?: $this->_request->url;
@@ -2367,7 +2133,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_regeneraterestauthtoken()
+    protected function do_regenerateRESTAuthToken()
     {
         $tokensObj = DAO::getCachedDAO('users_tokens')->get('restauth', 'token AS tlogin, token_key AS tlogin_key');
         if(!$tokensObj)
@@ -2391,7 +2157,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_regeneratersstoken()
+    protected function do_regenerateRSSToken()
     {
         $tokensObj = DAO::getCachedDAO('users_tokens')->get($this->_request->do, 'token AS tlogin, token_key AS tlogin_key');
         if(!$tokensObj)
@@ -2416,7 +2182,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_regenerateopmltoken()
+    protected function do_regenerateOPMLToken()
     {
         $tokensObj = DAO::getCachedDAO('users_tokens')->get($this->_request->do, 'token AS tlogin, token_key AS tlogin_key');
         if(!$tokensObj)
@@ -2440,7 +2206,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_refreshstream()
+    protected function do_refreshStream()
     {
         Logic::getCachedLogic('streams')->refresh($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -2458,7 +2224,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_upnew($display=true, $table='')
+    protected function do_upNew($display=true, $table='')
     {
         Logic::getCachedLogic('news')->update($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -2473,7 +2239,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_clearstream()
+    protected function do_clearStream()
     {
         Logic::getCachedLogic('streams')->clear($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -2490,7 +2256,7 @@ class Controller extends Singleton
      * @access protected
      * @return $this
      */
-    protected function do_edituser()
+    protected function do_editUser()
     {
         Logic::getCachedLogic('users')->edit($this->_request);
         $this->processResponse($this->_request->getResponse());

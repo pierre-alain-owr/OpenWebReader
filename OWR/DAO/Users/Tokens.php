@@ -77,13 +77,16 @@ class Tokens extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'action';
         $this->_fields = array(
             'token'      => array('required' => true, 'type' => \PDO::PARAM_STR),
             'action'     => array('required' => true, 'type' => \PDO::PARAM_STR),
-            'uid'        => array('required' => true, 'type' => \PDO::PARAM_INT), 
+            'uid'        => array('required' => true, 'type' => \PDO::PARAM_INT),
             'token_key'  => array('required' => true, 'type' => \PDO::PARAM_STR)
         );
+        $this->_relations = array(
+            'users'  => array('uid'   => 'id')
+        );
+        parent::__construct();
     }
 }

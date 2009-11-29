@@ -42,6 +42,7 @@ use OWR\DB\Request as DBRequest;
  * @uses Exception the exceptions handler
  * @uses DBRequest a request sent to the database
  * @uses DB the link database
+ * @uses Object transforms $this into an array
  * @package OWR
  */
 class User extends Singleton
@@ -136,6 +137,18 @@ class User extends Singleton
     }
 
     /**
+     * Executed when serializing this object
+     * Removing $this->_tz from session
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     */
+    public function __sleep()
+    {
+        return array('_rights', '_timezone', '_lang', '_login', '_uid', '_token', '_agent');
+    }
+
+    /**
      * Executed when deserializing this object
      * Register $this to PrivateSingleton, set the date_timezone and lang
      *
@@ -147,6 +160,7 @@ class User extends Singleton
         parent::__wakeUp();
         $this->setLang();
         date_default_timezone_set($this->_timezone);
+        $this->setTimezone($this->_timezone);
     }
 
     /**
@@ -341,8 +355,6 @@ class User extends Singleton
     public function reset()
     {
         $this->_rights = self::LEVEL_VISITOR;
-        $this->setTimezone();
-        $this->setLang();
         $this->_setRights();
         $this->_setLogin();
         $this->_setUid();
@@ -403,7 +415,7 @@ class User extends Singleton
      */
     public function getTimeZones($timezone='')
     {
-        if(!isset($this->_tz))
+        if(!isset($this->_tz) && !($this->_tz = Cache::get('timezones')))
         {
             $this->_tz = array();
             $iterator1 = new \ArrayIterator(\DateTimeZone::listAbbreviations());
@@ -419,9 +431,10 @@ class User extends Singleton
             sort($this->_tz);
             unset($this->_tz[0]);
             $this->_tz = array_flip($this->_tz);
+            Cache::write('timezones', $this->_tz);
         }
 
-        if($timezone)
+        if(!empty($timezone))
         {
             return isset($this->_tz[$timezone]) ? $timezone : Config::iGet()->get('date_default_timezone');
         }
@@ -455,7 +468,7 @@ class User extends Singleton
      */
     public function checkToken($auto = false, $uid=0, &$login='', &$key='', $action='')
     {
-        if($auto)
+        if(!empty($auto))
         {
             if(!$uid || !$login || !$key || !$action)
             {

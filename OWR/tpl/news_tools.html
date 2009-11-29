@@ -1,5 +1,5 @@
 <?php   
-    if(!$sort || 'n.pubDate' === $sort || 'nr.status' === $sort)
+    if(!$sort || 'news.pubDate' === $sort || 'news_relations.status' === $sort)
     {
         $nextdir = (!$dir || $dir === 'asc' ? 'desc' : 'asc');
     }
@@ -13,7 +13,7 @@
     <a href="javascript:;" class="read_page right backgrounded opac" onclick="rP.updateNews('page');" title="<?php echo $this->_utilities->_('Mark all the news of this page as read');?>"></a>
     
     <?php echo $this->_utilities->_('Order by');?> : 
-    <a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('title');?>" onclick="rP.showStream(rP.currentId, 'title', '<?php echo (($sort === 'n.title') ? $nextdir : 'asc');?>');"><?php echo (($sort === 'n.title') ? '<strong>'.$this->_utilities->_('title').'</strong>' : $this->_utilities->_('title'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('pubDate');?>" onclick="rP.showStream(rP.currentId, 'pubDate', '<?php echo (($sort === 'n.pubDate') ? $nextdir : 'desc');?>');"><?php echo ((!$sort || $sort === 'n.pubDate') ? '<strong>'.$this->_utilities->_('pubDate').'</strong>' : $this->_utilities->_('pubDate'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('status');?>" onclick="rP.showStream(rP.currentId, 'status', '<?php echo (($sort === 'nr.status') ? $nextdir : 'desc');?>');"><?php echo (($sort === 'nr.status') ? '<strong>'.$this->_utilities->_('status').'</strong>' : $this->_utilities->_('status'));?></a><?php echo '&nbsp;/&nbsp;'.(!$sort || !$dir || $nextdir === 'asc' ? '↓' : '↑');?>
+    <a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('title');?>" onclick="rP.showStream(rP.currentId, 'title', '<?php echo (($sort === 'news.title') ? $nextdir : 'asc');?>');"><?php echo (($sort === 'news.title') ? '<strong>'.$this->_utilities->_('title').'</strong>' : $this->_utilities->_('title'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('pubDate');?>" onclick="rP.showStream(rP.currentId, 'pubDate', '<?php echo (($sort === 'news.pubDate') ? $nextdir : 'desc');?>');"><?php echo ((!$sort || $sort === 'news.pubDate') ? '<strong>'.$this->_utilities->_('pubDate').'</strong>' : $this->_utilities->_('pubDate'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('status');?>" onclick="rP.showStream(rP.currentId, 'status', '<?php echo (($sort === 'news_relations.status') ? $nextdir : 'desc');?>');"><?php echo (($sort === 'news_relations.status') ? '<strong>'.$this->_utilities->_('status').'</strong>' : $this->_utilities->_('status'));?></a><?php echo '&nbsp;/&nbsp;'.(!$sort || !$dir || $nextdir === 'asc' ? '↓' : '↑');?>
     
 <?php   if($nbNews > 10) {
             $nbPages = ceil($nbNews/10);

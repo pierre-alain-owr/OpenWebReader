@@ -1,6 +1,7 @@
 <?php
 /**
- * Cron Controller class
+ * 
+ * Controller class for the CLI interface
  * Get the request, clean it and execute the given action
  *
  * PHP 5
@@ -108,8 +109,6 @@ class Controller extends MainController
         }
 
         $this->_user = User::iGet(); // init user
-
-        $this->_cron = Cron::iGet();
     }
     
     /**
@@ -130,9 +129,9 @@ class Controller extends MainController
             $id = $this->_request->id;
 
             $authorized = array(
-                'refreshstream'=>true, 
-                'managefavicons'=>true, 
-                'checkstreamsavailability'=>true
+                'refreshstream'             => true, 
+                'managefavicons'            => true, 
+                'checkstreamsavailability'  => true
             );
             if(!isset($authorized[$this->_request->do])) // hu ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
@@ -142,8 +141,9 @@ class Controller extends MainController
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
         
-            if(!$id)
+            if(empty($id))
             {
+                $this->_cron = Cron::iGet();
                 if($this->_cron->isLocked($action))
                 {
                     $this->_cron->abort($action);
@@ -155,12 +155,12 @@ class Controller extends MainController
 
             $this->$action(); // execute the given action
 
-            if(!$id)
+            if(empty($id))
                 $this->_cron->unlock($action); // unlink file lock for next processing
         } 
         catch(Exception $e) 
         {
-            if(!$id)
+            if(empty($id))
                 $this->_cron->unlock($action, true); // unlink file lock for next processing
 
             $this->_db->rollback();
@@ -231,7 +231,7 @@ class Controller extends MainController
      * @access protected
      * @return $this
      */
-    protected function do_checkstreamsavailability()
+    protected function do_checkStreamsAvailability()
     {
         Logic::getCachedLogic('streams')->checkAvailability($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -248,7 +248,7 @@ class Controller extends MainController
      * @access protected
      * @return $this
      */
-    protected function do_managefavicons()
+    protected function do_manageFavicons()
     {
         Logic::getCachedLogic('streams')->manageFavicons($this->_request);
         $this->processResponse($this->_request->getResponse());
@@ -262,7 +262,7 @@ class Controller extends MainController
      * @access protected
      * @return $this
      */
-    protected function do_refreshstream()
+    protected function do_refreshStream()
     {
         Logic::getCachedLogic('streams')->refreshAll($this->_request);
         $this->processResponse($this->_request->getResponse());

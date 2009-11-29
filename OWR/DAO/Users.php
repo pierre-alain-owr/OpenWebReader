@@ -101,7 +101,6 @@ class Users extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_uniqueFields = array('login' => true, 'email' => true, 'openid' => false);
         $this->_fields = array(
@@ -114,5 +113,9 @@ class Users extends DAO
             'openid'    => array('required' => false, 'type' => DBRequest::PARAM_URL),
             'timezone'  => array('required' => true, 'type' => DBRequest::PARAM_TIMEZONE),
         );
+        $this->_relations = array(
+            'users_tokens'  => array('id'   => 'uid')
+        );
+        parent::__construct();
     }
 }

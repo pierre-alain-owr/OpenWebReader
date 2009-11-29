@@ -1,0 +1,7 @@
+<?php   if(empty($groups)) {
+            echo '<option value="0">'.$this->_utilities->_('No category (root)').'</option>';
+        }else{
+            foreach($groups as $group) {
+                echo '<option value="'.$group['id'].'"'.(($gid > 0 && (int)$group['id'] === (int)$gid) || ((int)$gid === 0 && 'Root' === $group['name']) ? ' selected="selected"' : '').'>'.('Root' === $group['name'] ? $this->_utilities->_('No category (root)') : htmlentities($group['name'], ENT_COMPAT, 'UTF-8')).'</option>';
+            }
+        } ?>

@@ -308,7 +308,7 @@ class Request extends R
             $datas['sort'] = (string) $datas['sort'];
             if($datas['sort'] === 'pubdate') $datas['sort'] = 'pubDate';
 
-            $authorized = array('title'=>'n', 'pubDate'=>'n', 'status'=>'nr');
+            $authorized = array('title'=>'news', 'pubDate'=>'news', 'status'=>'news_relations');
             if(isset($authorized[$datas['sort']]))
             {
                 $this->sort = $authorized[$datas['sort']].'.'.$datas['sort'];
@@ -319,9 +319,9 @@ class Request extends R
             if(isset($datas['dir']) && $this->sort)
             {
                 $datas['dir'] = (string) $datas['dir'];
-                (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'desc';
+                (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'DESC';
             }
-            else $this->dir = 'desc';
+            else $this->dir = 'DESC';
             unset($datas['dir']);
         }
 

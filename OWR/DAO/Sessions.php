@@ -77,7 +77,6 @@ class Sessions extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_fields = array(
             'id'        => array('required' => true, 'type' => \PDO::PARAM_STR),
@@ -85,5 +84,6 @@ class Sessions extends DAO
             'ip'        => array('required' => false, 'type' => DBRequest::PARAM_IP, 'default' => $_SERVER['REMOTE_ADDR']),
             'data'      => array('required' => true, 'type' => \PDO::PARAM_STR)
         );
+        parent::__construct();
     }
 }

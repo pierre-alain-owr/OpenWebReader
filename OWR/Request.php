@@ -115,17 +115,23 @@ class Request
 
         if(isset($datas['sort']))
         {
-            $authorized = array('title'=>'n', 'pubDate'=>'n', 'status'=>'nr');
-            (isset($authorized[$datas['sort']]) && $this->sort = $authorized[$datas['sort']].'.'.$datas['sort']);
+            $datas['sort'] = (string) $datas['sort'];
+            if($datas['sort'] === 'pubdate') $datas['sort'] = 'pubDate';
+
+            $authorized = array('title'=>'news', 'pubDate'=>'news', 'status'=>'news_relations');
+            if(isset($authorized[$datas['sort']]))
+            {
+                $this->sort = $authorized[$datas['sort']].'.'.$datas['sort'];
+            }
             unset($datas['sort']);
 
             if(isset($datas['dir']) && $this->sort)
             {
                 $datas['dir'] = (string) $datas['dir'];
-                (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'asc';
+                (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'ASC';
                 unset($datas['dir']);
             }
-            else $this->dir = 'asc';
+            else $this->dir = 'ASC';
         }
 
         (!isset($datas['back']) || (!isset($_SERVER['X_REQUESTED_WITH']) || $_SERVER['X_REQUESTED_WITH'] !== 'XMLHttpRequest')) 

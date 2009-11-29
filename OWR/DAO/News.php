@@ -101,7 +101,6 @@ class News extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_idField = 'id';
         $this->_uniqueFields = array('hash' => true);
         $this->_fields = array(
@@ -115,13 +114,13 @@ class News extends DAO
             'author'    =>  array('required' => false,    'type' => \PDO::PARAM_STR)
         );
         $this->_userRelations = array(
-            'news_relations'    => array('id'                   => 'newsid'),
-            'streams_relations' => array('news_relations.rssid' => 'rssid')
+            'news_relations'        => array('id'       => 'newsid'),
+            'streams_relations'     => array('rssid'    => 'rssid')
         );
         $this->_relations = array(
-            'news_relations'    => array('id'   => 'newsid'),
-            'news_contents'     => array('id'   => 'id'),
-            'streams_relations' => array('news_relations.rssid' => 'rssid')
+            'news_contents'         => array('id'       => 'id'),
+            'streams'               => array('rssid'    => 'id')
         );
+        parent::__construct();
     }
 }

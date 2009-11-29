@@ -58,7 +58,7 @@ class Cache
      * @param boolean $maintenance must-we just check for the lastmtime ?
      * @return int number of deleted files
      */
-    static public function clearCache($dir = '', $maintenance = false)
+    static public function clear($dir = '', $maintenance = false)
     {
         $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.(string)$dir;
         
@@ -99,9 +99,9 @@ class Cache
      * @access public
      * @static
      */
-    static public function clearDBCache()
+    static public function clearDB()
     {
-        return self::clearCache('db');
+        return self::clear('db');
     }
 
     /**
@@ -111,11 +111,11 @@ class Cache
      * @access public
      * @static
      */
-    static public function clearHTMLCache()
+    static public function clearHTML()
     {
         !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR');
         !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US');
-        return (self::clearCache('fr_FR') + self::clearCache('en_US'));
+        return (self::clear('fr_FR') + self::clear('en_US'));
     }
 
     /**
@@ -129,7 +129,7 @@ class Cache
      * @return mixed
      * @access public
      */
-    static public function getFromCache($filename, $cacheTime=0)
+    static public function get($filename, $cacheTime=0)
     {
         $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
     
@@ -160,7 +160,7 @@ class Cache
      * @return mixed
      * @access public
      */
-    static public function writeToCache($filename, $datas)
+    static public function write($filename, $datas)
     {
         $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
         

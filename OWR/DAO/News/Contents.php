@@ -65,15 +65,17 @@ class Contents extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_uniqueFields = array('id' => true);
         $this->_fields = array(
-            'id'        =>  array('required' => true, 'type' => \PDO::PARAM_INT),
-            'contents'  =>  array('required' => true, 'type' => \PDO::PARAM_STR)
+            'id'                =>  array('required' => true, 'type' => \PDO::PARAM_INT),
+            'contents'          =>  array('required' => true, 'type' => \PDO::PARAM_STR)
         );
         $this->_userRelations = array(
-            'news_relations'    => array('id'                   => 'newsid'),
-            'streams_relations' => array('news_relations.rssid' => 'rssid')
+            'news_relations'    => array('id'   => 'newsid')
         );
+        $this->_relations = array(
+            'news'              => array('id'   => 'id')
+        );
+        parent::__construct();
     }
 }

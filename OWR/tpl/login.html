@@ -13,8 +13,8 @@
             <img class="logo right" src="<?php echo $surl;?>images/images.php?f=owr_50_50.png" alt="OpenWebReader" title="OpenWebReader - http://openwebreader.org"/>
             </a>
             <form action="<?php echo OWR\Config::iGet()->makeURI('login');?>" method="post">
-                <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
-                <input type="hidden" name="back" id="back" value="<?php echo $back;?>"/>
+                <input type="hidden" name="token" id="token" value="<OWR:NOCACHE NAME='token'/>"/>
+                <input type="hidden" name="back" id="back" value="<OWR:NOCACHE NAME='back'/>"/>
                 <fieldset>
                     <legend><?php echo $this->_utilities->_('Authentication');?></legend>
 <?php   if(isset($error)){ echo '<p class="error">'.$error.'</p>';} ?>
@@ -25,21 +25,10 @@
                     <label for="passwd"><?php echo $this->_utilities->_('Password');?> :</label>
                     <br />
                     <input type="password" name="passwd" size="31" id="passwd" />
-                    <br />
-                    <input type="submit" name="submit"/>
-                </fieldset>
-            </form>
-        </div>
-        <div id="loginOpenID" class="full_rounded shadow">
-            <form action="<?php echo OWR\Config::iGet()->makeURI('verifyOpenId');?>" method="post">
-                <input type="hidden" name="token" id="token" value="<?php echo $token;?>"/>
-                <input type="hidden" name="back" id="back" value="<?php echo $back;?>"/>
-                <fieldset>
-                    <legend>OpenID</legend>
 <?php   if(isset($openIDerror)){ echo '<p class="error">'.$openIDerror.'</p>';} ?>
+                    <label for="identifier">OpenID :</label>
                     <input class="openid" type="texte" size="31" name="identifier"/>
-                    <br />
-                    <input type="submit"/>
+                    <input type="submit" name="submit"/>
                 </fieldset>
             </form>
         </div>

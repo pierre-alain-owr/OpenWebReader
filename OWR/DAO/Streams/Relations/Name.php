@@ -71,7 +71,6 @@ class Name extends DAO
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_uniqueFields = array('rssid'=>true, 'name'=>true);
         $this->_fields = array(
             'rssid' => array('required' => true, 'type' => \PDO::PARAM_INT), 
@@ -79,7 +78,11 @@ class Name extends DAO
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'streams_relations' => array('id'   => 'rssid')
+            'streams_relations' => array('id'       => 'rssid')
         );
+        $this->_relations = array(
+            'streams'           => array('rssid'    => 'id')
+        );
+        parent::__construct();
     }
 }
