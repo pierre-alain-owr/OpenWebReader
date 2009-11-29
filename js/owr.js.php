@@ -13,7 +13,7 @@ if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $
 }
 // unset($etag,$lastMtime);
 // readfile('owr_nominify.js');
-exit;
+// exit;
 // try to gzip the page
 $encoding = false;
 if(extension_loaded('zlib') && !ini_get('zlib.output_compression'))
