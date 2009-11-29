@@ -12,13 +12,13 @@ if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $
     exit;
 }
 unset($etag,$lastMtime);
-$contents = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', file_get_contents('owr_nominify.css'));
- $contents = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $contents);
-echo $contents;
-@ob_end_flush();
-@flush();
+// $contents = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', file_get_contents('owr_nominify.css'));
+//  $contents = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $contents);
+// echo $contents;
+// @ob_end_flush();
+// @flush();
 // readfile('owr_nominify.css');
-exit;
+// exit;
 // try to gzip the page
 $encoding = false;
 if(extension_loaded('zlib') && !ini_get('zlib.output_compression'))
