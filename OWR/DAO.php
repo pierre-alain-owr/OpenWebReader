@@ -465,7 +465,7 @@ abstract class DAO implements iDAO
                 unset($args['uid']);
             }
 
-            $this->_setParameters($args, $request, $fields, $wheres);
+            $this->_prepareWhere($args, $request, $fields, $wheres, array());
         }
         elseif(isset($args) && $this->_idField)
         {
