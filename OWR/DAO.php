@@ -455,7 +455,7 @@ abstract class DAO implements iDAO
 
         $uid = false;
 
-        $wheres = $request = $requestFields = array();
+        $wheres = $joins = $request = $requestFields = array();
 
         if(is_array($args))
         {
@@ -465,7 +465,7 @@ abstract class DAO implements iDAO
                 unset($args['uid']);
             }
 
-            $this->_prepareWhere($args, $request, $fields, $wheres, array());
+            $this->_prepareWhere($args, $request, $fields, $wheres, $joins);
         }
         elseif(isset($args) && $this->_idField)
         {
