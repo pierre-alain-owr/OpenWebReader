@@ -1704,7 +1704,7 @@ class Controller extends Singleton
             (SELECT newsid
                 FROM news_relations
                 WHERE uid='.$this->_user->getUid().') 
-            AND MATCH(contents) AGAINST(?)
+            AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
 
@@ -1756,7 +1756,7 @@ class Controller extends Singleton
             (SELECT newsid
                 FROM news_relations
                 WHERE uid='.$this->_user->getUid().') 
-            AND MATCH(contents) AGAINST(?)
+            AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
 
