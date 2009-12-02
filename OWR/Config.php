@@ -93,10 +93,12 @@ class Config extends PrivateSingleton
 
             case 'index':
             default:
-                $url .= 'index.php';
                 if(!empty($do))
                 {
-                    $url .= '?do='.$do;
+                    if(false === strpos($do, 'do='))
+                        $url .= '?do='.$do;
+                    else $url .= html_entity_decode($do, ENT_COMPAT, 'UTF-8');
+
                     if(!empty($params))
                     {
                         $url .= ($escape ? '&amp;' : '&').$params;
