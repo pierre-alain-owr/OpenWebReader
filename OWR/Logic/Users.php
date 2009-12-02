@@ -391,10 +391,9 @@ class Users extends Logic
             return $this;
         }
 
-
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => !isset($types['id'])
+            'multiple'     => !isset($datas['id'])
         )));
         return $this;
     }
