@@ -1197,9 +1197,14 @@ OWR.prototype = {
         r.post($('editstream'));
         return false;
     },
-    searchFormAction: function()
+    searchFormAction: function(id)
     {
-        var val = $('keywords').get('value');
+        if(id) {
+            var val = $('search_'+id).get('value');
+        } else {
+            var val = $('keywords').get('value');
+            id = 0;
+        }
         if(val === '') { return false; }
         this.loading(true);
         var n = this.setLog('Searching for keywords');
@@ -1215,19 +1220,38 @@ OWR.prototype = {
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(json, n, val){
+        r.addEvent('success', function(json, n, val, id){
             this.loading(false, n);
             this.parseResponse(json, null, 'body_container');
             this.initContents();
             this.pageOffset = 0;
             this.keywords = val;
-            this.currentId = 'search';
+            this.currentId = 'search_'+id;
             this.initCurrent();
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
-        }.bindWithEvent(this, [n, val]));
-        r.post($('search'));
+        }.bindWithEvent(this, [n, val, id]));
+        if(!id) {
+            r.post($('search_0'));
+        } else {
+            r.post({'do': 'search', 'id':id, 'keywords':val});
+        }
         return false;
+    },
+    searchStream: function(id)
+    {
+        if(!id) { return; }
+        this.loading(true);
+        var search = $('search_'+id);
+        var el = $('stream_toggler_'+id);
+        if(search.getStyle('display') == 'inline') { 
+            if(this.sortables) { el.status ? this.sortables.addItems(el.getParents()[1]) : this.sortables.removeItems(el.getParents()[1]); }
+            search.setStyle('display', 'none');
+        } else {
+            if(this.sortables) { this.sortables.removeItems(el.getParents()[1]); }
+            search.setStyle('display', 'inline');
+        }
+        this.loading(false);
     },
     raiseXHRError: function(response, n)
     {
@@ -1374,6 +1398,7 @@ OWR.prototype = {
     editOPML: function()
     {
         if($('opml').get('value').length) {
+            this.setLog('Adding a stream');
             var iframe = new Element('iframe');
             iframe.set({'id':'ieditopml', 'name':'ieditopml'});
             iframe.setStyles({'width':0, 'height':0, 'border':'none'});
@@ -1424,9 +1449,14 @@ OWR.prototype = {
     initCurrent: function()
     {
         this.loading(true);
-        if(this.currentId === "search") {
+        if(-1 !== this.currentId.indexOf("search_")) {
+            var id = this.currentId.split('_')[1].toInt();
             $$('a[id^=current_]').setStyle('display', 'none');
-            $('current_search').setStyle('display', 'block');
+            if(!id) {
+                $('current_search').setStyle('display', 'block');
+            } else {
+                $('current_'+id).setStyle('display', 'block');
+            }
         } else {
             $$('a[id^=current_]').setStyle('display', 'none');
             $('current_'+this.currentId).setStyle('display', 'block');
@@ -1701,8 +1731,9 @@ OWR.prototype = {
             this.sort = sort;
             this.dir = dir;
         }.bindWithEvent(this, [n, sort, dir]));
-        if('search' === id) {
-            r.get({'do':'search', 'keywords':this.keywords, 'offset': this.pageOffset, 'sort':sort, 'dir':dir});
+        if(-1 !== id.indexOf('search_')) {
+            id = id.split('_')[1];
+            r.get({'do':'search', 'keywords':this.keywords, 'offset': this.pageOffset, 'sort':sort, 'dir':dir, 'id':id});
         } else {
             r.get({'id': id, 'do': 'getstream', 'sort': sort, 'dir': dir});
         }
@@ -1851,8 +1882,8 @@ OWR.prototype = {
             s.toTop();
             this.pageOffset = offset;
         }.bindWithEvent(this, n));
-        if('search' === this.currentId) {
-            r.get({'do':'search', 'keywords':this.keywords, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
+        if(-1 !== this.currentId.indexOf('search_')) {
+            r.get({'do':'search', 'keywords':this.keywords, 'offset': offset, 'sort':this.sort, 'dir':this.dir, 'id':this.currentId.split('_')[1]});
         } else {
             r.get({'do': 'getstream', 'id': this.currentId, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
         }
