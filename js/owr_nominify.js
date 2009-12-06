@@ -953,8 +953,8 @@ OWR.prototype = {
         this.loading(false);
     },
     gstreamsToggle: function(id, el) {
+        var element = $('groupContainer_'+id);
         if(!$defined(el.status)) {
-            var element = $('groupContainer_'+id);
             if(!element) {
                 var e = $('stream_'+id);
                 if(!e) { return; } // hu ?
@@ -1436,8 +1436,8 @@ OWR.prototype = {
     },
     streamsToggle: function(id, el)
     {
+        var element = $('streamContainer_'+id);
         if(!$defined(el.status)) {
-            var element = $('streamContainer_'+id);
             if(!element) {
                 var e = $('stream_'+id);
                 if(!e) { return; } // hu ?
