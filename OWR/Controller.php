@@ -953,8 +953,11 @@ class Controller extends Singleton
                                 'sort'      => !empty($datas['sort']) ? $datas['sort'] : null,
                                 'dir'       => !empty($datas['dir']) ? $datas['dir'] : null);
 
-                $pager = $this->_view->get('news_tools', $pager, $cacheTime);
-                $page .= $pager;
+                if(empty($datas['search']))
+                {
+                    $pager = $this->_view->get('news_tools', $pager, $cacheTime);
+                    $page .= $pager;
+                }
 
                 foreach($news as $new)
                 {
@@ -965,8 +968,11 @@ class Controller extends Singleton
                 }
                 unset($news);
 
-                $page .= $pager;
-                unset($pager);
+                if(empty($datas['search']))
+                {
+                    $page .= $pager;
+                    unset($pager);
+                }
             break;
 
             case 'index':
@@ -1702,9 +1708,39 @@ class Controller extends Singleton
     SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
         WHERE id IN 
-            (SELECT newsid
+            (';
+
+        if(empty($this->_request->id))
+            $query .= 'SELECT newsid
                 FROM news_relations
-                WHERE uid='.$this->_user->getUid().') 
+                WHERE uid='.$this->_user->getUid();
+        else
+        {
+            $query .= 'SELECT newsid
+                FROM news_relations nr
+                ';
+            $type = DAO::getType($this->_request->id);
+            switch($type)
+            {
+                case 'streams':
+                    $query .= '
+                WHERE nr.uid='.$this->_user->getUid().' AND rssid='.$this->_request->id;
+                    break;
+
+                case 'streams_groups':
+                    $query .= '
+
+                JOIN streams_relations sr ON (nr.rssid=sr.rssid)
+                WHERE nr.uid='.$this->_user->getUid().' AND sr.uid='.$this->_user->getUid().' AND gid='.$this->_request->id;
+                    break;
+
+                default:
+                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                    break;
+            }
+        }
+
+        $query .= ') 
             AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
@@ -1751,12 +1787,42 @@ class Controller extends Singleton
         }
         
         $query = '
-    SELECT id, MATCH(contents) AGAINST(?) result
+    SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
         WHERE id IN 
-            (SELECT newsid
+            (';
+
+        if(empty($this->_request->id))
+            $query .= 'SELECT newsid
                 FROM news_relations
-                WHERE uid='.$this->_user->getUid().') 
+                WHERE uid='.$this->_user->getUid();
+        else
+        {
+            $query .= 'SELECT newsid
+                FROM news_relations nr
+                ';
+            $type = DAO::getType($this->_request->id);
+            switch($type)
+            {
+                case 'streams':
+                    $query .= '
+                WHERE nr.uid='.$this->_user->getUid().' AND rssid='.$this->_request->id;
+                    break;
+
+                case 'streams_groups':
+                    $query .= '
+
+                JOIN streams_relations sr ON (nr.rssid=sr.rssid)
+                WHERE nr.uid='.$this->_user->getUid().' AND sr.uid='.$this->_user->getUid().' AND gid='.$this->_request->id;
+                    break;
+
+                default:
+                    throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
+                    break;
+            }
+        }
+
+        $query .= ') 
             AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
@@ -1766,7 +1832,7 @@ class Controller extends Singleton
 
         if($results->count())
         {
-            $datas = array();
+            $datas = array('search' => true);
             while($results->next())
             {
                 $results->id = (int)$results->id;
@@ -1782,8 +1848,6 @@ class Controller extends Singleton
         else
         {
             Logs::iGet()->log('No results found. Try again by simplifying the request.', 204);
-            $datas['sort'] = $this->_request->sort ?: '';
-            $datas['dir'] = $this->_request->dir ?: '';
         }
         return $this;
     }
