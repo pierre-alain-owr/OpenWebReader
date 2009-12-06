@@ -1023,6 +1023,7 @@ class Controller extends Singleton
                             $noCacheDatas['unread'] = isset($this->_request->unreads[$groups['id']]) ? $this->_request->unreads[$groups['id']] : 0;
                             $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
                             $tmpPage .= $this->_view->get('menu_contents', $groups, $cacheTime, $noCacheDatas);
+                            $groups = array($groups);
                         }
                     }
                 }

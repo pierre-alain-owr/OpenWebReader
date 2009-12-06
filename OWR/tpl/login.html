@@ -25,6 +25,7 @@
                     <label for="passwd"><?php echo $this->_utilities->_('Password');?> :</label>
                     <br />
                     <input type="password" name="passwd" size="31" id="passwd" />
+                    <br />
 <?php   if(isset($openIDerror)){ echo '<p class="error">'.$openIDerror.'</p>';} ?>
                     <label for="identifier">OpenID :</label>
                     <input class="openid" type="texte" size="31" name="identifier"/>
