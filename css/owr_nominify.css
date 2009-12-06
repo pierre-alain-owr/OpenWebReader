@@ -447,7 +447,7 @@ div#board a.clear
 .gstream_toggler, .stream_toggler
 {
     margin:2px 2px 0 1px;
-    background-position:-303px 0px;
+    background-position:-302px 0px;
 }
 
 .delete
@@ -513,7 +513,7 @@ div#board a.clear
 
 .img_blocked
 {
-    background-position:-175px 0px;
+    background-position:-176px 0px;
     display:inline;
 }
 
@@ -627,7 +627,7 @@ a.current.hidden, a.current_stream.hidden
 input.openid
 {
     background-image:url(../images/images.php?f=icons.png);
-    background-position:-656px 0px;
+    background-position:-675px 0px;
     background-repeat:no-repeat;
     width:180px;
     padding-left:20px;
@@ -703,6 +703,12 @@ input.openid
 {
     background-position:-390px 0px;
     margin:4px 10px 0 0;
+}
+
+.new_status
+{
+    background-position:-659px 0px;
+    margin:2px 5px 0 0;
 }
 
 li.menu_part_title

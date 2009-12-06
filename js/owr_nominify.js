@@ -893,6 +893,7 @@ OWR.prototype = {
                 this.messages['Getting contents of the new'] = "Récupération du contenu de la nouvelle";
                 this.messages['Clearing myself, bye !'] = "Nettoyage en cours, à bientôt !";
                 this.messages['Getting details of the new'] = "Récupération des informations de la nouvelle";
+                this.messages['Marking news as unread'] = "Marquage des nouvelles comme non-lues";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -1002,7 +1003,7 @@ OWR.prototype = {
             var timer;
             item.addEvent('click', function(e, el) {
                 $clear(timer);
-                if(e.target.get('class') === 'link_go') {return;}
+                if(e.target.get('class') === 'link_go' || e.target.hasClass('new_status')) {return;}
                 e.stop();
                 timer = (function(){
                     var id = el.get('id').split('_');
@@ -1013,7 +1014,7 @@ OWR.prototype = {
                     } else {
                         var cur = el.getStyle('color');
                         if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur) {
-                            el.setStyles({'background-color': '#BBBBBB', 'color': 'black', 'font-weight':'normal'});
+                            el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
                         } else {
                             el.setStyles({'background-color': '#666666', 'color':'white'});
                         }
@@ -1084,7 +1085,7 @@ OWR.prototype = {
             }
         } else {
             if(responseText) {
-                this.setLog(responseText);
+                this.setLog(responseText, true);
             }
             if(tpl) {
                 var tpl = $(tpl);
@@ -1102,13 +1103,20 @@ OWR.prototype = {
         if('' === v) { return false; }
         this.loading(true);
         var n = this.setLog('Adding a category');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            var contents = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var contents = this.parseResponse(json);
             contents.id = contents.id.toInt();
             $$('select[id^=move_]').each(function(item){
                 var ok = false;
@@ -1129,7 +1137,7 @@ OWR.prototype = {
                 $('menu_streams').grab(div.getFirst());
                 if(!$$('a.anchor')) { this.initMenu(); }
             }
-        }.bindWithEvent(this,[r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.post(f);
         return false;
     },
@@ -1137,13 +1145,20 @@ OWR.prototype = {
     {
         this.loading(true);
         var n = this.setLog('Adding a stream');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            var category = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var category = this.parseResponse(json);
             if(category) {
                 var div = new Element('div', {'html':category});
                 var li = div.getFirst();
@@ -1156,7 +1171,7 @@ OWR.prototype = {
                 }
                 this.initMenu();
             }
-        }.bindWithEvent(this, [r.onSuccess, n]));
+        }.bindWithEvent(this, n));
         r.post($('editstream'));
         return false;
     },
@@ -1167,13 +1182,20 @@ OWR.prototype = {
         this.loading(true);
         var n = this.setLog('Searching for keywords');
         this.setLog('"' + val + '"');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n, val){
+        r.addEvent('success', function(json, n, val){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+            this.parseResponse(json, null, 'body_container');
             this.initContents();
             this.pageOffset = 0;
             this.keywords = val;
@@ -1181,7 +1203,7 @@ OWR.prototype = {
             this.initCurrent();
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
-        }.bindWithEvent(this,[r.onSuccess,n, val]));
+        }.bindWithEvent(this, [n, val]));
         r.post($('search'));
         return false;
     },
@@ -1215,13 +1237,20 @@ OWR.prototype = {
             return;
         }
         var n = this.setLog('Renaming the element');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n, newContents, o){
+        r.addEvent('success', function(json, n, newContents, o){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1]);
+            this.parseResponse(json);
             $('showStream_'+id).set('html', newContents);
             if($('stream_'+id).hasClass('groups')) {
                 newContents = newContents.replace(myRegexp, "$1");
@@ -1242,7 +1271,7 @@ OWR.prototype = {
             }
             o.set('value', '');
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems($('stream_'+id)); }
-        }.bindWithEvent(this,[r.onSuccess,n,newContents, obj]));
+        }.bindWithEvent(this,[n, newContents, obj]));
         r.post({'do':'rename', 'name':obj.get('value'), 'id':id});
         obj.setStyle('display', 'none');
     },
@@ -1250,13 +1279,20 @@ OWR.prototype = {
     {
         this.loading(true);
         var n = this.setLog('Moving the element');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, r, n, obj){
+        r.addEvent('success', function(json, n, obj){
             this.loading(false, n);
-            this.parseResponse(responseJSON, r.arguments[1][1]);
+            this.parseResponse(json);
             var s = $('stream_'+obj.get('id').split('_')[1]);
             var o = $('gstream_toggler_'+obj.get('value'));
             if(s && o.status) {
@@ -1266,37 +1302,51 @@ OWR.prototype = {
             }
             this.initMenu();
             this.initCurrent();
-        }.bindWithEvent(this,[r.onSuccess,n, obj]));
+        }.bindWithEvent(this,[n, obj]));
         r.post({'do':'move','id':obj.get('id').split('_')[1], 'gid':obj.get('value')});
     },
     getRestAuthToken: function()
     {
         this.loading(true);
         var n = this.setLog('Asking for the REST auth token');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            var token = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var token = this.parseResponse(json);
             prompt('', token);
-        }.bindWithEvent(this,[r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do':'regeneraterestauthtoken'});
     },
     getRssToken: function(id)
     {
         this.loading(true);
         var n = this.setLog('Asking for the RSS gateway token');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            var token = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var token = this.parseResponse(json);
             prompt('', token);
-        }.bindWithEvent(this,[r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do':'regeneratersstoken','id':id});
     },
     editOPML: function()
@@ -1319,10 +1369,10 @@ OWR.prototype = {
             r.addEvent('failure', function(xhr, n) { 
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
-            r.addEvent('success', function(responseJSON, obj, n){
+            r.addEvent('success', function(json, n){
                 this.loading(false, n);
-                this.parseResponse(responseJSON, obj.arguments[1][1]);
-            }.bindWithEvent(this,[r.onSuccess,n]));
+                this.parseResponse(json);
+            }.bindWithEvent(this, n));
             r.post($('editopml'));
         }
         return false;
@@ -1331,15 +1381,22 @@ OWR.prototype = {
     {
         this.loading(true);
         var n = this.setLog('Asking for the OPML gateway token');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            var token = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var token = this.parseResponse(json);
             prompt('', token);
-        }.bindWithEvent(this,[r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do':'regenerateopmltoken','id':id});
     },
     initCurrent: function()
@@ -1393,14 +1450,21 @@ OWR.prototype = {
         if(!id || !gid) {return;}
         this.loading(true);
         var n = this.setLog('Moving the element');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1]);
-        }.bindWithEvent(this, [r.onSuccess, n]));
+            this.parseResponse(json);
+        }.bindWithEvent(this, n));
         r.post({'do':'move','id':id, 'gid':gid});
     },
     loading: function(isLoading, ind, err)
@@ -1461,16 +1525,23 @@ OWR.prototype = {
         this.loading(true);
         if(!arr) {
             var n = this.setLog('Refreshing the interface');
-            var r = new Request.JSON({'url':'./?token='+this.token});
+            var r = new Request.JSON({
+                url: './?token='+this.token,
+                onSuccess: function(json, text) {
+                    if(!json) {
+                        this.parseResponse(null, text);
+                    }
+                }.bindWithEvent(this)
+            });
             r.addEvent('failure', function(xhr, n) { 
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
-            r.addEvent('success', function(responseJSON, resp, n){
+            r.addEvent('success', function(json, n){
                 this.loading(false, n);
                 $$('span[id^=unread_]').each(function(item){
                     var id = item.get('id').split('_');
-                    if(resp.contents[id[1]]) {
-                        item.set('html', resp.contents[id[1]]);
+                    if(json.contents[id[1]]) {
+                        item.set('html', json.contents[id[1]]);
                         item.getParent().setStyle('font-weight', 'bold');
                     } else {
                         item.set('html', '0');
@@ -1478,7 +1549,7 @@ OWR.prototype = {
                     }
                 });
                 this.lastUpd = this.getTS();
-            }.bindWithEvent(this, [responseJSON, n]));
+            }.bindWithEvent(this, n));
             r.get({'do': 'getunread'});
         } else {
             $$('span[id^=unread_]').each(function(item){
@@ -1495,24 +1566,43 @@ OWR.prototype = {
             this.loading(false);
         }
     },
-    updateNews: function(id)
+    updateNews: function(id, toggle)
     {
         this.loading(true);
-        var n = this.setLog('Marking news as read');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var status = 0;
+        if('page' == id) {
+            id = [];
+            $$('div.new_container_nread').each(function(item) {
+                this.push(item.get('id').split('_')[1]);
+            }, id);
+            if(!id.length) { this.loading(false, n); return; }
+        } else {
+            if(toggle) {
+                status = $$('div[id^=new_'+id+']')[0].hasClass('new_container_read') ? 1 : 0;
+            }
+        }
+        var n = this.setLog(status ? 'Marking news as unread' : 'Marking news as read');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n, status){
             this.loading(false, n);
-            var contents = this.parseResponse(responseJSON, obj.arguments[1][1]);
-            if(this.currentId === 0 && id === 0) { // unread news page, asked for mark all news as read
+            var contents = this.parseResponse(json);
+            if(this.currentId === 0 && id === 0) { // unread news page, asked for mark all news as (un)read
                 $('body_container').empty();
                 this.pageOffset = 0;
             } else {
                 if('object' === typeof id || id === this.currentId) {
                     $$('div.new_container_nread]').removeClass('new_container_nread').addClass('new_container_read');
-                    $$('a[id^=imgnew]').destroy();
+                    $$('a[id^=imgnew]').setStyle('display', 'none');
                     if('object' === typeof id && (0 === this.currentId || this.sort)) {
                         --this.pageOffset;
                     }
@@ -1525,31 +1615,35 @@ OWR.prototype = {
                             ++cleared;
                         });
                     } else {
-                        $$('div.new_container_nread').each(function(item) {
-                            var ids = item.get('id').split('_');
-                            if(ids[1] == id || ids[2] == id || ids[3] == id) { 
-                                item.removeClass('new_container_nread').addClass('new_container_read');
-                                ++cleared;
-                            }
-                        });
+                        if(status) {
+                            $$('div.new_container_read').each(function(item) {
+                                var ids = item.get('id').split('_');
+                                if(ids[1] == id || ids[2] == id || ids[3] == id) {
+                                    item.removeClass('new_container_read').addClass('new_container_nread');
+                                    $('imgnew_'+id).setStyle('display', 'block');
+                                }
+                            });
+                        } else {
+                            $$('div.new_container_nread').each(function(item) {
+                                var ids = item.get('id').split('_');
+                                if(ids[1] == id || ids[2] == id || ids[3] == id) { 
+                                    item.removeClass('new_container_nread').addClass('new_container_read');
+                                    $('imgnew_'+id).setStyle('display', 'none');
+                                    ++cleared;
+                                }
+                            });
+                        }
                     }
                     if(cleared > 0 && (0 === this.currentId || this.sort)) {
                         --this.pageOffset;
                     }
                 }
             }
-        }.bindWithEvent(this, [r.onSuccess, n]));
-        if('page' == id) {
-            id = [];
-            $$('div.new_container_nread').each(function(item) {
-                this.push(item.get('id').split('_')[1]);
-            }, id);
-            if(!id.length) { this.loading(false, n); return; }
-        }
+        }.bindWithEvent(this, [n, status]));
         if('object' === typeof id) {
-            r.get({'ids': id, 'do': 'upnew', 'currentid': this.currentId});
+            r.get({'ids': id, 'do': 'upnew', 'currentid': this.currentId, 'status': status});
         } else {
-            r.get({'id': id, 'do': 'upnew', 'currentid': this.currentId, 'timestamp':this.getCurrentTS(id)});
+            r.get({'id': id, 'do': 'upnew', 'currentid': this.currentId, 'status': status, 'timestamp':this.getCurrentTS(id)});
         }
     },
     clearLogs: function() { $('logs').empty();this.nbLogsLine=0; },
@@ -1557,15 +1651,22 @@ OWR.prototype = {
         this.loading(true);
         if(!id) { id=0; }
         var n = this.setLog('Getting the news');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n, sort, dir){
+        r.addEvent('success', function(json, n, sort, dir){
             this.loading(false, n);
             this.currentId = id;
             this.initCurrent();
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+            this.parseResponse(json, null, 'body_container');
             this.initContents();
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
@@ -1573,7 +1674,7 @@ OWR.prototype = {
             this.pageOffset = 0;
             this.sort = sort;
             this.dir = dir;
-        }.bindWithEvent(this, [r.onSuccess, n, sort, dir]));
+        }.bindWithEvent(this, [n, sort, dir]));
         if('search' === id) {
             r.get({'do':'search', 'keywords':this.keywords, 'offset': this.pageOffset, 'sort':sort, 'dir':dir});
         } else {
@@ -1591,14 +1692,21 @@ OWR.prototype = {
             }
         }
         var n = this.setLog('Asking for refreshing of streams');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1]);
-        }.bindWithEvent(this, [r.onSuccess, n]));
+            this.parseResponse(json);
+        }.bindWithEvent(this, n));
         r.get({'id': id, 'do': 'refreshstream', 'currentid': this.currentId, 'force': refresh});
     },
     deleteStream: function(id) {
@@ -1606,14 +1714,21 @@ OWR.prototype = {
         if(!id) { id=0; }
         this.loading(true);
         var n = this.setLog('Deleting');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
             if(0 !== id && (id == this.currentId || 0 === this.currentId)) {
-                this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+                this.parseResponse(json, null, 'body_container');
                 this.initContents();
             } else { 
                 if(0 === id) {
@@ -1629,7 +1744,7 @@ OWR.prototype = {
                         });
                     });
                 }
-                this.parseResponse(responseJSON, obj.arguments[1][1]);
+                this.parseResponse(json);
             }
             if(0 !== id) {
                 if($('stream_'+id)) { 
@@ -1651,7 +1766,7 @@ OWR.prototype = {
                 });
             }
             if(id == this.currentId) { this.currentId = 0; }
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'delete', 'id': id, 'currentid': this.currentId});
     },
     deleteUser: function(id) {
@@ -1661,14 +1776,21 @@ OWR.prototype = {
         }
         this.loading(true);
         var n = this.setLog('Deleting');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n, id){
+        r.addEvent('success', function(json, n, id){
             this.loading(false, n);
             $('user_'+id).destroy();
-        }.bindWithEvent(this, [r.onSuccess,n,id]));
+        }.bindWithEvent(this, [n, id]));
         r.get({'do': 'delete', 'id': id});
     },
     moveToPage: function(offset) {
@@ -1683,19 +1805,26 @@ OWR.prototype = {
             }
         }
         var n = this.setLog(['Moving to page ',offset+1]);
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
             $$('div.links[id^=moveToPage_]').destroy();
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+            this.parseResponse(json, null, 'body_container');
             this.initContents();
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
             this.pageOffset = offset;
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         if('search' === this.currentId) {
             r.get({'do':'search', 'keywords':this.keywords, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
         } else {
@@ -1706,28 +1835,42 @@ OWR.prototype = {
         if(!confirm(this.getMessage('Delete ?'))) {return;}
         this.loading(true);
         var n = this.setLog('Deleting news');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+            this.parseResponse(json, null, 'body_container');
             this.initContents();
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'clearstream', 'id': id, 'currentid': this.currentId});
     },
     askMaintenance: function() {
         this.loading(true);
         var n = this.setLog('Making the maintenance.. please wait, it may take a while');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1]);
-        }.bindWithEvent(this, [r.onSuccess,n]));
+            this.parseResponse(json);
+        }.bindWithEvent(this, n));
         r.get({'do': 'maintenance'});
     },
     setLog: function(msg, error) {
@@ -1767,52 +1910,73 @@ OWR.prototype = {
     setLang: function(lang) {
         this.loading(true);
         var n = this.setLog('Setting the new interface language');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            if(!responseJSON.errors) { 
+            if(!json.errors) { 
                 window.location.href = './?token='+this.token;
                 return;
             }
-            this.parseResponse(responseJSON, obj.arguments[1][1]);
-        }.bindWithEvent(this, [r.onSuccess, n]));
+            this.parseResponse(json);
+        }.bindWithEvent(this, n));
         r.post({'do': 'changelang', 'newlang':lang});
     },
     getUsersList: function() {
         this.loading(true);
         var n = this.setLog('Getting the list of the users');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'body_container');
+            this.parseResponse(json, null, 'body_container');
             this.currentId = 0;
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'getusers'});
     },
     getLastNews: function() {
         if((this.lastUpd + this.ttl) > this.getTS()) { return; }
         this.loading(true);
         var n = this.setLog('Refreshing the interface');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
             if(0 === this.currentId) {
-                this.parseResponse(responseJSON, obj.arguments[1][1]);
+                this.parseResponse(json);
             } else {
-                this.parseResponse(responseJSON, obj.arguments[1][1]);
+                this.parseResponse(json);
             }
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'getlastnews', 'currentid': this.currentId});
     },
     confirmExit: function() {
@@ -1828,33 +1992,47 @@ OWR.prototype = {
         if(!id) {return;}
         this.loading(true);
         var n = this.setLog('Getting contents of the category');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'groupContainer_'+id);
+            this.parseResponse(json, null, 'groupContainer_'+id);
             this.initSortables();
             $('gstream_toggler_'+id).setStyle('background-position', '-319px 0px').status = 1;
             $('groupContainer_'+id).setStyle('display', 'block').getParent().setStyle('height', 'auto');
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'getmenupartgroup', 'id': id});
     },
     getMenuPartStream: function(id) {
         if(!id) {return;}
         this.loading(true);
         var n = this.setLog('Getting details of the stream');
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n){
+        r.addEvent('success', function(json, n){
             this.loading(false, n);
-            this.parseResponse(responseJSON, obj.arguments[1][1], 'streamContainer_'+id);
+            this.parseResponse(json, null, 'streamContainer_'+id);
             $('stream_toggler_'+id).setStyle('background-position', '-319px 0px').status = 1;
             $('streamContainer_'+id).setStyle('display', 'block').getParents()[2].setStyle('height', 'auto');
-        }.bindWithEvent(this, [r.onSuccess,n]));
+        }.bindWithEvent(this, n));
         r.get({'do': 'getmenupartstream', 'id': id});
     },
     getNewDetails: function(id, obj) {
@@ -1862,17 +2040,24 @@ OWR.prototype = {
         if(!obj.status) {
             this.loading(true);
             var n = this.setLog('Getting details of the new');
-            var r = new Request.JSON({'url':'./?token='+this.token});
+            var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
             r.addEvent('failure', function(xhr, n) { 
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
-            r.addEvent('success', function(responseJSON, obj, n, el, id){
+            r.addEvent('success', function(json, n, el, id){
                 this.loading(false, n);
-                this.parseResponse(responseJSON, obj.arguments[1][1], 'new_details_'+id);
+                this.parseResponse(json, null, 'new_details_'+id);
                 $('new_details_'+id).toggle();
                 addthis.button('#addthis_'+id, {'ui_cobrand': 'OWR', 'data_use_cookies':false, 'data_use_flash':false});
                 el.status = 1;
-            }.bindWithEvent(this, [r.onSuccess, n, obj, id]));
+            }.bindWithEvent(this, [n, obj, id]));
             r.get({'do': 'getnewdetails', 'id': id});
         } else {
             $('new_details_'+id).toggle();
@@ -1908,23 +2093,30 @@ OWR.prototype = {
         var live = el.hasClass('new_container_nread') ? 1 : 0;
         var ids = id.split('_');
         idc = el.getNext();
-        var r = new Request.JSON({'url':'./?token='+this.token});
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(responseJSON, obj, n, ids, idc, live, el){
+        r.addEvent('success', function(json, n, ids, idc, live, el){
             this.loading(false, n);
-            var contents = this.parseResponse(responseJSON, obj.arguments[1][1]);
+            var contents = this.parseResponse(json);
             if(contents) {
                 idc.set('html', contents).toggle();
-                el.removeClass('new_container_nread').addClass('new_container_read').setStyles({'background-color': '#666666', 'color': 'white', 'font-weight':'normal'});
+                el.removeClass('new_container_nread').addClass('new_container_read').setStyles({'background-color': '#666666', 'color': 'white'});
             }
             var img = $('imgnew_'+ids[1]);
-            if(img) {img.destroy();}
+            if(img) {img.setStyle('display', 'none');}
             if(0 === this.currentId) {
                 --this.pageOffset;
             }
-        }.bindWithEvent(this, [r.onSuccess, n, ids, idc, live, el]));
+        }.bindWithEvent(this, [n, ids, idc, live, el]));
         r.get({'do': 'getnewcontents', 'id': ids[1], 'live': live, 'currentid': this.currentId, 'offset':this.pageOffset});
     },
     clear: function() {

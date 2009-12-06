@@ -1032,6 +1032,9 @@ class Controller extends Singleton
                     $empty = true;
                 }
                 unset($response, $request);
+                $page .= $this->_view->get('contents_header', array(), $cacheTime);
+                $page .= $this->_getPage('news', $datas, true);
+                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
                 $page .= $this->_view->get('menu_header', array(), $cacheTime, 
                                             array(
                                                 'unread' => $this->_request->unreads[0], 
@@ -1055,9 +1058,6 @@ class Controller extends Singleton
                                                                         $cacheTime
                                                         )));
                 unset($groups);
-                $page .= $this->_view->get('contents_header', array(), $cacheTime);
-                $page .= $this->_getPage('news', $datas, true);
-                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
                 $page .= $this->_view->get('footer', array(
                                                         'lang'=>$ulang,
                                                         'surl'=>$surl

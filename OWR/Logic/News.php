@@ -309,6 +309,7 @@ class News extends Logic
      */
     public function update(Request $request)
     {
+        $status = (int) $request->status;
         if(0 < $request->id)
         {
             $table = DAO::getType($request->id);
@@ -320,16 +321,16 @@ class News extends Logic
                     $query = '
     UPDATE news_relations nr
         JOIN news n ON (nr.newsid=n.id)
-        SET status=0
-        WHERE uid='.User::iGet()->getUid().' AND status=1 
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
         AND nr.rssid='.$request->id.' AND lastupd < '.$request->timestamp;
                 }
                 else
                 {
                     $query = '
     UPDATE news_relations
-        SET status=0
-        WHERE uid='.User::iGet()->getUid().' AND status=1 AND rssid='.$request->id;
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rssid='.$request->id;
                 }
             }
             elseif('streams_groups' === $table)
@@ -340,8 +341,8 @@ class News extends Logic
     UPDATE news_relations nr
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
         JOIN news n ON (nr.newsid=n.id)
-        SET status=0
-        WHERE nr.uid='.User::iGet()->getUid().' AND status=1 
+        SET status='.$status.'
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
         AND rr.gid='.$request->id.' AND lastupd < '.$request->timestamp;
                 }
                 else
@@ -349,16 +350,16 @@ class News extends Logic
                     $query = '
     UPDATE news_relations nr
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
-        SET status=0
-        WHERE nr.uid='.User::iGet()->getUid().' AND status=1 AND rr.gid='.$request->id;
+        SET status='.$status.'
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rr.gid='.$request->id;
                 }
             }
             elseif('news' === $table)
             {
                 $query = '
     UPDATE news_relations
-        SET status=0
-        WHERE uid='.User::iGet()->getUid().' AND status=1 AND newsid='.$request->id;
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND newsid='.$request->id;
             }
             else
             {
@@ -374,8 +375,8 @@ class News extends Logic
         {
             $query = '
     UPDATE news_relations
-        SET status=0
-        WHERE uid='.User::iGet()->getUid().' AND status=1 
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
         AND newsid IN ('.join(',', $request->ids).')';
         }
         else
@@ -383,8 +384,8 @@ class News extends Logic
             $query = '
     UPDATE news_relations nr
         JOIN news n ON (nr.newsid=n.id)
-        SET status=0
-        WHERE uid='.User::iGet()->getUid().' AND status=1';
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status;
             if($request->timestamp > 0)
             {
                 $query .= ' AND lastupd < '.$request->timestamp;

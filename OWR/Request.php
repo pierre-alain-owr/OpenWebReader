@@ -90,7 +90,7 @@ class Request
         $this->page = '';
         unset($datas['page']);
 
-        foreach(array('id', 'gid', 'currentid', 'uid', 'offset', 'timestamp', 'live') as $k)
+        foreach(array('id', 'gid', 'currentid', 'uid', 'offset', 'timestamp', 'live', 'status') as $k)
         {
             (isset($datas[$k]) && $this->$k = (int) $datas[$k]) || $this->$k = 0;
             unset($datas[$k]);
