@@ -170,12 +170,13 @@ table tr, table td, table th
 div#menu
 {
     width:30%;
-    height:100%;
     overflow:auto;
     position:fixed;
     padding:0;
-    margin:75px 0 0 0;
+    margin:0;
     background-color:#EBEBEB;
+    top:75px;
+    bottom:0;
 }
 
 ul#logs
@@ -245,7 +246,7 @@ div#board
 ul.menu_container
 {
     list-style-type:none;
-    margin:0 0 80px 0;
+    margin:0;
     padding:0;
 }
 
