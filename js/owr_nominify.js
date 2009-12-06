@@ -1013,7 +1013,7 @@ OWR.prototype = {
                         this.getNew(el.get('id'));
                     } else {
                         var cur = el.getStyle('color');
-                        if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur) {
+                        if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur || '#ffffff' === cur || '#FFFFFF' === cur || '#fff' === cur || '#ffffff' === cur) {
                             el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
                         } else {
                             el.setStyles({'background-color': '#666666', 'color':'white'});
@@ -2041,13 +2041,13 @@ OWR.prototype = {
             this.loading(true);
             var n = this.setLog('Getting details of the new');
             var r = new Request.JSON({
-            url: './?token='+this.token,
-            onSuccess: function(json, text) {
-                if(!json) {
-                    this.parseResponse(null, text);
-                }
-            }.bindWithEvent(this)
-        });
+                url: './?token='+this.token,
+                onSuccess: function(json, text) {
+                    if(!json) {
+                        this.parseResponse(null, text);
+                    }
+                }.bindWithEvent(this)
+            });
             r.addEvent('failure', function(xhr, n) { 
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
