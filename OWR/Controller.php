@@ -322,7 +322,7 @@ class Controller extends Singleton
 
         isset($this->_view) || $this->_view = View::iGet();
 
-        if(isset($_SERVER['HTTP_ACCEPT']) && 'application/json' === $_SERVER['HTTP_ACCEPT'])
+        if(isset($_SERVER['HTTP_ACCEPT']) && (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
             $this->_view->addHeaders(array('Content-Type' => 'application/json; charset=utf-8'));
             $page = array('contents' => '');
@@ -548,7 +548,7 @@ class Controller extends Singleton
 
         $surl = $this->_cfg->makeURI($url, $params, false);
 
-        if(isset($_SERVER['HTTP_ACCEPT']) && 'application/json' === $_SERVER['HTTP_ACCEPT'])
+        if(isset($_SERVER['HTTP_ACCEPT']) && (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
             $page = json_encode(array('location' => $surl));
             isset($this->_view) || $this->_view = View::iGet();

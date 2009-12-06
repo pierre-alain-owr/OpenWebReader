@@ -82,15 +82,15 @@ class Request extends R
 
         $this->_method = strtolower($_SERVER['REQUEST_METHOD']);
 
-        if(!isset($_SERVER['HTTP_ACCEPT']) || 'application/json' === $_SERVER['HTTP_ACCEPT'])
+        if(!isset($_SERVER['HTTP_ACCEPT']) || (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
             $this->_httpAccept = 'json';
         }
-        elseif('text/xml' === $_SERVER['HTTP_ACCEPT'] || 'application/xml' === $_SERVER['HTTP_ACCEPT'])
+        elseif((false !== strpos($_SERVER['HTTP_ACCEPT'], 'text/xml')) || (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/xml')))
         {
             $this->_httpAccept = 'xml';
         }
-        elseif('text/html' === $_SERVER['HTTP_ACCEPT'])
+        elseif((false !== strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))
         {
             $this->_httpAccept = 'html';
         }
