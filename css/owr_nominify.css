@@ -216,7 +216,7 @@ a#menu_toggler
     background-position:0px 0px;
     background-color:#EBEBEB;
     width:16px;
-    height:100%;
+    height:16px;
     cursor:pointer;
     border:1px solid #BBBBBB;
     margin:0;
@@ -224,9 +224,22 @@ a#menu_toggler
     position:fixed;
 }
 
+a#board_toggler
+{
+    background-position:-692px 0px;
+    background-color:#EBEBEB;
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    border:1px solid #BBBBBB;
+    margin:0 0 0 25px;
+    padding:0;
+    position:fixed;
+}
+
 div#body_container
 {
-    margin-left:25px;
+    margin:0;
     padding:0;
 }
 
@@ -628,7 +641,7 @@ a.current.hidden, a.current_stream.hidden
 input.openid
 {
     background-image:url(../images/images.php?f=icons.png);
-    background-position:-675px 0px;
+    background-position:-710px 0px;
     background-repeat:no-repeat;
     width:180px;
     padding-left:20px;

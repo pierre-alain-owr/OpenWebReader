@@ -854,6 +854,7 @@ OWR.prototype = {
     sort: '',
     dir: '',
     token: '',
+    boardTogglerStatus: 1,
     init: function(lang, ttl, token, isSearch)
     {
         this.loading(true);
@@ -966,6 +967,23 @@ OWR.prototype = {
             element.getParent().setStyle('height', 'auto');
             element.toggle();
             el.status = !el.status;
+        }
+    },
+    toggleBoard: function()
+    {
+        var board = $('board');
+        if(this.boardTogglerStatus === 0) {
+            $('menu').setStyle('top', '75px');
+            $('contents').setStyle('margin-top', '80px');
+            board.setStyle('display', 'block');
+            $('board_toggler').setStyle('background-position', '-692px 0px');
+            this.boardTogglerStatus = 1;
+        } else {
+            $('menu').setStyle('top', '0px');
+            $('contents').setStyle('margin-top', '0px');
+            board.setStyle('display', 'none');
+            $('board_toggler').setStyle('background-position', '-675px 0px');
+            this.boardTogglerStatus = 0;
         }
     },
     manageToggler: function(force)

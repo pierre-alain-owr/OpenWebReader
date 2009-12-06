@@ -112,240 +112,177 @@ msgstr "Add feed(s) via an OPML file"
 msgid "Add OPML"
 msgstr "Add OPML file"
 
-#: index.html.d14.php:124 menu_contents.html.d14.php:113
 msgid "Add a custom category"
 msgstr "Add a category"
 
-#: index.html.d14.php:124 menu_contents.html.d14.php:113
 msgid "Add Category"
 msgstr "Add category"
 
-#: index.html.d14.php:138 menu_contents.html.d14.php:127
 msgid "Search in all news"
 msgstr "Search in all the news"
 
-#: index.html.d14.php:138 menu_contents.html.d14.php:127
 msgid "Search"
 msgstr "Search"
 
-#: index.html.d14.php:143 menu_contents.html.d14.php:132
 msgid "Keywords"
 msgstr "Keywords"
 
-#: index.html.d14.php:145 menu_contents.html.d14.php:134
 msgid "Find !"
 msgstr "Find !"
 
-#: index.html.d14.php:150 menu_contents.html.d14.php:139
 msgid "Logout"
 msgstr "Logout"
 
-#: index.html.d14.php:155 menu_contents.html.d14.php:144
 msgid "Streams"
 msgstr "Feeds"
 
-#: index.html.d14.php:162 menu_contents.html.d14.php:151 menu.html.d14.php:6
 msgid "Mark all the news as read"
 msgstr "Mark all the news as read"
 
-#: index.html.d14.php:162 menu_contents.html.d14.php:151 menu.html.d14.php:6
 msgid "Mark all as read"
 msgstr "Mark all as read"
 
-#: index.html.d14.php:165 menu_contents.html.d14.php:154 menu.html.d14.php:9
 msgid "Force refresh of all streams"
 msgstr "Force refresh of all feeds"
 
-#: index.html.d14.php:165 menu_contents.html.d14.php:154 menu.html.d14.php:9
 msgid "Refresh all"
 msgstr "Refresh all"
 
-#: index.html.d14.php:168 menu_contents.html.d14.php:157 menu.html.d14.php:12
 msgid "Delete all news of all the streams"
 msgstr "Delete all news of all the feeds"
 
-#: index.html.d14.php:168 menu_contents.html.d14.php:157 menu.html.d14.php:12
 msgid "Clear all"
 msgstr "Clear all"
 
-#: index.html.d14.php:171 menu_contents.html.d14.php:160 menu.html.d14.php:15
 msgid "Delete everything, categories included"
 msgstr "Delete everything, categories included"
 
-#: index.html.d14.php:171 menu_contents.html.d14.php:160 menu.html.d14.php:15
 msgid "Delete all"
 msgstr "Delete all"
 
-#: index.html.d14.php:174 menu_contents.html.d14.php:163 menu.html.d14.php:18
 msgid "Show all unread news"
 msgstr "Show all unread news"
 
-#: index.html.d14.php:174 menu_contents.html.d14.php:163 menu.html.d14.php:18
 msgid "Not read"
 msgstr "Unreads"
 
-#: index.html.d14.php:209 index.html.d14.php:210
-#: menu_contents.html.d14.php:198 menu_contents.html.d14.php:199
-#: menu.html.d14.php:53 menu.html.d14.php:54
 msgid "Show the news for this category"
 msgstr "Show the news for this category"
 
-#: index.html.d14.php:213 menu_contents.html.d14.php:202 menu.html.d14.php:57
 msgid "Mark all the news of this category as read"
 msgstr "Mark all the news of this category as read"
 
-#: index.html.d14.php:214 menu_contents.html.d14.php:203 menu.html.d14.php:58
 msgid "Refresh all the streams of this category"
 msgstr "Refresh all the feeds of this category"
 
-#: index.html.d14.php:215 menu_contents.html.d14.php:204 menu.html.d14.php:59
 msgid "Delete all the news of this category"
 msgstr "Delete all the news of this category"
 
-#: index.html.d14.php:216 menu_contents.html.d14.php:205 menu.html.d14.php:60
 msgid "Rename this category"
 msgstr "Rename this category"
 
-#: index.html.d14.php:218 menu_contents.html.d14.php:207 menu.html.d14.php:62
 msgid "Delete this category and all sub-streams"
 msgstr "Delete this category and all contained feeds"
 
-#: index.html.d14.php:245 index.html.d14.php:247
-#: menu_contents.html.d14.php:234 menu_contents.html.d14.php:236
-#: menu.html.d14.php:89 menu.html.d14.php:91
 msgid "Show the news for this stream"
 msgstr "Show the news for this feed"
 
-#: index.html.d14.php:246 menu_contents.html.d14.php:235 menu.html.d14.php:90
 msgid "Expand this stream"
 msgstr "Toggle feed informations"
 
-#: index.html.d14.php:252 menu_contents.html.d14.php:241
-#: menu_contents.html.d14.php:243 menu.html.d14.php:96 menu.html.d14.php:98
 msgid "Mark all the news of this stream as read"
 msgstr "Mark all the news of this feed as read"
 
-#: index.html.d14.php:253 menu_contents.html.d14.php:242 menu.html.d14.php:97
 msgid "Force refresh of this stream"
 msgstr "Refresh this feed"
 
-#: index.html.d14.php:254
 msgid "Delete all the news of this stream"
 msgstr "Delete all the news of this feed"
 
-#: index.html.d14.php:255 menu_contents.html.d14.php:244 menu.html.d14.php:99
 msgid "Rename this stream"
 msgstr "Rename this feed"
 
-#: index.html.d14.php:256 menu_contents.html.d14.php:245 menu.html.d14.php:100
 msgid "Move this stream to another category"
 msgstr "Move this feed to another category"
 
-#: index.html.d14.php:257 menu_contents.html.d14.php:246 menu.html.d14.php:101
 msgid "Delete this stream"
 msgstr "Delete this feed"
 
-#: index.html.d14.php:359 menu_contents.html.d14.php:348
 msgid "Administration"
 msgstr "Administration"
 
-#: index.html.d14.php:363 menu_contents.html.d14.php:352
 msgid "Do maintenance of the database (may take a while..)"
 msgstr "Do maintenance of the database (may take a while..)"
 
-#: index.html.d14.php:363 menu_contents.html.d14.php:352
 msgid "Maintenance"
 msgstr "Maintenance"
 
-#: index.html.d14.php:366 menu_contents.html.d14.php:355
 msgid "Create a user"
 msgstr "Create a user"
 
-#: index.html.d14.php:366 menu_contents.html.d14.php:355
 msgid "Create user"
 msgstr "Create user"
 
-#: index.html.d14.php:393 news.html.d14.php:20
 msgid "See online"
 msgstr "See online"
 
-#: index.html.d14.php:412 news.html.d14.php:39
 msgid "Enclosure"
 msgstr "Enclosure (click to see it)"
 
-#: login.html.d14.php:6
 msgid "Restricted access"
 msgstr "Restricted access"
 
-#: login.html.d14.php:16
 msgid "Authentication"
 msgstr "Authentication"
 
-#: upload.html.d14.php:12
 msgid "File"
 msgstr "File"
 
-#: index.html.d14.php:380 news.html.d14.php:26
 msgid "On"
 msgstr "on"
 
-#: index.html.d14.php:380 news.html.d14.php:26
 msgid "In"
 msgstr "in"
 
-#: index.html.d14.php:382 news.html.d14.php:28
 msgid "By"
 msgstr "by"
 
-#: index.html.d14.php:99 menu_contents.html.d14.php:96
 msgid "Export your feed(s) list to OMPL file"
 msgstr "Export your feed(s) list to OPML format"
 
-#: index.html.d14.php:99 menu_contents.html.d14.php:96
 msgid "Export to OMPL"
 msgstr "Export you feeds"
 
-#: index.html.d14.php:349 menu_contents.html.d14.php:340
 msgid "Clear the cache"
 msgstr "Delete all files from cache"
 
-#: index.html.d14.php:349 menu_contents.html.d14.php:340
 msgid "Clear cache"
 msgstr "Clear cache"
 
-#: index.html.d14.php:106 menu_contents.html.d14.php:97
 msgid "Download your feed(s) in OPML format"
 msgstr "Get your feed(s) in OPML format"
 
-#: index.html.d14.php:106 menu_contents.html.d14.php:97
 msgid "Download OMPL"
 msgstr "Download"
 
-#: adduser.html.d15.php:96
 msgid "Interface language"
 msgstr "Interface language"
 
-#: getusers.html.d15.php:37
 msgid "Edit"
 msgstr "Edit"
 
-#: getusers.html.d15.php:3
 msgid "Users list"
 msgstr "Users list"
 
-#: index.html.d15.php:335
 msgid "Edit your informations"
 msgstr "Edit your account"
 
-#: index.html.d15.php:222 menu_contents.html.d15.php:213
 msgid "Tools"
 msgstr "Tools"
 
-#: index.html.d15.php:313
 msgid "Get the RSS gateway url"
 msgstr "Get the url for RSS gateway to unread news (uses an automatic user authentication)"
 
-#: index.html.d15.php:313
 msgid "Rss gateway"
 msgstr "Url RSS gateway"
 
@@ -438,3 +375,9 @@ msgstr "Home"
 
 msgid "Refresh menu"
 msgstr "Refresh menu"
+
+msgid "Toggle board"
+msgstr "Show/hide the board"
+
+msgid "Toggle new status"
+msgstr "Toggle new status"
