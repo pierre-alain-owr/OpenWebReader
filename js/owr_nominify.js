@@ -953,9 +953,13 @@ OWR.prototype = {
         this.loading(false);
     },
     gstreamsToggle: function(id, el) {
-        var element = $('groupContainer_'+id);
-        if(!element) {return;} // hu ?
         if(!$defined(el.status)) {
+            var element = $('groupContainer_'+id);
+            if(!element) {
+                var e = $('stream_'+id);
+                if(!e) { return; } // hu ?
+                e.adopt(new Element('ul', {'id': 'groupContainer_'+id, 'class': 'menu_groups'}));
+            }
             this.getMenuPartGroup(id);
         } else {
             el.setStyle('background-position', (el.status ? '-303px 0px' : '-319px 0px'));
@@ -1433,11 +1437,15 @@ OWR.prototype = {
     streamsToggle: function(id, el)
     {
         if(!$defined(el.status)) {
+            var element = $('streamContainer_'+id);
+            if(!element) {
+                var e = $('stream_'+id);
+                if(!e) { return; } // hu ?
+                e.adopt(new Element('ul', {'id': 'streamContainer_'+id, 'class': 'stream_more'}));
+            }
             this.getMenuPartStream(id);
             if(this.sortables) { this.sortables.removeItems(el.getParents()[1]); }
         } else {
-            var element = $('streamContainer_'+id);
-            if(!element) {return;} // hu ?
             el.setStyle('background-position', (el.status ? '-303px 0px' : '-319px 0px'));
             el.getParents()[2].setStyle('height', 'auto');
             element.toggle();
@@ -1897,6 +1905,9 @@ OWR.prototype = {
         li.adopt(spanC);
         ++this.nbLogsLine;
         li.set('id', 'logging_line_' + this.nbLogsLine);
+        if(!$('logs')) {
+            $('logs_container').adopt(new Element('ul', {'id':'logs'}));
+        }
         $('logs').adopt(li);
         if(this.nbLogsLine>3) {
             // TODO : without Fx.Scroll (useless here, often launched)
