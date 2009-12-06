@@ -174,7 +174,7 @@ class Parser extends XMLReader
                             }
                         }
                     }
-                    elseif('folder' === $type)
+                    elseif('folder' === $type || !$this->isEmptyElement)
                     {
                         $this->_nodeTree[$this->depth] = $this->_localName = 'folder';
                         $title = $this->getAttribute('title');
