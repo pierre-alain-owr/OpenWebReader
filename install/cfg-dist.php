@@ -111,8 +111,8 @@ $cfg['dbport']                  = '3306';
 $cfg['dbdriver']                = 'mysql';
 $cfg['dbuser']                  = 'openwebreader';
 $cfg['dbpasswd']                = 'openwebreader';
-// generally /var/run/mysqld.sock or /tmp/mysql.sock
-$cfg['dbsocket']                = '/var/run/mysqld.sock';
+// generally /var/run/mysqld/mysqld.sock or /tmp/mysql.sock
+$cfg['dbsocket']                = '/var/run/mysqld/mysqld.sock';
 $cfg['dsn']                     = $cfg['dbdriver'].':dbname='.$cfg['dbname'] .
                                     ';host='.$cfg['dbhost'].';port='.$cfg['dbport'] .
                                     ';unix_socket='.$cfg['dbsocket'];
@@ -136,7 +136,7 @@ $cfg['defaultTmpDir']           = sys_get_temp_dir().DIRECTORY_SEPARATOR;
 // max upload file size, in octets, default to 5mo
 $cfg['maxUploadFileSize']       = 5120000;
 // path to php executable
-$cfg['phpbin']                  = '/usr/bin/php';
+$cfg['phpbin']                  = '/usr/bin/php -d open_basedir=';
 // default ttl, in minutes, used if no ttl is found while parsing a stream
 $cfg['defaultStreamRefreshTime'] = 60;
 // default minimum ttl, in minutes, used for checking ttl found while parsing a stream

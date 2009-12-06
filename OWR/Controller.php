@@ -762,7 +762,7 @@ class Controller extends Singleton
                 if(is_object($streams))
                     $streams = array($streams);
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams_groups')->view($request);
+                Logic::getCachedLogic('streams_groups')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 $groups = array();
                 if('error' !== $response->getNext())

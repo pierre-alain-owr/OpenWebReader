@@ -239,8 +239,6 @@ class Request extends ArrayObject
      */
     private function _getParameter($datas, $name, $field)
     {
-        $param = array();
-
         switch($field['type'])
         { // internal check, can't be checked by DB
             case self::PARAM_EMAIL:
@@ -365,7 +363,10 @@ class Request extends ArrayObject
 
         if(!$datas && $field['required'])
         {
-            throw new Exception('Missing value for required parameter "'.$name.'"', Exception::E_OWR_WARNING);
+            if(!empty($field['default']))
+                $datas = $field['default'];
+            else
+                throw new Exception('Missing value for required parameter "'.$name.'"', Exception::E_OWR_WARNING);
         }
 
         return array('type' => $type, 'value' => $datas);
