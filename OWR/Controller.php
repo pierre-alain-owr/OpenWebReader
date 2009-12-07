@@ -2185,8 +2185,6 @@ class Controller extends Singleton
         Logic::getCachedLogic('streams')->editOPML($this->_request);
         if(!$this->processResponse($this->_request->getResponse())) return $this;
 
-        if(!$this->_request->getResponse()->getTpl())
-            $this->redirect();
         return $this;
     }
 

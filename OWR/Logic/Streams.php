@@ -1499,7 +1499,6 @@ class Streams extends Logic
         unset($gidRoot, $r, $sr);
 
         $request->setResponse(new Response(array(
-            'do'        => 'redirect',
             'status'    => 201,
             'datas'     => array('ids' => $ids)
         )));

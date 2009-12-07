@@ -1399,7 +1399,8 @@ OWR.prototype = {
     editOPML: function()
     {
         if($('opml').get('value').length) {
-            this.setLog('Adding a stream');
+            this.loading(true);
+            var n = this.setLog('Adding a stream');
             var iframe = new Element('iframe');
             iframe.set({'id':'ieditopml', 'name':'ieditopml'});
             iframe.setStyles({'width':0, 'height':0, 'border':'none'});
@@ -1407,6 +1408,11 @@ OWR.prototype = {
             f.set('action', './?do=editopml&token='+this.token);
             f.set('target', 'ieditopml');
             f.getParent().adopt(iframe);
+            iframe.addEvent('load', function(e,n) {
+                this.loading(false, n);
+                $('ieditopml').destroy();
+                window.location = './?token='+this.token;
+            }.bindWithEvent(this, n));
             f.submit();
         } else {
             var v = $('url').get('value');
