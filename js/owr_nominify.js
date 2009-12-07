@@ -1450,7 +1450,7 @@ OWR.prototype = {
     initCurrent: function()
     {
         this.loading(true);
-        if(-1 !== this.currentId.indexOf("search_")) {
+        if(typeof(this.currentId) === 'string' && -1 !== this.currentId.indexOf("search_")) {
             var id = this.currentId.split('_')[1].toInt();
             $$('a[id^=current_]').setStyle('display', 'none');
             if(!id) {
@@ -1881,7 +1881,7 @@ OWR.prototype = {
             s.toTop();
             this.pageOffset = offset;
         }.bindWithEvent(this, n));
-        if(-1 !== this.currentId.indexOf('search_')) {
+        if(typeof this.currentId === 'string' && -1 !== this.currentId.indexOf('search_')) {
             r.get({'do':'search', 'keywords':this.keywords, 'offset': offset, 'sort':this.sort, 'dir':this.dir, 'id':this.currentId.split('_')[1]});
         } else {
             r.get({'do': 'getstream', 'id': this.currentId, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
