@@ -1,5 +1,2 @@
-# those files are needed in the repository, but we don't need to track them
 OWR/cache/
-OWR/logs/
 OWR/cfg.php
-.htaccess
