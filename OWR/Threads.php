@@ -83,6 +83,7 @@ class Threads extends Singleton
      */
     public function __destruct()
     {
+        $i = 0;
         while($this->_queue->count())
         {
             if($this->_getProcessCount() < $this->_max)
@@ -91,7 +92,7 @@ class Threads extends Singleton
             }
             else
             { // have to wait a bit
-                sleep(1);
+                sleep(++$i);
             }
         }
     }

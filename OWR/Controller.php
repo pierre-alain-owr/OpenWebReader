@@ -538,7 +538,11 @@ class Controller extends Singleton
                 $request = trim(Filter::iGet()->purify($_SERVER['REQUEST_URI']));
                 $current = basename($request);
                 if(false === strpos($current, 'logout') && false === strpos($current, 'login') && $this->_cfg->get('path') !== $request)
-                    $params .= '&back='.urlencode($current);
+                {
+                    $current = preg_replace('/[?&]token=[^&]*/', '', $current); // strip the token, not needed
+                    if(!empty($current) && $this->_cfg->get('path') !== $request)
+                        $params .= '&back='.urlencode($current);
+                }
             }
         }
         else
