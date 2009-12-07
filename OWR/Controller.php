@@ -1426,7 +1426,7 @@ class Controller extends Singleton
         $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'FETCH_TYPE' => 'array'), 'newsid', 'rssid', 'rssid,gid');
         if($nb)
         {
-            if(count($nb) > 3)
+            if(is_array($nb[0]))
             {
                 foreach($nb as $count)
                 {
