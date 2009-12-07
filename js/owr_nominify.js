@@ -1199,10 +1199,11 @@ OWR.prototype = {
     },
     searchFormAction: function(id)
     {
+        var val = '';
         if(id) {
-            var val = $('search_'+id).get('value');
+            val = $('search_'+id).get('value');
         } else {
-            var val = $('keywords').get('value');
+            val = $('keywords').get('value');
             id = 0;
         }
         if(val === '') { return false; }
@@ -1624,19 +1625,19 @@ OWR.prototype = {
     },
     updateNews: function(id, toggle)
     {
-        this.loading(true);
         var status = 0;
         if('page' == id) {
             id = [];
             $$('div.new_container_nread').each(function(item) {
                 this.push(item.get('id').split('_')[1]);
             }, id);
-            if(!id.length) { this.loading(false, n); return; }
+            if(!id.length) { return; }
         } else {
             if(toggle) {
                 status = $$('div[id^=new_'+id+']')[0].hasClass('new_container_read') ? 1 : 0;
             }
         }
+        this.loading(true);
         var n = this.setLog(status ? 'Marking news as unread' : 'Marking news as read');
         var r = new Request.JSON({
             url: './?token='+this.token,
@@ -1651,7 +1652,7 @@ OWR.prototype = {
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, status){
             this.loading(false, n);
-            var contents = this.parseResponse(json);
+            this.parseResponse(json);
             if(this.currentId === 0 && id === 0) { // unread news page, asked for mark all news as (un)read
                 $('body_container').empty();
                 this.pageOffset = 0;
@@ -1666,7 +1667,6 @@ OWR.prototype = {
                     var cleared = 0;
                     if(0 === id.toInt()) {
                         $$('div.new_container_nread').each(function(item) {
-                            var ids = item.get('id').split('_');
                             item.removeClass('new_container_nread').addClass('new_container_read');
                             ++cleared;
                         });
@@ -1718,7 +1718,7 @@ OWR.prototype = {
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(json, n, sort, dir){
+        r.addEvent('success', function(json, n, sort, dir, id){
             this.loading(false, n);
             this.currentId = id;
             this.initCurrent();
@@ -1730,8 +1730,8 @@ OWR.prototype = {
             this.pageOffset = 0;
             this.sort = sort;
             this.dir = dir;
-        }.bindWithEvent(this, [n, sort, dir]));
-        if(-1 !== id.indexOf('search_')) {
+        }.bindWithEvent(this, [n, sort, dir, id]));
+        if(typeof id === 'string' && -1 !== id.indexOf('search_')) {
             id = id.split('_')[1];
             r.get({'do':'search', 'keywords':this.keywords, 'offset': this.pageOffset, 'sort':sort, 'dir':dir, 'id':id});
         } else {
@@ -1815,7 +1815,6 @@ OWR.prototype = {
                     });
                 }
                 var news = $$('div[id^=new_\d+]');
-                var i=0;
                 var ids = [];
                 news.each(function(item){
                     ids = item.get('id').split('_');
@@ -2193,6 +2192,16 @@ OWR.prototype = {
         delete this.nbLogsLine;
         delete this.sortables;
         delete this.lang;
+        delete this.adding;
+        delete this.languages;
+        delete this.messages;
+        delete this.lastUpd;
+        delete this.ttl;
+        delete this.keywords;
+        delete this.sort;
+        delete this.dir;
+        delete this.token;
+        delete this.boardTogglerStatus;
         return true;
     }
 };
