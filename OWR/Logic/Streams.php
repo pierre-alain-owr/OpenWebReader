@@ -218,12 +218,10 @@ class Streams extends Logic
         {
             // no stream(s) detected
             // try auto-discovery
-            // we are getting one more HTTP request here
-            // to be re-written to cache last cURLWrapper request ?
-            $index = cURLWrapper::get($request->url, array(), false);
-            if(false !== $index)
+            $index = cURLWrapper::get($request->url, array(), false, true);
+            $nb = $nbErr = 0;
+            if(!empty($index))
             {
-                $nb = $nbErr = 0;
                 if($hrefs = $this->_extractHREF(array(
                         'rel'=>array('subscriptions', 'alternate', 'related'), 
                         'type'=>array(
@@ -249,7 +247,7 @@ class Streams extends Logic
                         }
                         catch(Exception $e)
                         {
-                            ++$nberr;
+                            ++$nbErr;
                             Logs::iGet()->log($e->getContent(), $e->getCode());
                         }
                     }
@@ -277,7 +275,7 @@ class Streams extends Logic
                         }
                         catch(Exception $e)
                         {
-                            ++$nberr;
+                            ++$nbErr;
                             Logs::iGet()->log($e->getContent(), $e->getCode());
                         }
                     }
@@ -1339,10 +1337,10 @@ class Streams extends Logic
         {
             $upload = new Upload('opml', array(
                 'isArray'       => false, 
-                'mime'          => 'text/x-opml+xml',
+                'mime'          => array('text/x-opml+xml', 'text/xml'),
                 'finfo_mime'    => 'application/xml', 
                 'maxFileSize'   => Config::iGet()->get('maxUploadFileSize'),
-                'ext'           => 'opml'
+                'ext'           => array('opml', 'xml')
             ));
 
             try
@@ -1353,7 +1351,6 @@ class Streams extends Logic
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
-                    'tpl'       => 'upload',
                     'error'     => $e->getContent(),
                     'status'    => $e->getCode()
                 )));
@@ -1366,7 +1363,6 @@ class Streams extends Logic
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'tpl'       => 'upload',
                 'error'     => 'Missing url',
                 'status'    => Exception::E_OWR_BAD_REQUEST
             )));
@@ -1560,7 +1556,7 @@ class Streams extends Logic
     protected function _extractHREF(array $requestedParams, $src)
     {
         $hrefs = array();
-    
+
         if(preg_match_all('/<link\b((\s+[a-z]+\s*=\s*(["\'])[^\\3]+?\\3)+)+\s*\/?>/is', $src, $tags))
         {
             foreach($tags[1] as $tag)
@@ -1602,8 +1598,8 @@ class Streams extends Logic
                     }
                 }
             }
-        
-            return $hrefs;
         }
+
+        return $hrefs;
     }
 }

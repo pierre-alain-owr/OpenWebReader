@@ -299,10 +299,10 @@ msgid "Move to page"
 msgstr "Afficher la page"
 
 msgid "Toggle menu"
-msgstr "Réduire/Afficher le menu"
+msgstr "Afficher/masquer le menu"
 
 msgid "Toggle category"
-msgstr "Afficher/Réduire les flux de cette catégorie"
+msgstr "Afficher/masquer les flux de cette catégorie"
 
 msgid "Refresh"
 msgstr "Rafraîchir"
@@ -311,7 +311,7 @@ msgid "And"
 msgstr "et"
 
 msgid "Toggle"
-msgstr "Afficher/Réduire"
+msgstr "Afficher/masquer"
 
 msgid "Timezone"
 msgstr "Fuseau horaire"

@@ -80,7 +80,7 @@ msgid "Loading.."
 msgstr "Loading.."
 
 msgid "Show logs"
-msgstr "Show logs"
+msgstr "Display logs"
 
 msgid "Change the interface language"
 msgstr "Change the interface language"
@@ -161,13 +161,13 @@ msgid "Delete all"
 msgstr "Delete all"
 
 msgid "Show all unread news"
-msgstr "Show all unread news"
+msgstr "Display all unread news"
 
 msgid "Not read"
 msgstr "Unreads"
 
 msgid "Show the news for this category"
-msgstr "Show the news for this category"
+msgstr "Display the news for this category"
 
 msgid "Mark all the news of this category as read"
 msgstr "Mark all the news of this category as read"
@@ -185,7 +185,7 @@ msgid "Delete this category and all sub-streams"
 msgstr "Delete this category and all contained feeds"
 
 msgid "Show the news for this stream"
-msgstr "Show the news for this feed"
+msgstr "Display the news for this feed"
 
 msgid "Expand this stream"
 msgstr "Toggle feed informations"
@@ -293,7 +293,7 @@ msgid "Email"
 msgstr "Email"
 
 msgid "Show the new"
-msgstr "Show the contents of the new (or double-click to open in a new window)"
+msgstr "Display the contents of the new (or double-click to open in a new window)"
 
 msgid "Move to page"
 msgstr "Display the page"
@@ -329,7 +329,7 @@ msgid "Set unavailable on"
 msgstr "Set unavailable on"
 
 msgid "Show/hide details of the new"
-msgstr "Show/hide all details of the new"
+msgstr "Display/hide all details of the new"
 
 msgid "More"
 msgstr "More.."
@@ -377,7 +377,7 @@ msgid "Refresh menu"
 msgstr "Refresh menu"
 
 msgid "Toggle board"
-msgstr "Show/hide the board"
+msgstr "Display/hide the board"
 
 msgid "Toggle new status"
 msgstr "Toggle new status"

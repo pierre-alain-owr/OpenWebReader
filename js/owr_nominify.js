@@ -994,7 +994,7 @@ OWR.prototype = {
             $('menu_toggler').setStyle('background-position', '-18px 0px');
             this.menuTogglerStatus = 1;
         } else {
-            $('contents').setStyle('width', '70%');
+            $('contents').setStyle('width', '75%');
             $('menu').setStyle('display', 'block');
             $('menu_toggler').setStyle('background-position', '0px 0px');
             this.menuTogglerStatus = 0;

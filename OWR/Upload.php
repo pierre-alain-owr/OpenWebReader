@@ -160,10 +160,27 @@ class Upload
             throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
         }
 
-        
-        if($this->_args['mime'] !== $file['type'])
+        if(is_array($this->_args['mime']))
         {
-            throw new Exception('Incorrect file type.', Exception::E_OWR_WARNING);
+            $nb = count($this->_args['mime']);
+            $err = 0;
+            foreach($this->_args['mime'] as $type)
+            {
+                if($type !== mb_strtolower(mb_substr($file['type'], - mb_strlen($type, 'UTF-8'), mb_strlen($type, 'UTF-8'), 'UTF-8'), 'UTF-8'))
+                    ++$err;
+            }
+            
+            if($nb === $err)
+            {
+                throw new Exception('Incorrect file type.', Exception::E_OWR_WARNING);
+            }
+        }
+        else
+        {
+            if($this->_args['mime'] !== $file['type'])
+            {
+                throw new Exception('Incorrect file type.'.$file['type'], Exception::E_OWR_WARNING);
+            }
         }
 
         if(class_exists('finfo', false))
@@ -181,9 +198,27 @@ class Upload
             unset($finfo);
         }
 
-        if($this->_args['ext'] !== mb_strtolower(mb_substr($file['name'], - mb_strlen($this->_args['ext'], 'UTF-8'), mb_strlen($this->_args['ext'], 'UTF-8'), 'UTF-8'), 'UTF-8'))
+        if(is_array($this->_args['ext']))
         {
-            throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+            $nb = count($this->_args['ext']);
+            $err = 0;
+            foreach($this->_args['ext'] as $ext)
+            {
+                if($ext !== mb_strtolower(mb_substr($file['name'], - mb_strlen($ext, 'UTF-8'), mb_strlen($ext, 'UTF-8'), 'UTF-8'), 'UTF-8'))
+                    ++$err;
+            }
+            
+            if($nb === $err)
+            {
+                throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+            }
+        }
+        else
+        {
+            if($this->_args['ext'] !== mb_strtolower(mb_substr($file['name'], - mb_strlen($this->_args['ext'], 'UTF-8'), mb_strlen($this->_args['ext'], 'UTF-8'), 'UTF-8'), 'UTF-8'))
+            {
+                throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+            }
         }
         
         $path = Cache::getRandomFilename(true); // uploaded file goes to tmp :-)
