@@ -222,6 +222,7 @@ a#menu_toggler
     margin:0 0 0 15px;
     padding:0;
     position:fixed;
+    z-index:1;
 }
 
 a#board_toggler
@@ -235,6 +236,7 @@ a#board_toggler
     margin:0 0 0 40px;
     padding:0;
     position:fixed;
+    z-index:1;
 }
 
 div#body_container
