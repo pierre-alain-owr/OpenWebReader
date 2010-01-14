@@ -89,6 +89,7 @@ class Threads extends Singleton
             if($this->_getProcessCount() < $this->_max)
             {
                 $this->_exec();
+                $i = 0; // resetting timer
             }
             else
             { // have to wait a bit
