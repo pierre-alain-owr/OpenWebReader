@@ -19,7 +19,7 @@
 # @copyright Copyright (c) 2009, Pierre-Alain Mignot
 # @license http://www.gnu.org/copyleft/gpl.html
 # @package OWR
-# Language file for french traduction
+# Language file for english traduction
 #
 #, fuzzy
 msgid ""
@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: pierre-alain@openwebreader.org\n"
 "POT-Creation-Date: 2009-03-21 17:52+0100\n"
-"PO-Revision-Date: 2009-11-21 02:43+0100\n"
+"PO-Revision-Date: 2010-01-19 22:11+0100\n"
 "Last-Translator: Pierre-Alain Mignot <pierre-alain@openwebreader.org>\n"
 "Language-Team: en_US\n"
 "MIME-Version: 1.0\n"
@@ -381,3 +381,6 @@ msgstr "Display/hide the board"
 
 msgid "Toggle new status"
 msgstr "Toggle new status"
+
+msgid "Back to top of the new"
+msgstr "Back to top of the new"
