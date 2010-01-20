@@ -1245,6 +1245,9 @@ OWR.prototype = {
         this.loading(true);
         var search = $('search_'+id);
         var el = $('stream_toggler_'+id);
+        if(!el) {
+            el = $('gstream_toggler_'+id);
+        }
         if(search.getStyle('display') == 'inline') { 
             if(this.sortables) { el.status ? this.sortables.addItems(el.getParents()[1]) : this.sortables.removeItems(el.getParents()[1]); }
             search.setStyle('display', 'none');
