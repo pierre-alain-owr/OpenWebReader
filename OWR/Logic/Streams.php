@@ -1013,14 +1013,38 @@ class Streams extends Logic
 
             if($icon)
             {
-                $favicon = $fav;
-                break;
+                if(class_exists('Imagick', false))
+                {
+                    try
+                    {
+                        $image = new \Imagick();
+                        $image->setFormat('ico');
+                        if($image->readImageBlob($icon))
+                        {
+                            $image->destroy();
+                            unset($image);
+                            $favicon = $fav;
+                            break;
+                        }
+                    }
+                    catch(Exception $e)
+                    { // is it really usefull to log here, surely not
+                        if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
+                    }
+   
+                    unset($image);
+                 }
+                 else
+                 {
+                     $favicon = $fav;
+                     break;
+                 }
             }
         }
 
         unset($favicons, $icon);
 
-        if(!$favicon)
+        if(empty($favicon))
         {
             $indexes = array_unique($indexes);
             foreach($indexes as $index)
@@ -1048,11 +1072,6 @@ class Streams extends Logic
                         {
                             if(!isset($url['path'])) continue;
 
-                            if(isset($headers['Location']))
-                            {
-                                $index = $headers['Location'];
-                            }
-                            
                             if('/' !== mb_substr($index, -1, 1, 'UTF-8'))
                                 $index .= '/';
 
@@ -1097,10 +1116,14 @@ class Streams extends Logic
                                 try 
                                 {
                                     $image = new \Imagick();
-                                    $image->readImageBlob($icon);
-                                    $image->destroy();
-                                    $favicon = $href;
-                                    break 2;
+                                    $image->setFormat('ico');
+                                    if($image->readImageBlob($icon))
+                                    {
+                                        $image->destroy();
+                                        unset($image);
+                                        $favicon = $href;
+                                        break 2;
+                                    }
                                 }
                                 catch(Exception $e)
                                 { // is it really usefull to log here, surely not
@@ -1121,9 +1144,9 @@ class Streams extends Logic
             unset($indexes, $index, $page);
         }
 
-        if($favicon)
+        if(!empty($favicon))
         {
-            $stream->favicon = $favicon;
+            $stream->favicon = (string) $favicon;
             $stream->url = null;
             $stream->save();
         }

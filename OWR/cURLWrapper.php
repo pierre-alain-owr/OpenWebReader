@@ -76,7 +76,7 @@ class cURLWrapper
         {
             $time = microtime(true);
             $heads = "Accept-Charset: utf-8\n".
-                        "User-Agent: OpenWebReader/".Config::iGet()->get('version')." http://openwebreader.org - Free Feed Aggregator\n"; // some ad :d
+                        "User-Agent: OpenWebReader/".Config::iGet()->get('version')." http://openwebreader.org - Free & OpenSource Feed Aggregator\n"; // some ad :d
 
             if(!$noCache)
             {
@@ -143,12 +143,12 @@ class cURLWrapper
                     CURLOPT_BINARYTRANSFER  => true,
                     CURLOPT_FAILONERROR     => true,
                     CURLOPT_HTTPAUTH        => CURLAUTH_ANY,
-                    CURLOPT_USERAGENT       => 'OpenWebReader/'.Config::iGet()->get('version').' http://openwebreader.org - Free Feed Aggregator', // some ad :d
+                    CURLOPT_USERAGENT       => 'OpenWebReader/'.Config::iGet()->get('version').' http://openwebreader.org - Free & OpenSource Feed Aggregator', // some ad :d
                     CURLOPT_URL             => $url,
                     CURLOPT_HTTPHEADER      => (array)"Accept-Charset: utf-8",
                     CURLOPT_SSL_VERIFYPEER  => false,
                     CURLOPT_SSL_VERIFYHOST  => 2,
-                    CURLOPT_TIMEOUT         => 30 // max 30s for timeout, just enough isn't it ?
+                    CURLOPT_TIMEOUT         => 20 // max 20s for timeout, just enough isn't it ?
                     );
             
             if(!$noCache)
@@ -185,7 +185,7 @@ class cURLWrapper
                 }
             }
 
-            $ret = trim(substr($resp, $infos['header_size']));
+            $ret = substr($resp, $infos['header_size']);
             $headers = self::_parseHeader(explode("\n", trim(substr($resp, 0, $infos['header_size']))));
             unset($resp);
 
@@ -207,6 +207,7 @@ class cURLWrapper
         
         if($isXML)
         {
+            $ret = trim($ret);
             $ret = Strings::toNormal($ret); // need to do it BEFORE utf8_encode
             
             if(false !== stripos($ret, '<?xml'))
@@ -218,7 +219,7 @@ class cURLWrapper
             }
         }
     
-        return trim($ret);
+        return $ret;
     }
 
     /**
