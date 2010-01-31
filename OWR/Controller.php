@@ -772,6 +772,7 @@ class Controller extends Singleton
                 if('error' !== $response->getNext())
                 {
                     $groups = $response->getDatas();
+                    if(!$response->isMultiple()) $groups = array($groups);
                 }
                 else
                 {

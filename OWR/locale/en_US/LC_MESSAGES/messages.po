@@ -384,3 +384,6 @@ msgstr "Toggle new status"
 
 msgid "Back to top of the new"
 msgstr "Back to top of the new"
+
+msgid "Edit the url of this stream"
+msgstr "Edit the url of this stream"

@@ -522,6 +522,7 @@ class Controller extends C
                 if('error' !== $response->getNext())
                 {
                     $g = $response->getDatas();
+                    if(!$response->isMultiple()) $g = array($g);
                     foreach($g as $k=>$group)
                     {
                         $groups[$group['id']] = $group['name'];
