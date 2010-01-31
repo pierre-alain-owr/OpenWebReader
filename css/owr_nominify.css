@@ -496,6 +496,12 @@ div#board a.clear
     background-position:-100px 0px;
 }
 
+.editurl
+{
+    background-position:-480px 0px;
+    margin-top:2px;
+}
+
 .read
 {
     margin-top:2px;

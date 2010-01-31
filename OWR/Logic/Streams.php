@@ -90,13 +90,21 @@ class Streams extends Logic
         $hash = md5($request->url);
 
         $ids = array();
+        $id = (int) $request->id;
+        if(!empty($id))
+        {
+            if('streams' !== DAO::getType($id))
+            {
+                $id = 0;
+            }
+        }
 
         $cron = Cron::iGet();
         $streams = $this->_dao->get(array('hash' => $hash));
         if($streams)
         { // stream exists
             unset($hash);
-            $request->id = $streams->id;
+            $request->id = (int) $streams->id;
             $request->ttl = $streams->ttl;
             
             $streams_relation = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $streams->id));
@@ -122,6 +130,17 @@ class Streams extends Logic
             }
             unset($streams_relation);
 
+            if(!empty($id) && $id !== $streams->id)
+            { // user changed the url of one of his own stream
+                $r = clone($request);
+                $r->id = $id;
+                $this->delete($r);
+                $response = $r->getResponse();
+                if('error' === $response->getNext())
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                unset($r);
+            }
+            
             $news = DAO::getCachedDAO('news')->get(array('rssid' => $streams->id), 'id', 'pubDate DESC, lastupd DESC');
             if($news)
             {
@@ -152,7 +171,7 @@ class Streams extends Logic
                     else $ids[] = $r->id;
                 }
             }
-            unset($news);
+            unset($news, $r);
 
             if(empty($request->name))
             {
@@ -206,7 +225,7 @@ class Streams extends Logic
         {
             // should NOT arrive
             // if we come here, that means that cURLWrapper got a 304 http response
-            // but the stream does not exists in DB ? surely a bug or DB not  up to date
+            // but the stream does not exists in DB ? surely a bug or DB not up to date
             // TODO : fix it by forcing cURLWrapper to fetch datas
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -312,6 +331,7 @@ class Streams extends Logic
         $streams->lastupd = (int) $request->begintime;
         $streams->ttl = $ttl;
         $streams->status = 0;
+        $streams->id = $id ?: null;
         unset($hash);
 
         $this->_db->beginTransaction();

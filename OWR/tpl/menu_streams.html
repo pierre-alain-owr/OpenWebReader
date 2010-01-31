@@ -20,13 +20,15 @@
             <a href="javascript:;" class="refresh left backgrounded opac" onclick="rP.refreshStream(<?php echo $id;?>, 1);" title="<?php echo $this->_utilities->_('Force refresh of this stream');?>"></a>
             <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete all the news of this stream');?>"></a>
             <a href="javascript:;" class="search backgrounded left opac" title="<?php echo $this->_utilities->_('Search');?>" onclick="rP.searchStream(<?php echo $id;?>);"></a>
-            <a href="javascript:;" class="rename left backgrounded opac" onclick="rP.renameStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Rename this stream');?>"></a>
+            <a href="javascript:;" class="rename left backgrounded opac" onclick="rP.renameStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Rename this stream');?>"></a>                           
+            <a href="javascript:;" class="editurl left backgrounded opac" onclick="rP.editStreamUrl(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Edit the url of this category');?>"></a>
             <a href="javascript:;" class="move left backgrounded opac" onclick="rP.moveStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Move this stream to another category');?>"></a>
             <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete this stream');?>"></a>
         </div>
         <div class="spacer"></div>
         <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);"><OWR:NOCACHE NAME='groups_select'/></select>
-        <input type="text" name="name" class="hidden left" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
+        <input type="text" name="name" class="hidden left" value="<?php echo htmlspecialchars($name, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
+        <input type="text" name="url" class="hidden left" value="<?php echo htmlspecialchars($url, ENT_COMPAT, 'UTF-8', false);?>" id="editurl_<?php echo $id;?>" onchange="rP.inputEditStreamUrl(this);"/>
         <input type="text" name="search" class="hidden left" id="search_<?php echo $id;?>" onchange="rP.searchFormAction(<?php echo $id;?>);"/>
         <div class="spacer"></div>
     </li>

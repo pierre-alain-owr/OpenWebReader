@@ -14,7 +14,7 @@
                                 <input type="text" name="search" class="hidden left" id="search_<?php echo $groupid;?>" onchange="rP.searchFormAction(<?php echo $groupid;?>);"/>
                                 <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearStream(<?php echo $groupid;?>);" id="clear_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Delete all the news of this category');?>"></a>
                                 <a href="javascript:;" class="rename left backgrounded opac" onclick="rP.renameStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Rename this category');?>"></a>
-                                <input type="text" name="name" class="hidden left" id="rename_<?php echo $groupid;?>" onchange="rP.inputRename(this);"/>
+                                <input type="text" name="name" class="hidden left" value="<?php echo htmlspecialchars($gname, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $groupid;?>" onchange="rP.inputRename(this);"/>
                                 <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Delete this category and all sub-streams');?>" id="delete_<?php echo $groupid;?>"></a>
                             </div>
                             <div class="spacer"></div>

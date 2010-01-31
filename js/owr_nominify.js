@@ -895,6 +895,7 @@ OWR.prototype = {
                 this.messages['Clearing myself, bye !'] = "Nettoyage en cours, à bientôt !";
                 this.messages['Getting details of the new'] = "Récupération des informations de la nouvelle";
                 this.messages['Marking news as unread'] = "Marquage des nouvelles comme non-lues";
+                this.messages['Editing the url of the stream'] = "Édition de l'url du flux";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -1298,7 +1299,7 @@ OWR.prototype = {
         r.addEvent('failure', function(xhr, n) { 
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
-        r.addEvent('success', function(json, n, newContents, o){
+        r.addEvent('success', function(json, n, newContents){
             this.loading(false, n);
             this.parseResponse(json);
             $('showStream_'+id).set('html', newContents);
@@ -1319,10 +1320,41 @@ OWR.prototype = {
                     }
                 });
             }
-            o.set('value', '');
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems($('stream_'+id)); }
-        }.bindWithEvent(this,[n, newContents, obj]));
+        }.bindWithEvent(this,[n, newContents]));
         r.post({'do':'rename', 'name':obj.get('value'), 'id':id});
+        obj.setStyle('display', 'none');
+    },
+    inputEditStreamUrl: function(obj)
+    {
+        this.loading(true);
+        var val = obj.get('value');
+        if(val === '') {
+            obj.setStyle('display', 'none');
+            this.loading(false);
+            return;
+        }
+        var id = obj.get('id').split('_')[1];
+        var gid = obj.getParents('.menu_groups')[0].get('id').split('_')[1];
+        var n = this.setLog('Editing the url of the stream');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
+        r.addEvent('failure', function(xhr, n) { 
+            this.raiseXHRError(xhr.responseText, n);
+        }.bindWithEvent(this, n));
+        r.addEvent('success', function(json, n, gid){
+            this.loading(false, n);
+            this.parseResponse(json);
+            this.getMenuPartGroup(gid);
+            this.showStream(0);
+        }.bindWithEvent(this,[n, gid]));
+        r.post({'do':'editstream', 'url':obj.get('value'), 'id':id});
         obj.setStyle('display', 'none');
     },
     selectMove: function(obj)
@@ -1556,6 +1588,20 @@ OWR.prototype = {
             }
         }
     },
+    editStreamUrl: function(id)
+    {
+        if(!id) { return; }
+        this.loading(true);
+        var rename = $('editurl_'+id);
+        if(rename.getStyle('display') == 'inline') { 
+            rename.setStyle('display', 'none');
+            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); } 
+        } else {
+            if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); } 
+            rename.setStyle('display', 'inline');
+        }
+        this.loading(false);
+    },
     renameStream: function(id)
     {
         if(!id) { return; }
@@ -1566,14 +1612,6 @@ OWR.prototype = {
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); } 
         } else {
             if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); } 
-            var myRegexp = new RegExp('<span class="bigger">(.*?)</span>', 'gi');
-            var matche = myRegexp.exec($('showStream_'+id).get('html'));
-            if(matche) { rename.set('value', matche[1]); }
-            else {
-                myRegexp = new RegExp('(.*?) \\(<span id="unread_\\d+">\\d+</span>\\)', 'gi');
-                matche = myRegexp.exec($('showStream_'+id).get('html'));
-                if(matche) { rename.set('value', matche[1]); }
-            }
             rename.setStyle('display', 'inline');
         }
         this.loading(false);
