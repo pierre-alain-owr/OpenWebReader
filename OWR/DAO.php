@@ -398,7 +398,7 @@ abstract class DAO implements iDAO
                             case DBRequest::PARAM_IP:
                             case \PDO::PARAM_STR:
                                 if(empty($this->$field))
-                                    throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAd_REQUEST);
+                                    throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAD_REQUEST);
 
                             default:
                                 break;
