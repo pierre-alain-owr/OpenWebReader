@@ -697,7 +697,18 @@ class Controller extends Singleton
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $page .= $this->_view->get('new_contents', $response->getDatas(), $cacheTime);
+                    $datas = $response->getDatas();
+                    if($this->_user->getConfig('blockimg'))
+                    {
+                        array_walk_recursive($datas, function(&$data) {
+                            $data = preg_replace('/<img\b([^>]*)(src\s*=\s*([\'"])?(.*?)\\3\s*)[^>]*\/?>/ise',
+                                "'<a href=\"javascript:;\" title=\"Blocked image, click to see it ! " .
+                                "('.addcslashes(\"\\4\", '\"').')\" class=\"img_blocked backgrounded\" " .
+                                "onclick=\"rP.loadImage(this, \''.addcslashes(\"\\4\", '\'').'\');\">" .
+                                "<img alt=\"&nbsp;&nbsp;&nbsp;&nbsp;\"/></a>'", $data);
+                        });
+                    }
+                    $page .= $this->_view->get('new_contents', $datas, $cacheTime);
                 }
                 else
                 {
@@ -873,7 +884,7 @@ class Controller extends Singleton
                     $datas['offset'] = 0;
                 }
 
-                $offset = $offset.',10'; // TODO : change this limit by the user defined one
+                $offset = $offset.','.$this->_user->getConfig('nbnews');
 
                 if(isset($datas['id']) && is_array($datas['id']))
                 {

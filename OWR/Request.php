@@ -87,66 +87,72 @@ class Request
             }
         }
 
-        $this->page = '';
-        unset($datas['page']);
-
-        foreach(array('id', 'gid', 'currentid', 'uid', 'offset', 'timestamp', 'live', 'status') as $k)
+        if(false === $nodatas)
         {
-            (isset($datas[$k]) && $this->$k = (int) $datas[$k]) || $this->$k = 0;
-            unset($datas[$k]);
-        }
+	        $this->page = '';
+	        unset($datas['page']);
 
-        $this->ids = array();
-
-        if(isset($datas['ids']))
-        {
-            if(is_array($datas['ids']))
+            foreach(array('id', 'gid', 'currentid', 'uid', 'offset', 'timestamp', 'live', 'status') as $k)
             {
-                foreach($datas['ids'] as $k=>$id)
-                    $this->ids[$k] = (int) $id;
+                (isset($datas[$k]) && $this->$k = (int) $datas[$k]) || $this->$k = 0;
+                unset($datas[$k]);
             }
 
-            unset($datas['ids']);
-        }
+            $this->ids = array();
 
-        (isset($datas['do']) && $this->do = mb_strtolower((string)$datas['do'], 'UTF-8')) || $this->do = 'index';
-
-        unset($datas['do']);
-
-        if(isset($datas['sort']))
-        {
-            $datas['sort'] = (string) $datas['sort'];
-            if($datas['sort'] === 'pubdate') $datas['sort'] = 'pubDate';
-
-            $authorized = array('title'=>'news', 'pubDate'=>'news', 'status'=>'news_relations');
-            if(isset($authorized[$datas['sort']]))
+            if(isset($datas['ids']))
             {
-                $this->sort = $authorized[$datas['sort']].'.'.$datas['sort'];
-            }
-            unset($datas['sort']);
+                if(is_array($datas['ids']))
+                {
+                    foreach($datas['ids'] as $k=>$id)
+                        $this->ids[$k] = (int) $id;
+                }
 
-            if(isset($datas['dir']) && $this->sort)
+                unset($datas['ids']);
+            }
+
+            (isset($datas['do']) && $this->do = mb_strtolower((string)$datas['do'], 'UTF-8')) || $this->do = 'index';
+
+            unset($datas['do']);
+
+            if(isset($datas['sort']))
             {
-                $datas['dir'] = (string) $datas['dir'];
-                (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'ASC';
-                unset($datas['dir']);
+                $datas['sort'] = (string) $datas['sort'];
+                if($datas['sort'] === 'pubdate') $datas['sort'] = 'pubDate';
+
+                $authorized = array('title'=>'news', 'pubDate'=>'news', 'status'=>'news_relations');
+                if(isset($authorized[$datas['sort']]))
+                {
+                    $this->sort = $authorized[$datas['sort']].'.'.$datas['sort'];
+                }
+                unset($datas['sort']);
+
+                if(isset($datas['dir']) && $this->sort)
+                {
+                    $datas['dir'] = (string) $datas['dir'];
+                    (($datas['dir'] === 'desc' || $datas['dir'] === 'asc') && $this->dir = $datas['dir']) || $this->dir = 'ASC';
+                    unset($datas['dir']);
+                }
+                else $this->dir = 'ASC';
             }
-            else $this->dir = 'ASC';
+
+            (!isset($datas['back']) || (!isset($_SERVER['X_REQUESTED_WITH']) || $_SERVER['X_REQUESTED_WITH'] !== 'XMLHttpRequest')) 
+            || $datas['back'] = urldecode((string) $datas['back']);
+
+            !isset($datas['token']) || $this->token = (string) $datas['token'];
+
+            unset($datas['token']);
         }
-
-        (!isset($datas['back']) || (!isset($_SERVER['X_REQUESTED_WITH']) || $_SERVER['X_REQUESTED_WITH'] !== 'XMLHttpRequest')) 
-        || $datas['back'] = urldecode((string) $datas['back']);
-
-        !isset($datas['token']) || $this->token = (string) $datas['token'];
-
-        unset($datas['token']);
 
         $this->_setDatas($datas);
         unset($datas);
 
-        (!empty($this->lang) && $this->lang = (string) $this->lang) ||
-        (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) && $this->lang = (string)$_SERVER['HTTP_ACCEPT_LANGUAGE']) ||
-        $this->lang = Config::iGet()->get('default_language');
+        if(false === $nodatas)
+        {
+	        (!empty($this->lang) && $this->lang = (string) $this->lang) ||
+	        (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) && $this->lang = (string)$_SERVER['HTTP_ACCEPT_LANGUAGE']) ||
+	        $this->lang = Config::iGet()->get('default_language');
+        }
     }
 
     /**
@@ -353,7 +359,7 @@ class Request
         {
             if(is_array($data))
             {
-                $this->$k = new Request($data);
+                $this->$k = new Request($data, true);
             }
             else
             {

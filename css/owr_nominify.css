@@ -571,7 +571,7 @@ p.stream_description
     line-height:15px;
 }
 
-div#login
+div#login, div#edituser
 {
     font-size:80%;
     width:280px;
@@ -581,16 +581,21 @@ div#login
     border:none;
 }
 
-div#login fieldset, div#loginOpenID fieldset
+div#login fieldset, div#loginOpenID fieldset, div#edituser fieldset
 {
     border:none;
 }
 
-div#login legend, div#loginOpenID legend
+div#login legend, div#loginOpenID legend, div#edituser legend
 {
     font-size:120%;
     text-shadow:1px 1px 0 gray;
     border-bottom:1px solid gray;
+}
+
+div#edituser
+{
+	width:310px;
 }
 
 table.users

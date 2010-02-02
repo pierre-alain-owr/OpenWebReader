@@ -387,3 +387,9 @@ msgstr "Vers le haut de la nouvelle"
 
 msgid "Edit the url of this stream"
 msgstr "Modifier l'url du flux"
+
+msgid "Number of news to display on each page"
+msgstr "Nombre de nouvelles à afficher par page"
+
+msgid "Block images with javascript"
+msgstr "Bloquer les images à l'aide de javascript"

@@ -206,6 +206,8 @@ class Request extends R
                             !isset($_POST['confirmpasswd']) ||
                             ($datas['confirmpasswd'] = (string) $_POST['confirmpasswd']);
                         }
+                        !isset($data['config']) ||
+                        ($datas['config'] = (array) $data['config']);
                         break;
 
                     default:
@@ -273,6 +275,8 @@ class Request extends R
                             !isset($data['confirmpasswd']) ||
                             ($datas['confirmpasswd'] = (string) $data['confirmpasswd']);
                         }
+                        !isset($data['config']) ||
+                        ($datas['config'] = (array) $data['config']);
                         break;
                 }
 

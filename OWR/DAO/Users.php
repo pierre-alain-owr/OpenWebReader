@@ -94,6 +94,12 @@ class Users extends DAO
     public $timezone;
 
     /**
+     * @var array configuration per user
+     * @access public
+     */
+    public $config;
+
+    /**
      * Constructor
      *
      * @access public
@@ -112,6 +118,7 @@ class Users extends DAO
             'email'     => array('required' => true, 'type' => DBRequest::PARAM_EMAIL),
             'openid'    => array('required' => false, 'type' => DBRequest::PARAM_URL),
             'timezone'  => array('required' => true, 'type' => DBRequest::PARAM_TIMEZONE),
+            'config'    => array('required' => true, 'type' => DBRequest::PARAM_SERIALIZED),
         );
         $this->_relations = array(
             'users_tokens'  => array('id'   => 'uid')

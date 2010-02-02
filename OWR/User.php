@@ -117,6 +117,12 @@ class User extends Singleton
     private $_tz;
 
     /**
+    * @var array user configuration
+    * @access private
+    */
+    private $_config = array();
+
+    /**
      * Constructor
      *
      * @access protected
@@ -145,7 +151,7 @@ class User extends Singleton
      */
     public function __sleep()
     {
-        return array('_rights', '_timezone', '_lang', '_login', '_uid', '_token', '_agent');
+        return array('_rights', '_timezone', '_lang', '_login', '_uid', '_token', '_agent', '_config');
     }
 
     /**
@@ -196,6 +202,9 @@ class User extends Singleton
         {
             $this->setTimezone($user['timezone']);
         } else $this->setTimezone();
+
+        if(isset($user['config']))
+            $this->_setConfig($user['config']);
     }
 
     /**
@@ -228,11 +237,22 @@ class User extends Singleton
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
      * @param string $login the login
-     * @return boolean true if admin
      */
     protected function _setLogin($login = '')
     {
         $this->_login = (string) $login;
+    }
+
+    /**
+     * Set the user's configuration
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @param array $config the configuration
+     */
+    protected function _setConfig($config)
+    {
+        $this->_config = (array) (is_string($config) ? @unserialize($config) : $config);
     }
 
     /**
@@ -665,6 +685,37 @@ class User extends Singleton
             $this->regenerateToken();
         }
         return (string) $this->_token;
+    }
+
+    /**
+     * Returns the user's configuration
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param string $var the var name
+     * @return mixed the value(s)
+     */
+    public function getConfig($var)
+    {
+        $var = (string) $var;
+
+        if(false === strpos($var, '.'))
+        {
+            return isset($this->_config[$var]) ? $this->_config[$var] : null;
+        }
+
+        $arrays = explode('.', $var);
+
+        $datas = $this->_config;
+
+        foreach($arrays as $arr)
+        {
+            if(!is_array($datas) || !isset($datas[$arr]))
+                return null;
+            $datas = $datas[$arr];
+        }
+
+        return $datas;
     }
 
     /**

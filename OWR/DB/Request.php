@@ -47,59 +47,64 @@ use \ArrayObject as ArrayObject,
 class Request extends ArrayObject
 {
     /**
-    * @var int type representing the current timestamp (= time())
-    */
+     * @var int type representing the current timestamp (= time())
+     */
     const PARAM_CURRENT_TIMESTAMP = 1111;
 
     /**
-    * @var int type representing a hash (= md5())
-    */
+     * @var int type representing a hash (= md5())
+     */
     const PARAM_HASH = 1112;
 
     /**
-    * @var int type representing an email
-    */
+     * @var int type representing an email
+     */
     const PARAM_EMAIL = 1113;
 
     /**
-    * @var int type representing an url
-    */
+     * @var int type representing an url
+     */
     const PARAM_URL = 1114;
 
     /**
-    * @var int type representing an IP address
-    */
+     * @var int type representing an IP address
+     */
     const PARAM_IP = 1115;
 
     /**
-    * @var int type representing a lang
-    */
+     * @var int type representing a lang
+     */
     const PARAM_LANG = 1116;
 
     /**
-    * @var int type representing a login
-    */
+     * @var int type representing a login
+     */
     const PARAM_LOGIN = 1117;
 
     /**
-    * @var int type representing a password
-    */
+     * @var int type representing a password
+     */
     const PARAM_PASSWD = 1118;
 
     /**
-    * @var int type representing a user rights
-    */
+     * @var int type representing a user rights
+     */
     const PARAM_RIGHTS = 1119;
 
     /**
-    * @var int type representing a timezone
-    */
+     * @var int type representing a timezone
+     */
     const PARAM_TIMEZONE = 1120;
 
     /**
-    * @var int type representing a null value
-    */
+     * @var int type representing a null value
+     */
     const PARAM_NULL = 1121;
+
+    /**
+     * @var int type representing a serialized value
+     */
+    const PARAM_SERIALIZED = 1122;
 
     /**
      * Constructor
@@ -165,6 +170,8 @@ class Request extends ArrayObject
                                 case self::PARAM_LOGIN :
                                 case self::PARAM_HASH : $request[$i]['value'] = ''; $request[$i]['type'] = \PDO::PARAM_STR; break;
                                 
+                                case self::PARAM_SERIALIZED: $request[$i]['value'] = serialize(array()); $request[$i]['type'] = \PDO::PARAM_STR; break;
+
                                 case \PDO::PARAM_NULL :
                                 case \PDO::PARAM_LOB : 
                                 case \PDO::PARAM_STMT:
@@ -209,6 +216,8 @@ class Request extends ArrayObject
                             case self::PARAM_LOGIN :
                             case self::PARAM_HASH : $request[$i]['value'] = ''; $request[$i]['type'] = \PDO::PARAM_STR; break;
                             
+                            case self::PARAM_SERIALIZED: $request[$i]['value'] = serialize(array()); $request[$i]['type'] = \PDO::PARAM_STR; break;
+
                             case \PDO::PARAM_NULL :
                             case \PDO::PARAM_LOB : 
                             case \PDO::PARAM_STMT:
@@ -353,6 +362,11 @@ class Request extends ArrayObject
                     if(false === $datas || mb_strlen($datas, 'UTF-8') !== 32) // we are asking md5 string, 32 chars
                         throw new Exception('Invalid hash for field '.$name, Exception::E_OWR_WARNING);
                 }
+                $type = \PDO::PARAM_STR;
+                break;
+
+            case self::PARAM_SERIALIZED:
+                $datas = empty($datas) ? null : serialize((array) $datas);
                 $type = \PDO::PARAM_STR;
                 break;
 

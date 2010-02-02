@@ -387,3 +387,9 @@ msgstr "Back to top of the new"
 
 msgid "Edit the url of this stream"
 msgstr "Edit the url of this stream"
+
+msgid "Number of news to display on each page"
+msgstr "Number of news to display on each page"
+
+msgid "Block images with javascript"
+msgstr "Block images with javascript"

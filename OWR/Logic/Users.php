@@ -202,6 +202,11 @@ class Users extends Logic
         $request->timezone = User::iGet()->getTimeZones($request->timezone);
         $request->ulang = User::iGet()->getLang($request->ulang);
 
+        // TODO : check this dynamicly
+        $cfg = Object::toArray($request->config);
+        $cfg['nbnews'] = (int) (isset($cfg['nbnews']) && $cfg['nbnews'] > 0 && $cfg['nbnews'] <= 50 && !($cfg['nbnews']%10) ? $cfg['nbnews'] : 10);
+        $cfg['blockimg'] = (bool) (isset($cfg['blockimg']) ? $cfg['blockimg'] : true);
+
         if(!empty($request->passwd) && !empty($request->confirmpasswd))
         {
             $args = array(
@@ -212,7 +217,8 @@ class Users extends Logic
                 'email'     => $request->email, 
                 'timezone'  => $request->timezone, 
                 'id'        => $request->id,
-                'openid'    => $request->openid
+                'openid'    => $request->openid,
+                'config'    => $cfg
             );
         }
         else
@@ -224,11 +230,12 @@ class Users extends Logic
                 'email'     => $request->email, 
                 'timezone'  => $request->timezone, 
                 'id'        => $request->id,
-                'openid'    => $request->openid
+                'openid'    => $request->openid,
+                'config'    => $cfg
             );
         }
 
-        unset($request->passwd, $request->confirmpasswd); // remove from memory !
+        unset($request->passwd, $request->confirmpasswd, $cfg); // remove from memory !
 
         if($request->id)
         {
@@ -382,7 +389,7 @@ class Users extends Logic
             $limit = 1;
         }
 
-        $datas = $this->_dao->get($args, 'id,login,rights,lang,email,openid,timezone', $order, $groupby, $limit);
+        $datas = $this->_dao->get($args, 'id,login,rights,lang,email,openid,timezone,config', $order, $groupby, $limit);
         if(!$datas)
         {
             $request->setResponse(new Response(array(
@@ -391,9 +398,20 @@ class Users extends Logic
             return $this;
         }
 
+        $multiple = !isset($datas['id']);
+
+        if($multiple)
+        {
+            foreach($datas as $row)
+            {
+                $row['config'] = @unserialize($row['config']);
+            }
+        }
+        else $datas['config'] = @unserialize($datas['config']);
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
-            'multiple'     => !isset($datas['id'])
+            'multiple'     => $multiple
         )));
         return $this;
     }

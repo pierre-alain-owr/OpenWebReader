@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php" type="text/css" media="screen" />
 <title><?php echo $this->_utilities->_('User creation');?></title>
 </head>
 <body>
-    <div id="login" class="shadow full_rounded">
+    <div id="edituser" class="shadow full_rounded">
         <form action="<?php echo OWR\Config::iGet()->makeURI('edituser');?>" method="post">
             <fieldset><legend><?php echo $this->_utilities->_('User informations');?></legend>
 <?php   if(isset($error)) {
@@ -33,28 +33,42 @@
             <label for="rights"><?php echo $this->_utilities->_('User rights');?> (*) :</label>
             <br/>
             <select name="rights" id="rights">
-                <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>
+                <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>
 <?php       if($userrights > OWR\User::LEVEL_USER) {
-                echo '<option value="'.OWR\User::LEVEL_ADMIN.'"'.(isset($rights) && $rights == 2 ? 'selected="selected"' : '').'>'.$this->_utilities->_('Administrator').'</option>';
+                echo '<option value="'.OWR\User::LEVEL_ADMIN.'"'.(isset($rights) && $rights == 2 ? ' selected="selected"' : '').'>'.$this->_utilities->_('Administrator').'</option>';
             } ?>
             </select>
             <br/>
             <label for="ulang"><?php echo $this->_utilities->_('Interface language');?> (*) :</label>
             <br/>
             <select name="ulang" id="ulang">
-                <option value="en_US"<?php if(isset($lang) && $lang === 'en_US'){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('English');?></option>
-                <option value="fr_FR"<?php if(isset($lang) && $lang === 'fr_FR'){ echo 'selected="selected"';}?>><?php echo $this->_utilities->_('French');?></option>
+                <option value="en_US"<?php if(isset($lang) && $lang === 'en_US'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('English');?></option>
+                <option value="fr_FR"<?php if(isset($lang) && $lang === 'fr_FR'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('French');?></option>
             </select>
             <br/>
             <label for="timezone"><?php echo $this->_utilities->_('Timezone');?> (*) :</label>
             <br/>
             <select name="timezone" id="timezone">
 <?php       foreach($timezones as $tz => $key) {
-                echo '<option value="'.$tz.'"'.(isset($timezone) && strcmp($tz, $timezone) === 0 ? 'selected="selected"' : '').'>'.$tz.'</option>';
+                echo '<option value="'.$tz.'"'.(isset($timezone) && strcmp($tz, $timezone) === 0 ? ' selected="selected"' : '').'>'.$tz.'</option>';
             } ?>
             </select>
             <br/>
-            <label for="identifier">OpenID :</label>
+            <label for="config_nbnews"><?php echo $this->_utilities->_('Number of news to display on each page');?> (*) :</label>
+            <br/>
+            <select name="config[nbnews]" id="config_nbnews">
+                <option value="10"<?php if(!isset($config['nbnews']) || (int)$config['nbnews'] === 10) { echo ' selected="selected"';}?>>10</option>
+                <option value="20"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 20) { echo ' selected="selected"';}?>>20</option>
+                <option value="30"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 30) { echo ' selected="selected"';}?>>30</option>
+                <option value="40"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 40) { echo ' selected="selected"';}?>>40</option>
+                <option value="50"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 50) { echo ' selected="selected"';}?>>50</option>
+            </select>
+            <br/>
+            <label for="config_blockimg"><?php echo $this->_utilities->_('Block images with javascript');?> (*) :</label>
+            <br/>
+            <input type="checkbox" name="config[blockimg]" id="config_blockimg"<?php if(!empty($config['blockimg'])) { echo ' checked="checked"';}?>/>
+            <br/>
+            <label for="openid">OpenID :</label>
             <br/>
             <input type="text" name="openid" size="25" id="openid" value="<?php if(isset($openid)){ echo $openid;}?>"/>
             <br/>

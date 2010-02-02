@@ -791,7 +791,7 @@ class Parser extends XMLReader
     {
         $data = nl2br(trim((string) $data));
         $data = preg_replace(   array(  "/<!\[CDATA\[(.*?)\]\]/is", // theorically useless here
-                                        '/(<img\b[^>]*)(src\s*=\s*([\'"])?((?:\/|%C2).*?)\\3\s*)([^>]*)\/?>/si',
+                                        '/(<img\b[^>]*)(src\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)\/?>/si',
                                         "/<div([^>]*>.*?)<\/div>/si"
                                 ), 
                                 array(  "\\1", 
@@ -800,11 +800,5 @@ class Parser extends XMLReader
                                 ), $data);
 
         $data = static::$_filter->purify($data);
-        
-        $data = preg_replace('/<img\b([^>]*)(src\s*=\s*([\'"])?(.*?)\\3\s*)[^>]*\/?>/ise',
-                    "'<a href=\"javascript:;\" title=\"Blocked image, click to see it ! " .
-                    "('.addcslashes(\"\\4\", '\"').')\" class=\"img_blocked backgrounded\" " .
-                    "onclick=\"rP.loadImage(this, \''.addcslashes(\"\\4\", '\'').'\');\">" .
-                    "<img alt=\"&nbsp;&nbsp;&nbsp;&nbsp;\"/></a>'", $data);
     }
 }

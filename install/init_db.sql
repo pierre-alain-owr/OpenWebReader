@@ -1,3 +1,5 @@
+-- MySQL dump 10.11
+--
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -221,6 +223,7 @@ CREATE TABLE `users` (
   `email` varchar(255) collate utf8_unicode_ci NOT NULL default '',
   `openid` varchar(255) collate utf8_unicode_ci NOT NULL,
   `timezone` varchar(255) collate utf8_unicode_ci NOT NULL default 'Europe/Paris',
+  `config` longtext collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`login`),
   UNIQUE KEY `email` (`email`),
