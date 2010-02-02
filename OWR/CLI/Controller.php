@@ -53,7 +53,8 @@ use OWR\Controller as MainController,
     OWR\cURLWrapper as cURLWrapper,
     OWR\DAO as DAO,
     OWR\DB as DB,
-    OWR\Logic as Logic;
+    OWR\Logic as Logic,
+    OWR\Threads as Threads;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -62,16 +63,17 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses OWR\Cron manages cron settings/locking (CLI mode or not)
  * @uses OWR\Controller parent controller
  * @uses OWR\DB the database link
- * @uses Request the request to execute
+ * @uses OWR\Request the request to execute
  * @uses OWR\Stream\Parser the stream parser
  * @uses OWR\Stream\Reader the stream reader
  * @uses OWR\Stream\Item the item reader
- * @uses User the current user
- * @uses Exception the exceptions handler
+ * @uses OWR\User the current user
+ * @uses OWR\Exception the exceptions handler
  * @uses OWR\Error the errors handler
  * @uses OWR\DB\Request a request sent to database
- * @uses cURLWrapper get favicon
- * @uses Logs the logs/errors storing object
+ * @uses OWR\cURLWrapper get favicon
+ * @uses OWR\Logs the logs/errors storing object
+ * @uses OWR\Threads the Threads object
  * @package OWR
  * @subpackage CLI
  */
@@ -141,27 +143,38 @@ class Controller extends MainController
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
         
-            if(empty($id))
+            $this->_cron = Cron::iGet();
+            if($this->_cron->isLocked($action.'_'.$id))
             {
-                $this->_cron = Cron::iGet();
-                if($this->_cron->isLocked($action))
-                {
-                    $this->_cron->abort($action);
-                    return $this;
-                }
-                // create a file that will lock the next processing of this cron job if the current is still running
-                $this->_cron->lock($action);
+                $this->_cron->abort($action.'_'.$id);
+                return $this;
             }
-
+            // create a file that will lock the next processing of this cron job if the current is still running
+            $this->_cron->lock($action.'_'.$id);
+            
             $this->$action(); // execute the given action
-
-            if(empty($id))
-                $this->_cron->unlock($action); // unlink file lock for next processing
+            
+            // wait for all the threads for this action to be finished
+            $i = 0;
+            $threads = Threads::iGet();
+	        while($threads->getQueueCount())
+	        {
+	            if(!$threads->exec())
+	            { // have to wait a bit
+	                if($i > 5) $i = 0; // reset the timer every 1+2+3+4+5s
+	                sleep(++$i);
+	            }
+	            else
+	            {
+	                $i = 0; // resetting timer
+	            }
+	        }
+	        
+            $this->_cron->unlock($action.'_'.$id); // unlink file lock for next processing
         } 
         catch(Exception $e) 
         {
-            if(empty($id))
-                $this->_cron->unlock($action, true); // unlink file lock for next processing
+            $this->_cron->unlock($action.'_'.$id, true); // unlink file lock for next processing
 
             $this->_db->rollback();
 

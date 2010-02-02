@@ -75,30 +75,6 @@ class Threads extends Singleton
     }
 
     /**
-     * Destructor
-     * Waits for the execution of all commands in queue
-     *
-     * @access public
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     */
-    public function __destruct()
-    {
-        $i = 0;
-        while($this->_queue->count())
-        {
-            if($this->_getProcessCount() < $this->_max)
-            {
-                $this->_exec();
-                $i = 0; // resetting timer
-            }
-            else
-            { // have to wait a bit
-                sleep(++$i);
-            }
-        }
-    }
-
-    /**
      * Adds a command to the queue
      * Executes immediatly the command if any slot left
      *
@@ -119,28 +95,55 @@ class Threads extends Singleton
             $cmd .= escapeshellarg($k).'='.escapeshellarg($v).' ';
         }
 
-        $cmd .= ' >> '.HOME_PATH.'logs/cli.log'; // redirect outputs to logs and set to non-blocking
+        $cmd .= ' >> '.HOME_PATH.'logs/cli.log'; // redirect outputs to logs
 
         $this->_queue->insert($cmd, $priority);
-        if($this->_getProcessCount() < $this->_max)
-        {
-            $this->_exec();
-        }
+        $this->exec();
     }
 
+    /**
+     * Returns the number of threads in queue
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return int threads count
+     */
+    public function getQueueCount()
+    {
+        return (int) $this->_queue->count();
+    }
+
+    /**
+     * Tries to execute a command
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     */
+    public function exec()
+    {
+        if($this->_getProcessCount() < $this->_max)
+        {
+            return $this->_exec();
+        }
+        
+        return false;
+    }
+    
     /**
      * Executes the command
      *
      * @access protected
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @return mixed return int status of executed command, or false if nothing left in queue
+     * @return boolean true on success
      */
     protected function _exec()
     {
         $cmd = $this->_queue->extract();
         if(!$cmd) return false;
 
-        return (int) pclose(popen(escapeshellcmd($cmd).' &', 'r'));
+        pclose(popen(escapeshellcmd($cmd).' &', 'r')); // the '&' sets to non-blocking
+        
+        return true;
     }
 
     /**
