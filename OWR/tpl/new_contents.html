@@ -149,7 +149,7 @@
                         <div class="enclosure">
                             <object type="application/x-shockwave-flash" data="dewplayer.swf?mp3=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>&amp;showtime=1" width="200" height="20">
                                 <param name="wmode" value="transparent" />
-                                <param name="movie" value="dewplayer.swf?mp3=test.mp3&amp;showtime=1" />
+                                <param name="movie" value="dewplayer.swf?mp3=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>&amp;showtime=1" />
                             </object>
                             <div class="spacer"></div>
 <?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
