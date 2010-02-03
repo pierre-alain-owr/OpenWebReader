@@ -112,7 +112,7 @@ class Controller extends MainController
 
         $this->_user = User::iGet(); // init user
     }
-    
+
     /**
      * Executes the given action
      * This method only accepts a Request object
@@ -137,12 +137,12 @@ class Controller extends MainController
             );
             if(!isset($authorized[$this->_request->do])) // hu ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
-    
+
             $action = 'do_'.$this->_request->do;
-    
+
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin ?
                 throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
-        
+
             $this->_cron = Cron::iGet();
             if($this->_cron->isLocked($action.'_'.$id))
             {
@@ -151,28 +151,28 @@ class Controller extends MainController
             }
             // create a file that will lock the next processing of this cron job if the current is still running
             $this->_cron->lock($action.'_'.$id);
-            
+
             $this->$action(); // execute the given action
-            
+
             // wait for all the threads for this action to be finished
             $i = 0;
             $threads = Threads::iGet();
-	        while($threads->getQueueCount())
-	        {
-	            if(!$threads->exec())
-	            { // have to wait a bit
-	                if($i > 5) $i = 0; // reset the timer every 1+2+3+4+5s
-	                sleep(++$i);
-	            }
-	            else
-	            {
-	                $i = 0; // resetting timer
-	            }
-	        }
-	        
+            while($threads->getQueueCount())
+            {
+                if(!$threads->exec())
+                { // have to wait a bit
+                    if($i > 5) $i = 0; // reset the timer every 1+2+3+4+5s
+                    sleep(++$i);
+                }
+                else
+                {
+                    $i = 0; // resetting timer
+                }
+            }
+
             $this->_cron->unlock($action.'_'.$id); // unlink file lock for next processing
-        } 
-        catch(Exception $e) 
+        }
+        catch(Exception $e)
         {
             $this->_cron->unlock($action.'_'.$id, true); // unlink file lock for next processing
 
@@ -203,7 +203,7 @@ class Controller extends MainController
             }
             while($error = @ob_get_clean());
         }
-        
+
         $hasErrors = false;
 
         if(Logs::iGet()->hasLogs())

@@ -8,7 +8,7 @@
         <title>OpenWebReader - <?php echo $this->_utilities->_('Restricted access');?></title>
     </head>
     <body>
-        <div id="login" class="full_rounded shadow">
+        <div id="loginbox" class="full_rounded shadow">
             <a href="http://openwebreader.org/">
             <img class="logo right" src="<?php echo $surl;?>images/images.php?f=owr_50_50.png" alt="OpenWebReader" title="OpenWebReader - http://openwebreader.org"/>
             </a>
@@ -34,4 +34,10 @@
             </form>
         </div>
     </body>
+    <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php"></script>
+    <script type="text/javascript">
+        window.addEvent('domready', function(){
+            $('login').focus();
+        });
+    </script>
 </html>
