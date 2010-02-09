@@ -896,6 +896,7 @@ OWR.prototype = {
                 this.messages['Getting details of the new'] = "Récupération des informations de la nouvelle";
                 this.messages['Marking news as unread'] = "Marquage des nouvelles comme non-lues";
                 this.messages['Editing the url of the stream'] = "Édition de l'url du flux";
+                this.messages['Editing tags'] = "Édition des tags";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -1026,12 +1027,18 @@ OWR.prototype = {
             var timer;
             item.addEvent('click', function(e, el) {
                 $clear(timer);
-                if(e.target.get('class') === 'link_go' || e.target.hasClass('new_status')) {return;}
+                if(e.target.hasClass('link_go')) {
+                    if(el.hasClass('new_container_nread')) {
+                        this.updateNews(el.get('id').split('_')[1]);
+                    }
+                    return false;
+                }
+                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags')) {return false;}
                 e.stop();
                 timer = (function(){
                     var id = el.get('id').split('_');
                     var element = $('new__'+id[1]+'_'+id[2]+'_'+id[3]);
-                    if(!element) {return;} // hu ?
+                    if(!element) {return false;} // hu ?
                     if(!element.get('html').trim()) {
                         this.getNew(el.get('id'));
                     } else {
@@ -1046,6 +1053,7 @@ OWR.prototype = {
                 }).delay(200, this);
             }.bindWithEvent(this, item));
             item.addEvent('dblclick', function(e, el) {
+                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags')) {return false;}
                 $clear(timer);
                 window.open(el.getFirst().getChildren('.link_go').get('href'));
                 if(el.hasClass('new_container_nread')) {
@@ -1896,6 +1904,30 @@ OWR.prototype = {
         }.bindWithEvent(this, [n, id]));
         r.get({'do': 'delete', 'id': id});
     },
+    deleteNew: function(id) {
+        if(!id) { return; }
+        if(!confirm(this.getMessage('Delete ?'))) {
+            return;
+        }
+        this.loading(true);
+        var n = this.setLog('Deleting');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
+        r.addEvent('failure', function(xhr, n) {
+            this.raiseXHRError(xhr.responseText, n);
+        }.bindWithEvent(this, n));
+        r.addEvent('success', function(json, n, id){
+            this.loading(false, n);
+            $$('id^=new__?'+id).destroy();
+        }.bindWithEvent(this, [n, id]));
+        r.get({'do': 'delete', 'id': id});
+    },
     moveToPage: function(offset) {
         if(!offset) { offset = 0; }
         if(this.pageOffset == offset) { return; }
@@ -2224,6 +2256,41 @@ OWR.prototype = {
             }
         }.bindWithEvent(this, [n, ids, idc, live, el]));
         r.get({'do': 'getnewcontents', 'id': ids[1], 'live': live, 'currentid': this.currentId, 'offset':this.pageOffset});
+    },
+    editTags: function(id) {
+        var tags = $('edit_tags_'+id);
+        if(!tags) {
+            return;
+        }
+        if(tags.hasClass('hidden')) {
+            tags.removeClass('hidden');
+        } else {
+            tags.addClass('hidden');
+        }
+    },
+    inputEditTags: function(obj, id) {
+        var n = this.setLog('Editing tags');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
+        r.addEvent('failure', function(xhr, n) {
+            this.raiseXHRError(xhr.responseText, n);
+        }.bindWithEvent(this, n));
+        r.addEvent('success', function(json, n, id){
+            this.loading(false, n);
+            var contents = this.parseResponse(json);
+            if(contents) {
+                var div = new Element('div',{'html':contents});
+                $('menu_tags').adopt(div.getChildren());
+            }
+            this.editTags(id);
+        }.bindWithEvent(this, [n,id]));
+        r.post({'do': 'edittagsrelations', 'ids': id, 'name': obj.get('value')});
     },
     clear: function() {
         this.setLog('Clearing myself, bye !');

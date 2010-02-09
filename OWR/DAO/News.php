@@ -119,6 +119,7 @@ class News extends DAO
         );
         $this->_relations = array(
             'news_contents'         => array('id'       => 'id'),
+            'news_relations_tags'   => array('id'       => 'newsid'),
             'streams'               => array('rssid'    => 'id')
         );
         parent::__construct();

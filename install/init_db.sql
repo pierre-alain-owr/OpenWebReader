@@ -1,5 +1,3 @@
--- MySQL dump 10.11
---
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -72,6 +70,45 @@ CREATE TABLE `news_relations` (
   CONSTRAINT `news_relations_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `news_relations_ibfk_2` FOREIGN KEY (`newsid`) REFERENCES `news` (`id`) ON DELETE CASCADE,
   CONSTRAINT `news_relations_ibfk_4` FOREIGN KEY (`rssid`) REFERENCES `streams` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `news_relations_tags`
+--
+
+DROP TABLE IF EXISTS `news_relations_tags`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `news_relations_tags` (
+  `newsid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `tid` int(11) NOT NULL,
+  UNIQUE KEY `uniq_key` (`newsid`,`tid`),
+  KEY `uid` (`uid`),
+  KEY `tid` (`tid`),
+  CONSTRAINT `news_relations_tags_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `news_relations_tags_ibfk_2` FOREIGN KEY (`newsid`) REFERENCES `news` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `news_relations_tags_ibfk_3` FOREIGN KEY (`tid`) REFERENCES `news_tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `news_tags`
+--
+
+DROP TABLE IF EXISTS `news_tags`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `news_tags` (
+  `id` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  UNIQUE KEY `uniq_key` (`uid`,`name`),
+  KEY `uid` (`uid`),
+  KEY `id` (`id`),
+  CONSTRAINT `news_tags_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `news_tags_ibfk_2` FOREIGN KEY (`id`) REFERENCES `objects` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
@@ -259,3 +296,5 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2010-02-09 17:56:00

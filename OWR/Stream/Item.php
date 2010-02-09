@@ -110,7 +110,7 @@ class Item
                     }
                 }
             }
-            else
+            elseif(isset($this->_item['link'][0]))
             {
                 $this->_item['url']['contents'] = $this->_item['link'][0]['attributes']['href'];
             }
@@ -129,7 +129,7 @@ class Item
                         }
                     }
                 }
-                else
+                elseif(isset($node['contents']))
                 {
                     $this->_item['description']['contents'] = $node['contents'];
                 }

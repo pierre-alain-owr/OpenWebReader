@@ -786,15 +786,16 @@ class Streams extends Logic
                     break;
 
                 case 'streams_groups': 
-                    $query .= '
-    DELETE FROM news_relations
-        WHERE rssid IN 
-            (SELECT rssid
-                FROM streams_relations
-                WHERE gid='.$request->id.' AND uid='.User::iGet()->getUid().')
-            AND uid='.User::iGet()->getUid();
+                    $query = '
+    DELETE FROM news_relations nr
+        JOIN streams_relations sr ON (nr.rssid=sr.rssid)
+        WHERE gid='.$request->id.' AND nr.uid='.User::iGet()->getUid().' AND sr.uid='.User::iGet()->getUid();
 
                     $this->_db->set($query);
+                    break;
+
+                case 'news_tags':
+                    DAO::getCachedDAO('news_relations_tags')->delete(array('tid' => $request->id));
                     break;
 
                 default: 
@@ -834,6 +835,16 @@ class Streams extends Logic
      */
     public function rename(Request $request)
     {
+        if(empty($request->name))
+        {
+            $request->setResponse(new Response(array(
+                'do'        => 'error',
+                'error'     => 'Missing name',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+
         $stream = DAO::getCachedDAO('streams_relations_name')->get(array('rssid'=>$request->id), 'rssid, uid');
         if(!$stream)
         {
@@ -1039,7 +1050,7 @@ class Streams extends Logic
                     {
                         $image = new \Imagick();
                         $image->setFormat('ico');
-                        if($image->readImageBlob($icon))
+                        if(@$image->readImageBlob($icon))
                         {
                             $image->destroy();
                             unset($image);
@@ -1137,7 +1148,7 @@ class Streams extends Logic
                                 {
                                     $image = new \Imagick();
                                     $image->setFormat('ico');
-                                    if($image->readImageBlob($icon))
+                                    if(@$image->readImageBlob($icon))
                                     {
                                         $image->destroy();
                                         unset($image);

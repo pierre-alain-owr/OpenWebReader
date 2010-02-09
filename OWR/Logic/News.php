@@ -214,18 +214,69 @@ class News extends Logic
             return $this;
         }
 
+        $dao = DAO::getCachedDAO('news_relations_tags');
+
         if(!isset($datas['id']))
         {
             $multiple = true;
-            if(!isset($request->getContents) || $request->getContents)
+            $ids = array();
+
+            foreach($datas as $k => $data)
             {
-                foreach($datas as $k => $data)
+                if(!isset($request->getContents) || $request->getContents)
+                {
                     $datas[$k]['contents'] = unserialize($data['contents']);
+                }
+
+                $args['newsid'] = $data['id'];
+                $tags = $dao->get($args, 'news_tags.name,tid');
+                if($tags)
+                {
+                    $fullTags = array();
+                    if(!isset($tags['name']))
+                    {
+                        foreach($tags as $tag)
+                        {
+                            $fullTags[] = $tag['name'];
+                            $ids[] = $tag['tid'];
+                        }
+                    }
+                    else
+                    {
+                        $fullTags[] = $tags['name'];
+                        $ids[] = $tags['tid'];
+                    }
+
+                    $datas[$k]['tags'] = join(',', $fullTags);
+                }
+                else $datas[$k]['tags'] = '';
             }
+            $datas['ids'] = $ids;
         }
-        elseif(!isset($request->getContents) || $request->getContents)
+        else
         {
-            $datas['contents'] = unserialize($datas['contents']);
+            if(!isset($request->getContents) || $request->getContents)
+                $datas['contents'] = unserialize($datas['contents']);
+            $args['newsid'] = $datas['id'];
+            $tags = $dao->get($args, 'news_tags.name');
+            if($tags)
+            {
+                $fullTags = array();
+                if(!isset($tags['name']))
+                {
+                    foreach($tags as $tag)
+                    {
+                        $fullTags[] = $tag['name'];
+                    }
+                }
+                else
+                {
+                    $fullTags[] = $tags['name'];
+                }
+
+                $datas['tags'] = join(',', $fullTags);
+            }
+            else $datas['tags'] = '';
         }
 
         $request->setResponse(new Response(array(
@@ -322,7 +373,7 @@ class News extends Logic
     UPDATE news_relations nr
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
-        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
         AND nr.rssid='.$request->id.' AND lastupd < '.$request->timestamp;
                 }
                 else
@@ -352,6 +403,27 @@ class News extends Logic
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
         SET status='.$status.'
         WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rr.gid='.$request->id;
+                }
+            }
+            elseif('news_tags' === $table)
+            {
+                if($request->timestamp > 0)
+                {
+                    $query = '
+    UPDATE news_relations nr
+        JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
+        JOIN news n ON (nr.newsid=n.id)
+        SET status='.$status.'
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        AND nrt.tid='.$request->id.' AND lastupd < '.$request->timestamp;
+                }
+                else
+                {
+                    $query = '
+    UPDATE news_relations nr
+        JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
+        SET status='.$status.'
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND nrt.tid='.$request->id;
                 }
             }
             elseif('news' === $table)

@@ -601,7 +601,7 @@ class Controller extends Singleton
                 $tpl = $response->getTpl();
                 if($tpl)
                 {
-                    $this->_getPage($response->getTpl(), $response->getDatas());
+                    $this->_getPage($tpl, $response->getDatas());
                 }
                 else Logs::iGet()->log($response->getError(), $response->getStatus());
                 $ret = false;
@@ -756,7 +756,7 @@ class Controller extends Singleton
             case 'menu_part_category':
                 $datas['gname'] = $datas['name'];
                 $datas['groupid'] = $datas['gid'];
-                
+
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
 
@@ -801,6 +801,11 @@ class Controller extends Singleton
                     if('error' !== $response->getNext())
                     {
                         $stream = $response->getDatas();
+                        if(empty($stream))
+                        {
+                            $empty = true;
+                            break;
+                        }
                         $stream['groups'] = $groups;
                         if($stream['status'] > 0) 
                         {
@@ -873,7 +878,7 @@ class Controller extends Singleton
                 if(isset($datas['offset']))
                 {
                     $datas['offset'] = (int)$datas['offset'];
-                    
+
                     if($datas['offset'] > 0)
                     {
                         $offset = (int)($datas['offset']*10);
@@ -936,6 +941,12 @@ class Controller extends Singleton
                         $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
+                    elseif('news_tags' === $table)
+                    {
+                        Logic::getCachedLogic('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
+                        $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                    }
                     else
                     {
                         Logs::iGet()->log('Invalid id');
@@ -975,7 +986,9 @@ class Controller extends Singleton
                     $page .= $pager;
                 }
 
-                foreach($news as $new)
+                unset($news['ids']);
+
+                foreach($news as $k => $new)
                 {
                     if(isset($datas['searchResults'][$new['id']]))
                         $new['search_result'] = (float) $datas['searchResults'][$new['id']];
@@ -1065,6 +1078,10 @@ class Controller extends Singleton
                                             ));
                 $page .= $tmpPage;
                 unset($tmpPage);
+                $page .= $this->_view->get('menu_tags', array(), $cacheTime);
+
+                $page .= $this->_getPage('menu_tags_contents', $datas, true);
+
                 $page .= $this->_view->get('menu_footer', array(
                                                             'groups'            => $groups, 
                                                             'userrights'        => $this->_user->getRights(),
@@ -1091,6 +1108,45 @@ class Controller extends Singleton
                                                         'ttl'=>$this->_cfg->get('defaultMinStreamRefreshTime')*60*1000,
                                                         'opensearch'=>(isset($datas['opensearch']) ? $datas['opensearch'] : 0)
                                                     ));
+                break;
+
+            case 'menu_tags_contents':
+                $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
+                Logic::getCachedLogic('news_tags')->view($request);
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $tags = $response->getDatas();
+                    if(!empty($tags))
+                    {
+                        if($response->isMultiple())
+                        {
+                            foreach($tags as $tag)
+                            {
+                                $tag['groupid'] = $tag['id'];
+                                $tag['gname'] = $tag['name'];
+                                $noCacheDatas['unread'] = isset($this->_request->unreads[$tag['id']]) ? $this->_request->unreads[$tag['id']] : 0;
+                                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
+                                $page .= $this->_view->get('menu_tags_contents', $tag, $cacheTime, $noCacheDatas);
+                            }
+                        }
+                        else
+                        {
+                            $tags['groupid'] = $tags['id'];
+                            $tags['gname'] = $tags['name'];
+                            $noCacheDatas['unread'] = isset($this->_request->unreads[$tags['id']]) ? $this->_request->unreads[$tags['id']] : 0;
+                            $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
+                            $page .= $this->_view->get('menu_tags_contents', $tags, $cacheTime, $noCacheDatas);
+                        }
+                    }
+                    else $empty = true;
+                    unset($tags);
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
                 break;
 
             case 'getopensearch':
@@ -1229,7 +1285,7 @@ class Controller extends Singleton
                     $empty = true;
                 }
                 unset($response, $request);
-                
+
                 if(!empty($ids))
                 {
                     $query = '
@@ -1239,7 +1295,7 @@ class Controller extends Singleton
                     $this->_db->set($query);
                 }
                 break;
-            
+
             case 'login':
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['xmlLang'] = $this->_user->getXMLLang();
@@ -1250,7 +1306,7 @@ class Controller extends Singleton
             default: 
                 break;
         }
-        
+
         if(!empty($page))
         {
             if($return)
@@ -1366,7 +1422,7 @@ class Controller extends Singleton
         $this->_getPage('menu_part_stream', array('id'=>$this->_request->id));
         return $this;
     }
-    
+
     /**
      * Renders news template from a specific stream with a specific offset
      *
@@ -1379,8 +1435,8 @@ class Controller extends Singleton
         if(0 < $this->_request->id)
         {
             $type = DAO::getType($this->_request->id);
-            
-            if('streams' !== $type && 'streams_groups' !== $type)
+
+            if('streams' !== $type && 'streams_groups' !== $type && 'news_tags' !== $type)
                 throw new Exception('Invalid Id', Exception::E_OWR_BAD_REQUEST);
         }
 
@@ -1409,7 +1465,7 @@ class Controller extends Singleton
         else
         {
             $type = DAO::getType($this->_request->id);
-            
+
             if('streams' === $type)
             {
                 $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'rssid' => $this->_request->id));
@@ -1424,7 +1480,7 @@ class Controller extends Singleton
         $this->_request->page = $nb ? $nb->nb : 0;
         return $this;
     }
-    
+
     /**
      * Renders or sets the unreads news count
      *
@@ -1460,6 +1516,22 @@ class Controller extends Singleton
             }
         }
 
+        $nb = DAO::getCachedDAO('news_relations')->count(array('status' => 1, 'FETCH_TYPE' => 'array'), 'newsid', 'tid', 'tid');
+        if($nb)
+        {
+            if(is_array($nb[0]))
+            {
+                foreach($nb as $count)
+                {
+                    $unreads[$count[1]] = $count[0];
+                }
+            }
+            else
+            {
+                $unreads[$nb[1]] = $nb[0];
+            }
+        }
+
         if(!$return)
             $this->_request->page = $unreads;
         else
@@ -1480,7 +1552,7 @@ class Controller extends Singleton
         $this->_getPage('index');
         return $this;
     }
-    
+
     /**
      * Renders the list of the users
      *
@@ -1492,7 +1564,7 @@ class Controller extends Singleton
     {
         if(!$this->_user->isAdmin())
             throw new Exception('You don\'t have the rights to do that.', Exception::E_OWR_UNAUTHORIZED);
-        
+
         $this->_getPage('users');
         return $this;
     }
@@ -1524,15 +1596,15 @@ class Controller extends Singleton
     {
         if(!$this->_request->id)
             throw new Exception('An id is required', Exception::E_OWR_BAD_REQUEST);
-        
+
         $type = DAO::getType($this->_request->id);
         if('news' !== $type) throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
-        
+
         if($this->_request->live)
         {
             try
             {
-                $this->do_upnew(false, 'news');
+                $this->do_upNew(false, 'news');
             }
             catch(Exception $e)
             {
@@ -1548,11 +1620,11 @@ class Controller extends Singleton
                 }
             }
         }
-        
+
         $this->_getPage('new_contents', array('id'=>$this->_request->id, 'offset'=>$this->_request->offset));
         return $this;
     }
-    
+
     /**
      * Exports the feeds in OPML format
      *
@@ -1620,9 +1692,11 @@ class Controller extends Singleton
         AND id NOT IN (
             SELECT id FROM users)
         AND id NOT IN (
-            SELECT id FROM news)';
+            SELECT id FROM news)
+        AND id NOT IN (
+            SELECT id FROM news_tags)';
         $this->_db->set($query);
-        
+
         $query = '
     DELETE FROM objects
         WHERE id IN (
@@ -1631,7 +1705,7 @@ class Controller extends Singleton
                     SELECT rssid
                         FROM streams_relations
                         GROUP BY rssid))';
-        
+
         $this->_db->set($query);
 
         $query = '
@@ -1639,7 +1713,7 @@ class Controller extends Singleton
         WHERE id NOT IN (
             SELECT id
                 FROM news)';
-        
+
         $this->_db->set($query);
 
         $query = '
@@ -1719,7 +1793,7 @@ class Controller extends Singleton
             $this->_getPage('index');
             return $this;
         }
-        
+
         $query = '
     SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
@@ -1732,7 +1806,7 @@ class Controller extends Singleton
                 WHERE uid='.$this->_user->getUid();
         else
         {
-            $query .= 'SELECT newsid
+            $query .= 'SELECT nr.newsid
                 FROM news_relations nr
                 ';
             $type = DAO::getType($this->_request->id);
@@ -1745,9 +1819,14 @@ class Controller extends Singleton
 
                 case 'streams_groups':
                     $query .= '
-
                 JOIN streams_relations sr ON (nr.rssid=sr.rssid)
                 WHERE nr.uid='.$this->_user->getUid().' AND sr.uid='.$this->_user->getUid().' AND gid='.$this->_request->id;
+                    break;
+
+                case 'news_tags':
+                    $query .= '
+                JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
+                WHERE nr.uid='.$this->_user->getUid().' AND nrt.uid='.$this->_user->getUid().' AND tid='.$this->_request->id;
                     break;
 
                 default:
@@ -1801,7 +1880,7 @@ class Controller extends Singleton
             throw new Exception('Empty search, please enter at least a keyword !', Exception::E_OWR_BAD_REQUEST);
             return $this;
         }
-        
+
         $query = '
     SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
@@ -1814,7 +1893,7 @@ class Controller extends Singleton
                 WHERE uid='.$this->_user->getUid();
         else
         {
-            $query .= 'SELECT newsid
+            $query .= 'SELECT nr.newsid
                 FROM news_relations nr
                 ';
             $type = DAO::getType($this->_request->id);
@@ -1827,9 +1906,14 @@ class Controller extends Singleton
 
                 case 'streams_groups':
                     $query .= '
-
                 JOIN streams_relations sr ON (nr.rssid=sr.rssid)
                 WHERE nr.uid='.$this->_user->getUid().' AND sr.uid='.$this->_user->getUid().' AND gid='.$this->_request->id;
+                    break;
+
+                case 'news_tags':
+                    $query .= '
+                JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
+                WHERE nr.uid='.$this->_user->getUid().' AND nrt.uid='.$this->_user->getUid().' AND tid='.$this->_request->id;
                     break;
 
                 default:
@@ -1898,7 +1982,7 @@ class Controller extends Singleton
     protected function do_login($auto=false, $openid=null)
     {
         $exists = DAO::getCachedDAO('users')->get(null, 'id', null, null, 1);
-        
+
         if(!$exists)
         {
             $this->_user->reset();
@@ -1906,7 +1990,7 @@ class Controller extends Singleton
             return $this;
         }
         unset($exists);
-        
+
         if(!$auto && empty($_POST) && !isset($openid) && empty($this->_request->identifier))
         {
             $datas = array();
@@ -1916,9 +2000,9 @@ class Controller extends Singleton
             $this->_getPage('login', $datas);
             return $this;
         }
-        
+
         $uid = 0;
-        
+
         if($auto)
         {
             if(!$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, $this->_request->do))
@@ -1976,7 +2060,7 @@ class Controller extends Singleton
                 $this->_getPage('login', array('error'=>'Invalid token'));
                 return $this;
             }
-            
+
             if(empty($this->_request->login) || empty($this->_request->passwd))
             {
                 $this->_user->reset();
@@ -1989,12 +2073,12 @@ class Controller extends Singleton
                 $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
                 return $this;
             }
-            
+
             $this->_user->auth($this->_request->login, md5($this->_request->login.$this->_request->passwd));
 
             unset($this->_request->passwd);
         }
-        
+
         $uid = $this->_user->getUid();
 
         if(!$uid)
@@ -2003,7 +2087,7 @@ class Controller extends Singleton
             $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
             return $this;
         }
-        
+
         if(!$auto)
         { // we set the session only if it is NOT a token login
         // because actions for this type of login is restricted and will always need
@@ -2033,7 +2117,7 @@ class Controller extends Singleton
     {
         $this->_user->reset();
         $_SESSION = array();
-        
+
         $session = session_name();
         $sessid = session_id();
 
@@ -2044,9 +2128,9 @@ class Controller extends Singleton
                 setcookie($name, '', $this->_request->begintime - 42000, $this->_cfg->get('path'), $this->_cfg->get('url'), $this->_cfg->get('httpsecure'), true);
             }
         }
-        
+
         if($sessid) session_destroy();
-        
+
         unset($sessid);
         if($redirect)
             $this->redirect('login');
@@ -2097,7 +2181,7 @@ class Controller extends Singleton
                 case 'news':
                 case 'streams':
                 case 'streams_groups':
-                    $tpl = 'news';
+                case 'news_tags':
                     Logic::getCachedLogic($type)->delete($this->_request);
                     if(!$this->processResponse($this->_request->getResponse())) return $this;
                     break;
@@ -2107,15 +2191,15 @@ class Controller extends Singleton
                     break;
             }
         }
-        
+
         if(!isset($escape) && (!$this->_request->currentid || $this->_request->id === $this->_request->currentid))
         {
             $this->_getPage('news', array('id' => 0, 'sort' => $this->_request->sort ?: '', 'dir' => $this->_request->dir ?: ''));
-        } 
+        }
 
         return $this;
     }
-    
+
     /**
      * Adds a stream and redirects the user to the index
      * Used by externals call
@@ -2127,11 +2211,11 @@ class Controller extends Singleton
     protected function do_add()
     {
         $this->do_editstream();
-       
+
         $this->redirect();
         return $this;
     }
-    
+
     /**
      * Adds a stream
      *
@@ -2152,7 +2236,7 @@ class Controller extends Singleton
 
         return $this;
     }
-    
+
     /**
      * Adds/Edits a category
      *
@@ -2181,10 +2265,10 @@ class Controller extends Singleton
 
         return $this;
     }
-    
+
     /**
      * Adds streams from OPML input
-     * If an url is passed, we'll try to get the opml remote file
+     * If an url is passed, we'll try to get the remote opml file
      * else it is an uploaded file
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
@@ -2292,27 +2376,24 @@ class Controller extends Singleton
 
         return $this;
     }
-    
 
     /**
      * Update new(s) status (read/unread)
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param boolean $display must-we render something ?
-     * @param string the name of the table corresponding to the specified id, optionnal
      * @access protected
      * @return $this
      */
-    protected function do_upNew($display=true, $table='')
+    protected function do_upNew()
     {
         Logic::getCachedLogic('news')->update($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
     }
-    
+
     /**
-     * Delete all news relations between the user and a specified stream/category
+     * Delete all news relations between the user and a specified stream/category/tag
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
@@ -2325,7 +2406,7 @@ class Controller extends Singleton
 
         return $this;
     }
-    
+
     /**
      * Adds/Edits a user
      * Must be an administrator to add or edit another user
@@ -2344,7 +2425,37 @@ class Controller extends Singleton
     }
 
     /**
-     * Renames a stream/category
+     * Adds/Edits a tag
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_editTag()
+    {
+        Logic::getCachedLogic('news_tags')->edit($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+
+    /**
+     * Adds/removes tag(s) to new(s)
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_editTagsRelations()
+    {
+        Logic::getCachedLogic('news_tags')->editRelations($this->_request);
+        $this->processResponse($this->_request->getResponse());
+
+        return $this;
+    }
+
+    /**
+     * Renames a stream/category/tag
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
@@ -2361,28 +2472,15 @@ class Controller extends Singleton
             )));
             return $this;
         }
-        
-        if(empty($this->_request->name))
-        {
-            $this->processResponse(new LogicResponse(array(
-                'do'        => 'error',
-                'error'     => 'Missing name',
-                'status'    => Exception::E_OWR_BAD_REQUEST
-            )));
-            return $this;
-        }
 
         $type = DAO::getType($this->_request->id);
         $obj = null;
         switch($type)
         {
             case 'streams':
-                Logic::getCachedLogic('streams')->rename($this->_request);
-                if(!$this->processResponse($this->_request->getResponse())) return $this;
-                break;
-            
             case 'streams_groups':
-                Logic::getCachedLogic('streams_groups')->rename($this->_request);
+            case 'news_tags':
+                Logic::getCachedLogic($type)->rename($this->_request);
                 if(!$this->processResponse($this->_request->getResponse())) return $this;
                 break;
 

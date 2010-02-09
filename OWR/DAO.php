@@ -72,7 +72,7 @@ abstract class DAO implements iDAO
      * @access protected
      */
     protected $_uniqueFields = array();
-    
+
     /**
      * @var string the name of the field used to have a unique ID
      * @access protected
@@ -200,7 +200,7 @@ abstract class DAO implements iDAO
         $wheres = $request = $fields = $joins = array();
 
         $query = '
-    SELECT '.(string) $this->_prepareSelect($select, $joins, $wheres).' 
+    SELECT '.$this->_prepareSelect($select, $joins, $wheres).'
         FROM '.$this->_name;
 
         if(is_array($args))
@@ -525,7 +525,7 @@ abstract class DAO implements iDAO
         $wheres = $request = $fields = $joins = array();
 
         $query = '
-    SELECT COUNT('.(string) $this->_prepareSelect($select, $joins, $wheres).') AS nb'.(!empty($selectAdd) ? ', '.$this->_prepareSelect($selectAdd, $joins, $wheres) : '').'
+    SELECT COUNT('.$this->_prepareSelect($select, $joins, $wheres).') AS nb'.(!empty($selectAdd) ? ', '.$this->_prepareSelect($selectAdd, $joins, $wheres) : '').'
         FROM '.$this->_name;
 
         if(is_array($args))
@@ -727,17 +727,22 @@ abstract class DAO implements iDAO
                         $field = 'rssid';
                         $table = 'streams_relations';
                         break;
-        
+
                     case 'streams_groups':
                         $field = 'id';
                         $table = $type->type;
                         break;
-        
+
                     case 'news':
                         $field = 'newsid';
                         $table = 'news_relations';
                         break;
-        
+
+                    case 'news_tags':
+                        $field = 'id';
+                        $table = $type->type;
+                        break;
+
                     case 'users':
                         if(User::iGet()->isAdmin())
                         {
@@ -746,7 +751,7 @@ abstract class DAO implements iDAO
                         }
                         throw new Exception('Invalid id', Exception::E_OWR_UNAUTHORIZED);
                         break;
-        
+
                     default:
                         throw new Exception('Invalid id', Exception::E_OWR_BAD_REQUEST);
                         break;
@@ -1241,6 +1246,8 @@ abstract class DAO implements iDAO
         $DBResult = self::$_db->getP((string) $query, $request, (bool) $force);
 
         $DBResults = array();
+        $fetchType = (string) $fetchType;
+
         if('assoc' === $fetchType)
         {
             $DBResults = $DBResult->fetchAll(\PDO::FETCH_ASSOC);
@@ -1599,6 +1606,6 @@ abstract class DAO implements iDAO
             }
         }
 
-        return join(',', $selects); // we are done, recompoze the select string
+        return (string) join(',', $selects); // we are done, recompoze the select string
     }
 }

@@ -93,6 +93,7 @@ class Objects extends DAO
             case 'streams':
             case 'users':
             case 'streams_groups':
+            case 'news_tags':
                 break;
 
             default:

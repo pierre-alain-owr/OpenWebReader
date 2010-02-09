@@ -165,7 +165,7 @@ $cfg['openIDUrl']               = 'http'.($cfg['httpsecure'] ? 's' : '').'://'.$
 $cfg['openIDReturn']            = $cfg['surl'].'?do=verifyOpenID&try=1';
 
 // version
-$cfg['version']                 = '0.1a2';
+$cfg['version']                 = '0.2';
 
 // activate debug mode here
 define('DEBUG', false);

@@ -1,8 +1,12 @@
                 <div class="article_title full_rounded shadow new_container_<?php if($status){ echo 'n';}?>read" id="new_<?php echo $id.'_'.$streamid.'_'.$gid;?>" title="<?php echo $this->_utilities->_('Show the new');?>">
                     <div class="new_title">
                         <span class="verysmall"><?php echo $title;?></span>
-                        <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');rP.clearNew(this);" class="link_go right backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
+                        <a href="javascript:;" onclick="rP.deleteNew(<?php echo $id;?>);" class="delete right backgrounded opac" title="<?php echo $this->_utilities->_('Delete new');?>"></a>
+                        <input type="text" class="hidden right new_tags" id="edit_tags_<?php echo $id;?>" onchange="rP.inputEditTags(this, <?php echo $id;?>);" value="<?php echo htmlspecialchars($tags, ENT_COMPAT, 'UTF-8', false);?>"/>
+                        <a href="javascript:;" onclick="rP.editTags(<?php echo $id;?>);" class="new_tag right backgrounded opac" title="<?php echo $this->_utilities->_('Edit tags');?>"></a>
                         <a href="javascript:;" onclick="rP.updateNews(<?php echo $id;?>, true);" class="new_status right backgrounded opac" title="<?php echo $this->_utilities->_('Toggle new status');?>"></a>
+                        <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');" class="link_go right backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
+
 <?php           if($status) {
                     echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded"></a>';
                 } 

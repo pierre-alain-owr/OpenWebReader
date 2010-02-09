@@ -654,7 +654,7 @@ a.current.hidden, a.current_stream.hidden
 input.openid
 {
     background-image:url(../images/images.php?f=icons.png);
-    background-position:-710px 0px;
+    background-position:-728px 0px;
     background-repeat:no-repeat;
     width:180px;
     padding-left:20px;
@@ -741,6 +741,12 @@ input.openid
 .new_status
 {
     background-position:-659px 0px;
+    margin:2px 5px 0 0;
+}
+
+.new_tag
+{
+    background-position:-709px 0px;
     margin:2px 5px 0 0;
 }
 

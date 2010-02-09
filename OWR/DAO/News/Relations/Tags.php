@@ -1,6 +1,6 @@
 <?php
 /**
- * DAO Object representing the table news_relations
+ * DAO Object representing the table news_relations_tags
  *
  * PHP 5
  *
@@ -32,18 +32,18 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage DAO\news
+ * @subpackage DAO\news\relations
  */
-namespace OWR\DAO\news;
+namespace OWR\DAO\news\relations;
 use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
 /**
- * This object represents the table news_relations
+ * This object represents the table news_relations_tags
  * @uses DAO extends the base class
  * @uses DBRequest defines the fields type
  * @package OWR
- * @subpackage DAO\news
+ * @subpackage DAO\news\relations
  */
-class Relations extends DAO
+class Tags extends DAO
 {
     /**
      * @var int new's id
@@ -58,16 +58,10 @@ class Relations extends DAO
     public $uid;
 
     /**
-     * @var int new' status
+     * @var int tag's id
      * @access public
      */
-    public $status;
-
-    /**
-     * @var int stream's id
-     * @access public
-     */
-    public $rssid;
+    public $tid;
 
     /**
      * Constructor
@@ -78,18 +72,16 @@ class Relations extends DAO
     public function __construct()
     {
         $this->_fields = array(
-            'newsid'    =>  array('required' => true, 'type' => \PDO::PARAM_INT),
-            'rssid'     =>  array('required' => true, 'type' => \PDO::PARAM_INT),
-            'status'    =>  array('required' => false, 'type' => \PDO::PARAM_INT, 'default' => 1),
-            'uid'       =>  array('required' => true, 'type' => \PDO::PARAM_INT)
+            'newsid' => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'tid'    => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'uid'    => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'streams_relations'     => array('rssid'    => 'rssid'),
-            'news_relations_tags'   => array('newsid'   => 'newsid')
+            'news_relations'    => array('newsid'   => 'newsid'),
+            'news_tags'         => array('tid'      => 'id')
         );
         $this->_relations = array(
-            'streams'           => array('rssid'    => 'id'),
-            'news'              => array('newsid'   => 'id')
+            'news'              => array('newsid'   => 'id'),
         );
         parent::__construct();
     }

@@ -107,6 +107,7 @@ class Request
                     foreach($datas['ids'] as $k=>$id)
                         $this->ids[$k] = (int) $id;
                 }
+                else $this->ids = (array) ( (int) $datas['ids']);
 
                 unset($datas['ids']);
             }
