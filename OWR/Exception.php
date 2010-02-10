@@ -98,6 +98,7 @@ class Exception extends Exceptions
      */
     public function __construct($errstr, $errcode = self::E_OWR_DIE) 
     {
+        $errcode = (int) $errcode;
         switch($errcode)
         {
             case E_STRICT:
@@ -133,7 +134,7 @@ class Exception extends Exceptions
                 break;
         }
 
-        parent::__construct($errstr, (int) $errcode);
+        parent::__construct($errstr, $errcode);
     }
 
     /**

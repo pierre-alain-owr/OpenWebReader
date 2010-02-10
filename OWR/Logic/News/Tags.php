@@ -250,7 +250,7 @@ class Tags extends Logic
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'error'     => 'Missing id(s) of news',
+                'error'     => 'Missing ids of news',
                 'status'    => Exception::E_OWR_BAD_REQUEST
             )));
             return $this;

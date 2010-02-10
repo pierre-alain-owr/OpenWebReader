@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: pierre-alain@openwebreader.org\n"
 "POT-Creation-Date: 2009-03-21 17:52+0100\n"
-"PO-Revision-Date: 2010-02-09 18:36+0100\n"
+"PO-Revision-Date: 2010-02-10 20:25+0100\n"
 "Last-Translator: Pierre-Alain Mignot <pierre-alain@openwebreader.org>\n"
 "Language-Team: en_US\n"
 "MIME-Version: 1.0\n"
@@ -414,3 +414,222 @@ msgstr "Rename this tag"
 
 msgid "Delete all the news from this tag"
 msgstr "Remove all the news from this tag"
+
+msgid "Non-blocking error(s) occured"
+msgstr "Non-blocking error(s) occured"
+
+msgid "CLI interface required"
+msgstr "CLI interface required"
+
+msgid "Invalid action \"%s\""
+msgstr "Invalid action \"%s\""
+
+msgid "Invalid return from Logic"
+msgstr "Invalid return from Logic"
+
+msgid "Missing id"
+msgstr "Missing id"
+
+msgid "Missing type"
+msgstr "Missing type"
+
+msgid "Missing url"
+msgstr "Missing url"
+
+msgid "Missing operator"
+msgstr "Missing operator"
+
+msgid "You don't have the rights to do that"
+msgstr "You don't have the rights to do that, contact your administrator"
+
+msgid "An id is required"
+msgstr "An id is required"
+
+msgid "Empty search, please enter at least a keyword"
+msgstr "Empty search, please enter at least one keyword of 3 chars length"
+
+msgid "Internal error while redirecting to your OP"
+msgstr "Internal error while redirecting to your OP"
+
+msgid "Missing type for cron managing"
+msgstr "Missing type for cron managing"
+
+msgid "No way to write into cache directory"
+msgstr "No way to write into cache directory"
+
+msgid "No values to save, you surely have an error in your code"
+msgstr "No values to save, you surely have an error in your code"
+
+msgid "Some values are not uniques"
+msgstr "Some values are not uniques"
+
+msgid "Don't know what to save"
+msgstr "Don't know what to save !"
+
+msgid "Missing value for required parameter \"%s\""
+msgstr "Missing value for required parameter \"%s\""
+
+msgid "Nothing to delete"
+msgstr "Nothing to delete !"
+
+msgid "Invalid type"
+msgstr "Invalid type of object"
+
+msgid "Please specify the stream to set as unavailable"
+msgstr "Please specify the stream to set as unavailable"
+
+msgid "Invalid email for field \"%s\""
+msgstr "Invalid email for field \"%s\""
+
+msgid "Invalid url for field \"%s\""
+msgstr "Invalid url for field \"%s\""
+
+msgid "Invalid IP address for field \"%s\""
+msgstr "Invalid IP address for field \"%s\""
+
+msgid "Invalid lang for field \"%s\""
+msgstr "Invalid lang for field \"%s\""
+
+msgid "Invalid login for field \"%s\""
+msgstr "Invalid login for field \"%s\""
+
+msgid "Invalid password for field \"%s\""
+msgstr "Invalid password for field \"%s\""
+
+msgid "Invalid rights for field \"%s\""
+msgstr "Invalid rights for field \"%s\""
+
+msgid "Invalid hash for field \"%s\""
+msgstr "Invalid hash for field \"%s\""
+
+msgid "Unknown fetch type"
+msgstr "Unknown fetch type"
+
+msgid "Can not parse stream \"%s\""
+msgstr "Can not parse stream \"%s\""
+
+msgid "Can't parse the stream"
+msgstr "Can't parse the stream"
+
+msgid "Can not open temporary OPML file"
+msgstr "Can not open OPML file"
+
+msgid "Missing title for folder"
+msgstr "Missing title for folder"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+msgstr "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
+msgstr "Invalid XML : needed attribute \"%s\" in tag <%s>"
+
+msgid "Please edit your code, cloning a singleton is not allowed"
+msgstr "Please edit your code, cloning a singleton is not allowed"
+
+msgid "Authentification required"
+msgstr "Authentification required"
+
+msgid "Can't start session"
+msgstr "Can't start session"
+
+msgid "Invalid IP"
+msgstr "Invalid IP"
+
+msgid "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
+msgstr "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
+
+msgid "Invalid uri"
+msgstr "Invalid uri"
+
+msgid "Invalid stream"
+msgstr "Invalid stream"
+
+msgid "No file \"%s\" uploaded"
+msgstr "No file \"%s\" uploaded"
+
+msgid "I don't accept array"
+msgstr "I don't accept array"
+
+msgid "No way to get at least one uploaded file"
+msgstr "No way to get at least one uploaded file"
+
+msgid "Missing file"
+msgstr "Missing file"
+
+msgid "Filesize is more than limit configuration"
+msgstr "Filesize is more than limit configuration"
+
+msgid "Error while transfering, try again"
+msgstr "Error while transfering, try again"
+
+msgid "SQL errror"
+msgstr "SQL errror"
+
+msgid "Incorrect file name"
+msgstr "Incorrect file name"
+
+msgid "Incorrect file type"
+msgstr "Incorrect file type"
+
+msgid "Can not open fileinfo"
+msgstr "Can not open fileinfo"
+
+msgid "Error while moving uploaded file, try again"
+msgstr "Error while moving uploaded file, try again"
+
+msgid "Missing locale ! (%s)"
+msgstr "Missing locale \"%s\""
+
+msgid "You lost your token ! Confirm back your identity"
+msgstr "You lost your authentication token ! Please confirm back your identity"
+
+msgid "Missing ttl for cron managing"
+msgstr "Missing ttl for cron managing"
+
+msgid "Invalid type for cron managing"
+msgstr "Invalid type for cron managing"
+
+msgid "Invalid login or password. Please try again."
+msgstr "Invalid login or password. Please try again"
+
+msgid "Missing name"
+msgstr "Missing name"
+
+msgid "Missing ids of news"
+msgstr "Missing ids of news"
+
+msgid "You can't create user with rights higher than yours."
+msgstr "You can't create user with rights higher than yours."
+
+msgid "Empty lang"
+msgstr "Empty lang"
+
+msgid "Login or openid already used. Please choose another."
+msgstr "Login or openid already used. Please choose another."
+
+msgid "Passwords are not identiquals."
+msgstr "Passwords are not identiquals."
+
+msgid "Login too long, please limit it to 55 chars."
+msgstr "Login too long, please limit it to 55 chars length."
+
+msgid "Please fill all the fields."
+msgstr "Please fill all required fields, they are marked with a star"
+
+msgid "Invalid token"
+msgstr "Invalid authentication token"
+
+msgid "Session timeout"
+msgstr "Session timeout"
+
+msgid "No results found. Try again by simplifying the request"
+msgstr "No results found. Try again by simplifying the request"
+
+msgid "The directory \"%s\" is not writeable"
+msgstr "The directory \"%s\" is not writeable"
+
+msgid "The file \"%s\" exists, is not a dir and can not be removed"
+msgstr "The file \"%s\" exists, is not a dir and can not be removed"
+
+msgid "Can not create the directory \"%s\""
+msgstr "Can not create the directory \"%s\""

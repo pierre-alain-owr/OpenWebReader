@@ -35,9 +35,11 @@
  * @package OWR
  */
 namespace OWR;
+use OWR\View\Utilities as Utilities;
 /**
  * This object manages checking/moving uploaded files
  * @uses Cache get an unique file name
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
 class Upload
@@ -80,7 +82,7 @@ class Upload
     {
         if(!isset($_FILES[$this->_name]))
         {
-            throw new Exception('No file "'.$this->_name.'" uploaded', Exception::E_OWR_WARNING);
+            throw new Exception(sprintf(Utilities::iGet()->_('No file "%s" uploaded'), $this->_name), Exception::E_OWR_WARNING);
         }
 
         $file =& $_FILES[$this->_name];
@@ -142,22 +144,22 @@ class Upload
         {
             switch($file['error'])
             {
-                case UPLOAD_ERR_NO_FILE: throw new Exception('Missing file.', Exception::E_OWR_WARNING); break;
-                case UPLOAD_ERR_INI_SIZE: throw new Exception('Filesize is more than limit configuration.', Exception::E_OWR_WARNING); break;
-                case UPLOAD_ERR_FORM_SIZE: throw new Exception('Filesize is more than limit configuration.', Exception::E_OWR_WARNING); break;
-                case UPLOAD_ERR_PARTIAL: throw new Exception('Error while transfering, try again.', Exception::E_OWR_WARNING); break;
-                default: throw new Exception('An error occured, try again.', Exception::E_OWR_WARNING); break;
+                case UPLOAD_ERR_NO_FILE: throw new Exception('Missing file', Exception::E_OWR_WARNING); break;
+                case UPLOAD_ERR_INI_SIZE: throw new Exception('Filesize is more than limit configuration', Exception::E_OWR_WARNING); break;
+                case UPLOAD_ERR_FORM_SIZE: throw new Exception('Filesize is more than limit configuration', Exception::E_OWR_WARNING); break;
+                case UPLOAD_ERR_PARTIAL: throw new Exception('Error while transfering, try again', Exception::E_OWR_WARNING); break;
+                default: throw new Exception('An error occured, try again', Exception::E_OWR_WARNING); break;
             }
         }
         
         if ($file['size'] > $this->_args['maxFileSize'])
         {
-            throw new Exception('Filesize is more than limit configuration.', Exception::E_OWR_WARNING);
+            throw new Exception('Filesize is more than limit configuration', Exception::E_OWR_WARNING);
         }
         
         if(!is_uploaded_file($file['tmp_name']))
         {
-            throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+            throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
         }
 
         if(is_array($this->_args['mime']))
@@ -172,14 +174,14 @@ class Upload
             
             if($nb === $err)
             {
-                throw new Exception('Incorrect file type.', Exception::E_OWR_WARNING);
+                throw new Exception('Incorrect file type', Exception::E_OWR_WARNING);
             }
         }
         else
         {
             if($this->_args['mime'] !== $file['type'])
             {
-                throw new Exception('Incorrect file type.'.$file['type'], Exception::E_OWR_WARNING);
+                throw new Exception('Incorrect file type', Exception::E_OWR_WARNING);
             }
         }
 
@@ -193,7 +195,7 @@ class Upload
             
             if(0 !== mb_strpos($finfo->file($file['tmp_name']), $this->_args['finfo_mime'], 0, 'UTF-8'))
             {
-                throw new Exception('Incorrect file type.', Exception::E_OWR_WARNING);
+                throw new Exception('Incorrect file type', Exception::E_OWR_WARNING);
             }
             unset($finfo);
         }
@@ -210,14 +212,14 @@ class Upload
             
             if($nb === $err)
             {
-                throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+                throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
             }
         }
         else
         {
             if($this->_args['ext'] !== mb_strtolower(mb_substr($file['name'], - mb_strlen($this->_args['ext'], 'UTF-8'), mb_strlen($this->_args['ext'], 'UTF-8'), 'UTF-8'), 'UTF-8'))
             {
-                throw new Exception('Incorrect file name.', Exception::E_OWR_WARNING);
+                throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
             }
         }
         
@@ -225,7 +227,7 @@ class Upload
         
         if(!move_uploaded_file($file['tmp_name'], $path))
         {
-            throw new Exception('Error while moving uploaded file, please try again.', Exception::E_OWR_WARNING);
+            throw new Exception('Error while moving uploaded file, please try again', Exception::E_OWR_WARNING);
         }
 
         return $path;

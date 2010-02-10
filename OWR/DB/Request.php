@@ -37,10 +37,13 @@
 namespace OWR\DB;
 use \ArrayObject as ArrayObject,
     OWR\Exception as Exception,
-    OWR\User as User;
+    OWR\User as User,
+    OWR\View\Utilities as Utilities;
 /**
  * This object is sent to DB to be executed
- * @uses Exception the exceptions handler
+ * @uses OWR\Exception the exceptions handler
+ * @uses OWR\View\Utilities translate errors
+ * @uses OWR\User check timezones and rights
  * @package OWR
  * @subpackage DB
  */
@@ -228,7 +231,7 @@ class Request extends ArrayObject
                 }
                 elseif(!$force)
                 {
-                    throw new Exception('Missing required parameter "'.$k.'"', Exception::E_OWR_WARNING);
+                    throw new Exception(sprintf(Utilities::iGet()->_('Missing required parameter "%s"'), $k), Exception::E_OWR_WARNING);
                 }
             }
         }
@@ -256,7 +259,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas, FILTER_VALIDATE_EMAIL);
                     if(false === $datas)
-                        throw new Exception('Invalid email for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid email for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -286,7 +289,7 @@ class Request extends ArrayObject
                     }
 
                     if(false === $validUrl)
-                        throw new Exception('Invalid url for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid url for field "%s"'), $name), Exception::E_OWR_WARNING);
                     $datas = $validUrl;
                     unset($url, $validUrl);
                 }
@@ -299,7 +302,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6);
                     if(false === $datas)
-                        throw new Exception('Invalid IP address for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid IP address for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -310,7 +313,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[a-z]{2,3}_[A-Z]{2,3}$/")));
                     if(false === $datas)
-                        throw new Exception('Invalid lang for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid lang for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -326,7 +329,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas);
                     if(false === $datas || mb_strlen($datas, 'UTF-8') > 55)
-                        throw new Exception('Invalid login for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid login for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -337,7 +340,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas);
                     if(false === $datas || mb_strlen($datas, 'UTF-8') !== 32) // we are asking md5 string, 32 chars
-                        throw new Exception('Invalid password for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid password for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -345,7 +348,7 @@ class Request extends ArrayObject
             case self::PARAM_RIGHTS:
                 $datas = (int) $datas;
                 if($datas > User::LEVEL_ADMIN || $datas < User::LEVEL_VISITOR)
-                    throw new Exception('Invalid rights for field '.$name, Exception::E_OWR_WARNING);
+                    throw new Exception(sprintf(Utilities::iGet()->_('Invalid rights for field "%s"'), $name), Exception::E_OWR_WARNING);
                 $type = \PDO::PARAM_INT;
                 break;
 
@@ -360,7 +363,7 @@ class Request extends ArrayObject
                 {
                     $datas = filter_var($datas);
                     if(false === $datas || mb_strlen($datas, 'UTF-8') !== 32) // we are asking md5 string, 32 chars
-                        throw new Exception('Invalid hash for field '.$name, Exception::E_OWR_WARNING);
+                        throw new Exception(sprintf(Utilities::iGet()->_('Invalid hash for field "%s"'), $name), Exception::E_OWR_WARNING);
                 }
                 $type = \PDO::PARAM_STR;
                 break;
@@ -380,7 +383,7 @@ class Request extends ArrayObject
             if(!empty($field['default']))
                 $datas = $field['default'];
             else
-                throw new Exception('Missing value for required parameter "'.$name.'"', Exception::E_OWR_WARNING);
+                throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $name), Exception::E_OWR_WARNING);
         }
 
         return array('type' => $type, 'value' => $datas);

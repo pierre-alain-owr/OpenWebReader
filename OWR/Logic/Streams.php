@@ -905,7 +905,7 @@ class Streams extends Logic
 
         if($streams->count())
         {
-            $dao = parent::getDAO('streams');
+            $dao = DAO::getDAO('streams');
             while($streams->next())
             {
                 try

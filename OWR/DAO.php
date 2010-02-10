@@ -36,7 +36,8 @@
 namespace OWR;
 use OWR\DB\Result as DBResult,
     OWR\DB\Request as DBRequest,
-    OWR\Interfaces\DAO as iDAO;
+    OWR\Interfaces\DAO as iDAO,
+    OWR\View\Utilities as Utilities;
 /**
  * This class is used as base class for all DAO objects and defines all usefull functions
  * @abstract
@@ -45,6 +46,7 @@ use OWR\DB\Result as DBResult,
  * @uses OWR\DB\Result a DB\Result from the database
  * @uses OWR\Exception the exceptions handler
  * @uses OWR\Object transforms an object to an associative array
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
 abstract class DAO implements iDAO
@@ -344,7 +346,7 @@ abstract class DAO implements iDAO
                     
                     if($exists->next() && $exists->nb > 0)
                     {
-                        throw new Exception('Some values are not uniques.', 409);
+                        throw new Exception('Some values are not uniques', 409);
                     }
                     unset($exists);
                 }
@@ -363,7 +365,7 @@ abstract class DAO implements iDAO
             }
             else
             {
-                throw new Exception('Don\'t know what to save !', Exception::E_OWR_BAD_REQUEST);
+                throw new Exception("Don't know what to save", Exception::E_OWR_BAD_REQUEST);
             }
         }
 
@@ -380,7 +382,7 @@ abstract class DAO implements iDAO
                     else
                     {
                         if(!isset($this->$field))
-                            throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAD_REQUEST);
+                            throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
 
                         switch($decl['type'])
                         {
@@ -398,7 +400,7 @@ abstract class DAO implements iDAO
                             case DBRequest::PARAM_IP:
                             case \PDO::PARAM_STR:
                                 if(empty($this->$field))
-                                    throw new Exception('Missing value for required parameter '.$field, Exception::E_OWR_BAD_REQUEST);
+                                    throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
 
                             default:
                                 break;
@@ -444,7 +446,7 @@ abstract class DAO implements iDAO
             if(!isset($this->_fields['uid']) && $this->_idField)
             {
                 if(!isset($this->{$this->_idField}))
-                    throw new Exception('Nothing to delete !', Exception::E_OWR_BAD_REQUEST);
+                    throw new Exception('Nothing to delete', Exception::E_OWR_BAD_REQUEST);
                 $args = $this->{$this->_idField};
             }
         }

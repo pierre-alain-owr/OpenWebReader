@@ -131,7 +131,7 @@ class Session extends Singleton
         
         if(FALSE === $ret)
         {
-            throw new Exception("SQL Error: ". $this->_db->errorInfo());
+            throw new Exception("SQL Error ". DEBUG ? $this->_db->errorInfo() : '');
         }
         
         if($row = $ret->fetch())

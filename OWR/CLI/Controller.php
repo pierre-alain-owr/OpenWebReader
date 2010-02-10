@@ -54,7 +54,8 @@ use OWR\Controller as MainController,
     OWR\DAO as DAO,
     OWR\DB as DB,
     OWR\Logic as Logic,
-    OWR\Threads as Threads;
+    OWR\Threads as Threads,
+    OWR\View\Utilities as Utilities;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -74,6 +75,7 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses OWR\cURLWrapper get favicon
  * @uses OWR\Logs the logs/errors storing object
  * @uses OWR\Threads the Threads object
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  * @subpackage CLI
  */
@@ -136,12 +138,12 @@ class Controller extends MainController
                 'checkstreamsavailability'  => true
             );
             if(!isset($authorized[$this->_request->do])) // hu ?
-                throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
+                throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
 
             $action = 'do_'.$this->_request->do;
 
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin ?
-                throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
+                throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
 
             $this->_cron = Cron::iGet();
             if($this->_cron->isLocked($action.'_'.$id))

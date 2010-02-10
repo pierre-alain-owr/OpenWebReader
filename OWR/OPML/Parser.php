@@ -39,12 +39,14 @@ namespace OWR\OPML;
 use \XMLReader as XMLReader,
     OWR\Exception as Exception,
     OWR\Strings as Strings,
-    OWR\cURLWrapper as cURLWrapper;
+    OWR\cURLWrapper as cURLWrapper,
+    OWR\View\Utilities as Utilities;
 /**
  * This object is used to parse OPML
  * @uses Exception the exceptions handler
  * @uses Strings xml entities and M$ bad chars conversion
  * @uses cURLWrapper get the remote opml file
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  * @subpackage OPML
  */
@@ -129,7 +131,7 @@ class Parser extends XMLReader
 
             if(!$src || !($src = Strings::toXML($src, false, false)) || !@$this->XML($src, 'UTF-8', LIBXML_NOBLANKS | LIBXML_NOCDATA))
             {
-                throw new Exception('Can not parse stream '.$opml, Exception::E_OWR_WARNING);
+                throw new Exception(sprintf(Utilities::iGet()->_('Can not parse stream "%"'), $opml), Exception::E_OWR_WARNING);
                 return false;
             }
         }
@@ -323,7 +325,7 @@ class Parser extends XMLReader
                 if(!$required['required']) continue;
                 else
                 {
-                    throw new Exception("Invalid XML : needed attribute '{$attribute}' in tag {$this->_localName}".(!is_null($this->_parentLocalName) ? " in parent tag {$this->_parentLocalName}." : '.').' for OPML '.$this->_currentStream, Exception::E_OWR_WARNING);
+                    throw new Exception(sprintf(Utilities::iGet()->_('Invalid XML : needed attribute "%s" in tag "%s"'.(!is_null($this->_parentLocalName) ? ' in parent tag "%s"' : '')), $attribute, $this->_localName, $this->_parentLocalName), Exception::E_OWR_WARNING);
                     $node[$attribute] = '';
                 }
             }

@@ -39,7 +39,8 @@ use \XMLReader as XMLReader,
     OWR\cURLWrapper as cURLWrapper,
     OWR\Exception as Exception,
     OWR\DAO as DAO,
-    OWR\Strings as Strings;
+    OWR\Strings as Strings,
+    OWR\View\Utilities as Utilities;
 /**
  * This object is used to parse stream (rss, atom, rdf, dc)
  * @uses Strings xml entities and M$ bad chars conversion
@@ -47,6 +48,7 @@ use \XMLReader as XMLReader,
  * @uses StreamReader the parsed stream
  * @uses Cache check HTMLPurifier cache directory
  * @uses cURLWrapper get the stream source
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
 class Parser extends XMLReader
@@ -374,7 +376,7 @@ class Parser extends XMLReader
         {
             $dao = DAO::getCachedDAO('streams')->get(array('url' => $url));
             if($dao) $dao->declareUnavailable();
-            throw new Exception('Aborting StreamParser::getSrc: can\'t get the source of the stream '.$url.', and declaring it as unavailable', Exception::E_OWR_WARNING);
+            throw new Exception(sprintf(Utilities::iGet()->_('Aborting parsing of stream "%s" and declaring it as unavailable : can\'t get the content'), $url), Exception::E_OWR_WARNING);
         }
         
         return $src;
@@ -393,7 +395,7 @@ class Parser extends XMLReader
         
         if(false === $url || !isset($url['scheme']) || 'file' === $url['scheme'])
         {
-            throw new Exception('Invalid uri '.$uri, Exception::E_OWR_WARNING);
+            throw new Exception(sprintf(Utilities::iGet()->_('Invalid uri "%s"'), $uri), Exception::E_OWR_WARNING);
         }
         
         $this->_currentHost = $url['scheme'].'://'.$url['host'];

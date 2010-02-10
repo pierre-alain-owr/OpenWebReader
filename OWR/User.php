@@ -35,7 +35,8 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\DB\Request as DBRequest;
+use OWR\DB\Request as DBRequest,
+    OWR\View\Utilities as Utilities;
 /**
  * This object represents the user running the script
  * @uses Singleton implements the singleton pattern
@@ -43,6 +44,7 @@ use OWR\DB\Request as DBRequest;
  * @uses DBRequest a request sent to the database
  * @uses DB the link database
  * @uses Object transforms $this into an array
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
 class User extends Singleton
@@ -312,7 +314,7 @@ class User extends Singleton
                     $lang = Config::iGet()->get('default_language');
                     if(!@setlocale(LC_ALL, $lang.'.UTF8') && !@setlocale(LC_ALL, $lang.'.UTF-8'))
                     {
-                        throw new Exception('Missing locale ! ('.$lang.'.UTF8)');
+                        throw new Exception(sprintf(Utilities::iGet()->_('Missing locale ! (%s)'), $lang.'.UTF8'));
                     }
                     $this->_lang = $lang;
                 }
@@ -332,7 +334,7 @@ class User extends Singleton
                         $lang = Config::iGet()->get('default_language');
                         if(!@setlocale(LC_ALL, $lang.'.UTF8') && !@setlocale(LC_ALL, $lang.'.UTF-8'))
                         {
-                            throw new Exception('Missing locale ! ('.$lang.'.UTF8)');
+                            throw new Exception(sprintf(Utilities::iGet()->_('Missing locale ! (%s)'), $lang.'.UTF8'));
                         }
                         $this->_lang = $lang;
                     }
@@ -343,7 +345,7 @@ class User extends Singleton
                 $lang = Config::iGet()->get('default_language');
                 if(!@setlocale(LC_ALL, $lang.'.UTF8') && !@setlocale(LC_ALL, $lang.'.UTF-8'))
                 {
-                    throw new Exception('Missing locale ! ('.$lang.'.UTF8)');
+                    throw new Exception(sprintf(Utilities::iGet()->_('Missing locale ! (%s)'), $lang.'.UTF8'));
                 }
                 $this->_lang = $lang;
             }
@@ -352,7 +354,7 @@ class User extends Singleton
         {
             if(!@setlocale(LC_ALL, $this->_lang.'.UTF8') && !@setlocale(LC_ALL, $this->_lang.'.UTF-8'))
             {
-                throw new Exception('Missing locale ! ('.$this->_lang.'.UTF8)');
+                throw new Exception(sprintf(Utilities::iGet()->_('Missing locale ! (%s)'), $this->_lang.'.UTF8'));
             }
         }
         

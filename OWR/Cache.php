@@ -199,7 +199,7 @@ class Cache
         {
             if(!is_writeable($dir))
             {
-                Logs::iGet()->log('The directory '.$dir.' is not writeable');
+                Logs::iGet()->log(sprintf(Utilities::iGet()->_('The directory "%s" is not writeable'), $dir));
                 return false;
             }
         }
@@ -207,7 +207,7 @@ class Cache
         {
             if(!@unlink($dir))
             {
-                Logs::iGet()->log('The file '.$dir.' exists, is not a dir and can not be removed');
+                Logs::iGet()->log(sprintf(Utilities::iGet()->_('The file "%s" exists, is not a dir and can not be removed'), $dir));
                 return false;
             }
             
@@ -218,13 +218,14 @@ class Cache
             {
                 if(!@mkdir($dir))
                 { // hu ?
-                    Logs::iGet()->log('Can not create the directory '.$dir);
+                    
+                    Logs::iGet()->log(sprintf(Utilities::iGet()->_('Can not create the directory "%s"'), $dir));
                     return false;
                 }
             } 
             else 
             {
-                Logs::iGet()->log('The directory '.HOME_PATH.'cache is not writeable');
+                Logs::iGet()->log(Utilities::iGet()->_('The directory "%s" is not writeable', HOME_PATH.'cache'));
                 return false;
             }
         }

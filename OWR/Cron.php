@@ -238,7 +238,7 @@ class Cron extends Singleton
                 case 'refreshstream':
                     if(!isset($args['ttl']))
                     {
-                        throw new Exception('Missing ttl for cron managing:refreshstream', Exception::E_OWR_WARNING);
+                        throw new Exception('Missing ttl for cron managing', Exception::E_OWR_WARNING);
                     }
 
                     if($this->_minCronTtl > 0 && $this->_minCronTtl <= $args['ttl']) return;
@@ -297,7 +297,7 @@ class Cron extends Singleton
                     break;
 
                 default:
-                    throw new Exception('Invalid type for cron managing, aborting', Exception::E_OWR_WARNING);
+                    throw new Exception('Invalid type for cron managing', Exception::E_OWR_WARNING);
                     break;
             }
             

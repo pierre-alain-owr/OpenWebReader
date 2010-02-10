@@ -36,7 +36,8 @@
  */
 namespace OWR;
 use OWR\DB\Request as DBRequest,
-    OWR\Logic\Response as LogicResponse;
+    OWR\Logic\Response as LogicResponse,
+    OWR\View\Utilities as Utilities;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -53,6 +54,7 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses Error the errors handler
  * @uses OWR\DB\Request a request sent to database
  * @uses Logs the logs/errors storing object
+ * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
 class Controller extends Singleton
@@ -219,7 +221,7 @@ class Controller extends Singleton
                         case 'getopml':
                             break;
                         default: 
-                            throw new Exception('Invalid action '.$this->_request->do, Exception::E_OWR_BAD_REQUEST);
+                            throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
                             break;
                     }
                    
@@ -243,7 +245,7 @@ class Controller extends Singleton
                     // we prompt the user to log-in to confirm he is really who he pretends to be
                         if($this->_request->do === 'opensearch' || $this->_request->do === 'add')
                             $this->_request->back = basename(trim(Filter::iGet()->purify($_SERVER['REQUEST_URI'])));
-                        $this->_getPage('login', array('error'=>'You lost your token ! Confirm back your identity'));
+                        $this->_getPage('login', array('error' => Utilities::iGet()->_('You lost your token ! Confirm back your identity')));
                         return $this;
                     }
                 }
@@ -253,7 +255,7 @@ class Controller extends Singleton
             $action = 'do_'.$this->_request->do;
     
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin
-                throw new Exception('Invalid action "'.$this->_request->do.'"', Exception::E_OWR_BAD_REQUEST);
+                throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
         
             if($this->_user->isAdmin())
             {
@@ -364,7 +366,7 @@ class Controller extends Singleton
                         }
                     }
 
-                    if(empty($page['errors'])) $page['errors'][] = 'Non-blocking error(s) occured';
+                    if(empty($page['errors'])) $page['errors'][] = Utilities::iGet()->_('Non-blocking error(s) occured');
                 }
             }
             
@@ -428,7 +430,7 @@ class Controller extends Singleton
                         }
                     }
 
-                    if(empty($page['errors'])) $page['errors'][] = 'Non-blocking error(s) occured';
+                    if(empty($page['errors'])) $page['errors'][] = Utilities::iGet()->_('Non-blocking error(s) occured');
 
                     Logs::iGet()->writeLogs();
 
@@ -949,7 +951,7 @@ class Controller extends Singleton
                     }
                     else
                     {
-                        Logs::iGet()->log('Invalid id');
+                        Logs::iGet()->log(Utilities::iGet()->_('Invalid id'));
                         $empty = true;
                         break;
                     }
@@ -1563,7 +1565,7 @@ class Controller extends Singleton
     protected function do_getUsers()
     {
         if(!$this->_user->isAdmin())
-            throw new Exception('You don\'t have the rights to do that.', Exception::E_OWR_UNAUTHORIZED);
+            throw new Exception("You don't have the rights to do that", Exception::E_OWR_UNAUTHORIZED);
 
         $this->_getPage('users');
         return $this;
@@ -1668,7 +1670,7 @@ class Controller extends Singleton
     protected function do_maintenance()
     {
         if($this->_user->getRights() < User::LEVEL_ADMIN)
-            throw new Exception('You don\'t have the rights to do this. Please ask for your administrator.', Exception::E_OWR_UNAUTHORIZED);
+            throw new Exception("You don't have the rights to do that", Exception::E_OWR_UNAUTHORIZED);
 
         // remove unused streams
         $query = '
@@ -1786,7 +1788,7 @@ class Controller extends Singleton
     {
         if(empty($this->_request->oskeywords))
         {
-            Logs::iGet()->log('Empty search, please enter at least a keyword !', Exception::E_OWR_BAD_REQUEST);
+            Logs::iGet()->log(Utilities::iGet()->_('Empty search, please enter at least one keyword'), Exception::E_OWR_BAD_REQUEST);
             $datas = array();
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
@@ -1858,7 +1860,7 @@ class Controller extends Singleton
         }
         else
         {
-            Logs::iGet()->log('No results found. Try again by simplifying the request.', 204);
+            Logs::iGet()->log(Utilities::iGet()->_('No results found. Try again by simplifying the request'), 204);
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
             $this->_getPage('index', $datas);
@@ -1877,7 +1879,7 @@ class Controller extends Singleton
     {
         if(empty($this->_request->keywords))
         {
-            throw new Exception('Empty search, please enter at least a keyword !', Exception::E_OWR_BAD_REQUEST);
+            throw new Exception('Empty search, please enter at least one keyword', Exception::E_OWR_BAD_REQUEST);
             return $this;
         }
 
@@ -1947,7 +1949,7 @@ class Controller extends Singleton
         }
         else
         {
-            Logs::iGet()->log('No results found. Try again by simplifying the request.', 204);
+            Logs::iGet()->log(Utilities::iGet()->_('No results found. Try again by simplifying the request'), 204);
         }
         return $this;
     }
@@ -1994,7 +1996,7 @@ class Controller extends Singleton
         if(!$auto && empty($_POST) && !isset($openid) && empty($this->_request->identifier))
         {
             $datas = array();
-            if(isset($this->_request->timeout)) $datas['error'] = 'Session timeout';
+            if(isset($this->_request->timeout)) $datas['error'] = Utilities::iGet()->_('Session timeout');
             if(isset($this->_request->back)) $datas['back'] = $this->_request->back;
             $this->_user->reset();
             $this->_getPage('login', $datas);
@@ -2008,7 +2010,7 @@ class Controller extends Singleton
             if(!$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, $this->_request->do))
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=>'Invalid token'));
+                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
         }
@@ -2021,7 +2023,7 @@ class Controller extends Singleton
             $this->_request->token !== $token)
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=>'Invalid token'));
+                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
             $this->_user->openIdAuth($openid);
@@ -2057,20 +2059,20 @@ class Controller extends Singleton
             if(!$this->_user->checkToken())
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=>'Invalid token'));
+                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
 
             if(empty($this->_request->login) || empty($this->_request->passwd))
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=>'Please fill all the fields.'));
+                $this->_getPage('login', array('error'=> Utilities::iGet()->_('Please fill all the fields.')));
                 return $this;
             }
             elseif(mb_strlen($this->_request->login, 'UTF-8') > 55)
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
+                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
                 return $this;
             }
 
@@ -2084,7 +2086,7 @@ class Controller extends Singleton
         if(!$uid)
         {
             $this->_user->reset();
-            $this->_getPage('login', array('error'=>'Invalid login or password. Please try again.'));
+            $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
             return $this;
         }
 

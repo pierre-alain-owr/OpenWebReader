@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: pierre-alain@openwebreader.org\n"
 "POT-Creation-Date: 2009-03-21 17:52+0100\n"
-"PO-Revision-Date: 2010-02-09 18:56+0100\n"
+"PO-Revision-Date: 2010-02-10 20:25+0100\n"
 "Last-Translator: Pierre-Alain Mignot <pierre-alain@openwebreader.org>\n"
 "Language-Team: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -233,7 +233,7 @@ msgid "Restricted access"
 msgstr "Accès restreint"
 
 msgid "Authentication"
-msgstr "Identification"
+msgstr "Authentification"
 
 msgid "File"
 msgstr "Fichier"
@@ -414,3 +414,222 @@ msgstr "Renommer ce tag"
 
 msgid "Delete all the news from this tag"
 msgstr "Enlever toutes les nouvelles de ce tag"
+
+msgid "Non-blocking error(s) occured"
+msgstr "Des erreurs non fatales sont intervenues"
+
+msgid "CLI interface required"
+msgstr "L'interface CLI de PHP est requise pour accéder à cette partie de l'application"
+
+msgid "Invalid action \"%s\""
+msgstr "Action \"%s\" invalide"
+
+msgid "Invalid return from Logic"
+msgstr "Retour de la Logic invalide"
+
+msgid "Missing id"
+msgstr "ID manquant"
+
+msgid "Missing type"
+msgstr "Type manquant"
+
+msgid "Missing url"
+msgstr "Url manquante"
+
+msgid "Missing operator"
+msgstr "Opérateur manquant"
+
+msgid "You don't have the rights to do that"
+msgstr "Vous n'avez pas les droits nécessaire pour effectuer cette action, contactez votre administrateur"
+
+msgid "An id is required"
+msgstr "Veuillez spécifier un ID"
+
+msgid "Empty search, please enter at least one keyword"
+msgstr "Votre recherche est vide, veuillez spécifier au moins un mot-clé d'une longueur d'au moins 3 caractères"
+
+msgid "Internal error while redirecting to your OP"
+msgstr "Erreur interne lors de la redirection vers votre opérateur"
+
+msgid "Missing type for cron managing"
+msgstr "Type manquant pour la gestion de la crontab"
+
+msgid "No way to write into cache directory"
+msgstr "Impossible d'écrire dans le répertoire cache"
+
+msgid "No values to save, you surely have an error in your code"
+msgstr "Aucune valeur à enregistrer, vous devez avoir une erreur dans votre code"
+
+msgid "Some values are not uniques"
+msgstr "Certaines valeurs ne sont pas uniques"
+
+msgid "Don't know what to save"
+msgstr "Je ne sais pas quoi sauvegarder !"
+
+msgid "Missing value for required parameter \"%s\""
+msgstr "Il manque la valeur du champ \"%s\""
+
+msgid "Nothing to delete"
+msgstr "Je n'ai rien à supprimer !"
+
+msgid "Invalid type"
+msgstr "Type d'objet invalide"
+
+msgid "Please specify the stream to set as unavailable"
+msgstr "Merci de spécifier quel flux je dois marquer comme non-accessible"
+
+msgid "Invalid email for field \"%s\""
+msgstr "Courriel invalide pour le champ \"%s\""
+
+msgid "Invalid url for field \"%s\""
+msgstr "Url invalide pour le champ \"%s\""
+
+msgid "Invalid IP address for field \"%s\""
+msgstr "Adresse IP invalide pour le champ \"%s\""
+
+msgid "Invalid lang for field \"%s\""
+msgstr "Langue invalide pour le champ \"%s\""
+
+msgid "Invalid login for field \"%s\""
+msgstr "Nom d'utilisateur invalide pour le champ \"%s\""
+
+msgid "Invalid password for field \"%s\""
+msgstr "Mot de passe invalide pour le champ \"%s\""
+
+msgid "Invalid rights for field \"%s\""
+msgstr "Droits invalide pour le champ \"%s\""
+
+msgid "Invalid hash for field \"%s\""
+msgstr "Hash invalide pour le champ \"%s\""
+
+msgid "Unknown fetch type"
+msgstr "Type de récupération inconnu"
+
+msgid "Can not parse stream \"%s\""
+msgstr "Impossible de parser le contenu du flux \"%s\""
+
+msgid "Can't parse the stream"
+msgstr "Impossible de parser le contenu du flux"
+
+msgid "Can not open temporary OPML file"
+msgstr "Impossible d'ouvrir le fichier OPML"
+
+msgid "Missing title for folder"
+msgstr "Il manque le nom de la catégorie"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+msgstr "XML non valide : il manque l'attribut \"%s\" de la balise <%s> contenue dans la balise <%s>"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
+msgstr "XML non valide : il manque l'attribut \"%s\" de la balise <%s>"
+
+msgid "Please edit your code, cloning a singleton is not allowed"
+msgstr "Merci de corriger votre code, cloner un singleton n'est pas autorisé"
+
+msgid "Authentification required"
+msgstr "Authentification requise"
+
+msgid "Can't start session"
+msgstr "Impossible de démarrer la session"
+
+msgid "Invalid IP"
+msgstr "Adresse IP invalide"
+
+msgid "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
+msgstr "Abandon de l'analyse du flux \"%s\" et déclaration comme non-accessible : impossible de récupérer la source"
+
+msgid "Invalid uri"
+msgstr "Uri non valide"
+
+msgid "Invalid stream"
+msgstr "Flux invalide"
+
+msgid "No file \"%s\" uploaded"
+msgstr "Aucun fichier \"%s\" chargé"
+
+msgid "I don't accept array"
+msgstr "Je n'accepte pas les tableaux"
+
+msgid "No way to get at least one uploaded file"
+msgstr "Impossible de récupérer au moins un fichier chargé"
+
+msgid "Missing file"
+msgstr "Aucun fichier"
+
+msgid "Filesize is more than limit configuration"
+msgstr "La taille du fichier est supérieure à la limite de la configuration"
+
+msgid "Error while transfering, try again"
+msgstr "Une erreur est survenue pendant le transfert, essayez de nouveau"
+
+msgid "SQL errror"
+msgstr "Erreur SQL"
+
+msgid "Incorrect file name"
+msgstr "Nom de fichier invalide"
+
+msgid "Incorrect file type"
+msgstr "Type de fichier invalide"
+
+msgid "Can not open fileinfo"
+msgstr "Impossible d'ouvrir fileinfo"
+
+msgid "Error while moving uploaded file, try again"
+msgstr "Une erreur est survenue pendant le déplacement du fichier chargé, essayez de nouveau"
+
+msgid "Missing locale ! (%s)"
+msgstr "Il manque la locale \"%s\""
+
+msgid "You lost your token ! Confirm back your identity"
+msgstr "Vous avez perdu votre jeton d'authentification ! Merci de confirmer de nouveau votre identité"
+
+msgid "Missing ttl for cron managing"
+msgstr "Il manque le ttl pour la gestion de la crontab"
+
+msgid "Invalid type for cron managing"
+msgstr "Type d'action inconnu pour la gestion de la crontab"
+
+msgid "Invalid login or password. Please try again."
+msgstr "Nom d'utilisateur ou mot de passe invalide. Essayez de nouveau"
+
+msgid "Missing name"
+msgstr "Il manque le nom"
+
+msgid "Missing ids of news"
+msgstr "Il manque les ID des nouvelles"
+
+msgid "You can't create user with rights higher than yours."
+msgstr "Vous ne pouvez pas créer d'utilisateur avec un niveau de droits supérieur au vôtre"
+
+msgid "Empty lang"
+msgstr "La langue est vide"
+
+msgid "Login or openid already used. Please choose another."
+msgstr "Nom d'utilisateur ou identifiant OpenID déjà utilisé. Merci d'en choisir un autre"
+
+msgid "Passwords are not identiquals."
+msgstr "Les mots de passes ne sont pas identiques."
+
+msgid "Login too long, please limit it to 55 chars."
+msgstr "Nom d'utilisateur trop long, maximum 55 caractères"
+
+msgid "Please fill all the fields."
+msgstr "Merci de compléter tous les champs requis, ils sont marqués d'une étoile"
+
+msgid "Invalid token"
+msgstr "Jeton d'authentification invalide"
+
+msgid "Session timeout"
+msgstr "Votre session a expirée"
+
+msgid "No results found. Try again by simplifying the request"
+msgstr "Aucun résultats. Essayez de simplifier votre recherche"
+
+msgid "The directory \"%s\" is not writeable"
+msgstr "Je ne peux pas écrire dans le répertoire \"%s\""
+
+msgid "The file \"%s\" exists, is not a dir and can not be removed"
+msgstr "Le fichier \"%s\" existe, n'est pas un répertoire et ne peut être supprimé"
+
+msgid "Can not create the directory \"%s\""
+msgstr "Je ne peux pas créer le répertoire \"%s\""

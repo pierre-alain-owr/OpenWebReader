@@ -139,17 +139,17 @@ class Item
             if(!empty($this->_item['author']))
             {
                 $author = '';
-                if(isset($this->_item['author']['name']))
+                if(isset($this->_item['author']['name']) && isset($this->_item['author']['name']['contents']))
                 {
                     $author .= $this->_item['author']['name']['contents'];
                 }
 
-                if(isset($this->_item['author']['email']))
+                if(isset($this->_item['author']['email']) && isset($this->_item['author']['email']))
                 {
                     $author .= empty($author) ? $this->_item['author']['email']['contents'] : ', '.$this->_item['author']['email']['contents'];
                 }
 
-                if(isset($this->_item['author']['uri']))
+                if(isset($this->_item['author']['uri']) && isset($this->_item['author']['uri']))
                 {
                     $author .= empty($author) ? $this->_item['author']['uri']['contents'] : ', '.$this->_item['author']['uri']['contents'];
                 }
