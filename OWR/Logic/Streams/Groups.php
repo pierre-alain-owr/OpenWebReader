@@ -274,7 +274,7 @@ class Groups extends Logic
      */
     public function rename(Request $request)
     {
-        if(empty($this->_request->name))
+        if(empty($request->name))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
