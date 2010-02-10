@@ -89,8 +89,8 @@ class Request
 
         if(false === $nodatas)
         {
-	        $this->page = '';
-	        unset($datas['page']);
+            $this->page = '';
+            unset($datas['page']);
 
             foreach(array('id', 'gid', 'currentid', 'uid', 'offset', 'timestamp', 'live', 'status') as $k)
             {
@@ -150,9 +150,9 @@ class Request
 
         if(false === $nodatas)
         {
-	        (!empty($this->lang) && $this->lang = (string) $this->lang) ||
-	        (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) && $this->lang = (string)$_SERVER['HTTP_ACCEPT_LANGUAGE']) ||
-	        $this->lang = Config::iGet()->get('default_language');
+            (!empty($this->lang) && $this->lang = (string) $this->lang) ||
+            (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) && $this->lang = (string)$_SERVER['HTTP_ACCEPT_LANGUAGE']) ||
+            $this->lang = Config::iGet()->get('default_language');
         }
     }
 
@@ -265,11 +265,11 @@ class Request
 
         if(is_array($value))
         {
-            $datas = new Request($value);
+            $datas = new Request($value, true);
         }
         elseif(is_object($value))
         {
-            $datas = new Request(Object::toArray($value));
+            $datas = new Request(Object::toArray($value), true);
         }
         else
         {

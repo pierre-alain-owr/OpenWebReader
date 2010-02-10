@@ -1237,7 +1237,7 @@ class Streams extends Logic
         WHERE rel.gid='.$request->id.' AND rel.uid='.User::iGet()->getUid().' 
         AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
         GROUP BY r.id';
-                
+
                 $rss = $this->_db->getAll($query);
                 if($rss->count())
                 {
@@ -1300,7 +1300,7 @@ class Streams extends Logic
         else
         {
             $table = DAO::getType($request->id);
-            
+
             if('streams' === $table)
             {
                 $streams = $this->_db->getOne('
@@ -1339,7 +1339,7 @@ class Streams extends Logic
         JOIN streams_relations rel ON (r.id=rel.rssid)
         WHERE rel.gid='.$request->id.' AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
         GROUP BY r.id';
-                
+
                 $streams = $this->_db->getAll($query);
                 if($streams->count())
                 {
@@ -1425,7 +1425,7 @@ class Streams extends Logic
         }
 
         $reader = new OPMLParser();
-        
+
         $reader->parse($request->url, isset($upload));
 
         if(isset($upload))

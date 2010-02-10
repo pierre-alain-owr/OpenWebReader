@@ -373,7 +373,7 @@ class Request extends ArrayObject
                 $type = \PDO::PARAM_STR;
                 break;
 
-            default: 
+            default:
                 $type = $field['type'];
                 break;
         }

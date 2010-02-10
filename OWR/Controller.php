@@ -795,6 +795,7 @@ class Controller extends Singleton
                 }
                 unset($response, $g);
                 $request->getContents = false;
+                $streamsToDisplay = array();
                 foreach($streams as $s)
                 {
                     $request->id = $s->rssid;
@@ -820,21 +821,33 @@ class Controller extends Singleton
                                                                         'groups' => $groups),
                                                                         $cacheTime
                                                         );
-                        $unread = isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0;
-                        $page .= $this->_view->get('menu_streams', $stream, $cacheTime, array(
-                                    'unread'    => $unread,
-                                    'bold'      => $unread > 0 ? 'bold ' : '',
-                                    'groups_select'     => $groups_select[$stream['gid']]
-                                    ));
+                        $streamsToDisplay[$stream['name']] = $stream;
+                        $streamsToDisplay[$stream['name']]['unread'] = isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0;
                     }
                     else
                     {
                         Logs::iGet()->log($response->getError(), $response->getStatus());
                         $empty = true;
+                        break;
                     }
                     unset($response);
                 }
-                unset($streams, $request);
+                unset($streams);
+
+                ksort($streamsToDisplay);
+
+                foreach($streamsToDisplay as $stream)
+                {
+                    $unread = $stream['unread'];
+                    unset($stream['unread']);
+                    $page .= $this->_view->get('menu_streams', $stream, $cacheTime, array(
+                            'unread'    => $unread,
+                            'bold'      => $unread > 0 ? 'bold ' : '',
+                            'groups_select'     => $groups_select[$stream['gid']]
+                            ));
+                }
+
+                unset($streamsToDisplay, $request);
                 break;
 
             case 'menu_part_stream':
@@ -1033,7 +1046,7 @@ class Controller extends Singleton
                                                     ));
 
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams_groups')->view($request);
+                Logic::getCachedLogic('streams_groups')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 $groups = array();
                 $tmpPage = '';
@@ -1114,7 +1127,7 @@ class Controller extends Singleton
 
             case 'menu_tags_contents':
                 $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
-                Logic::getCachedLogic('news_tags')->view($request);
+                Logic::getCachedLogic('news_tags')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
