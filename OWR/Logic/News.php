@@ -227,29 +227,6 @@ class News extends Logic
                 {
                     $datas[$k]['contents'] = unserialize($data['contents']);
                 }
-
-                $args['newsid'] = $data['id'];
-                $tags = $dao->get($args, 'news_tags.name,tid');
-                if($tags)
-                {
-                    $fullTags = array();
-                    if(!isset($tags['name']))
-                    {
-                        foreach($tags as $tag)
-                        {
-                            $fullTags[] = $tag['name'];
-                            $ids[] = $tag['tid'];
-                        }
-                    }
-                    else
-                    {
-                        $fullTags[] = $tags['name'];
-                        $ids[] = $tags['tid'];
-                    }
-
-                    $datas[$k]['tags'] = join(',', $fullTags);
-                }
-                else $datas[$k]['tags'] = '';
             }
             $datas['ids'] = $ids;
         }
@@ -257,26 +234,6 @@ class News extends Logic
         {
             if(!isset($request->getContents) || $request->getContents)
                 $datas['contents'] = unserialize($datas['contents']);
-            $args['newsid'] = $datas['id'];
-            $tags = $dao->get($args, 'news_tags.name');
-            if($tags)
-            {
-                $fullTags = array();
-                if(!isset($tags['name']))
-                {
-                    foreach($tags as $tag)
-                    {
-                        $fullTags[] = $tag['name'];
-                    }
-                }
-                else
-                {
-                    $fullTags[] = $tags['name'];
-                }
-
-                $datas['tags'] = join(',', $fullTags);
-            }
-            else $datas['tags'] = '';
         }
 
         $request->setResponse(new Response(array(

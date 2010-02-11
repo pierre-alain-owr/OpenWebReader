@@ -897,6 +897,7 @@ OWR.prototype = {
                 this.messages['Marking news as unread'] = "Marquage des nouvelles comme non-lues";
                 this.messages['Editing the url of the stream'] = "Édition de l'url du flux";
                 this.messages['Editing tags'] = "Édition des tags";
+                this.messages['Getting tags'] = "Récupération des tags";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -2263,7 +2264,33 @@ OWR.prototype = {
             return;
         }
         if(tags.hasClass('hidden')) {
-            tags.removeClass('hidden');
+            if(!tags.status) {
+                var n = this.setLog('Getting tags');
+                var r = new Request.JSON({
+                    url: './?token='+this.token,
+                    onSuccess: function(json, text) {
+                        if(!json) {
+                            this.parseResponse(null, text);
+                        }
+                    }.bindWithEvent(this)
+                });
+                r.addEvent('failure', function(xhr, n) {
+                    this.raiseXHRError(xhr.responseText, n);
+                }.bindWithEvent(this, n));
+                r.addEvent('success', function(json, n, tags){
+                    this.loading(false, n);
+                    var contents = this.parseResponse(json);
+                    if(contents) {
+                        tags.set('value', contents);
+                    }
+                    tags.removeClass('hidden');
+                    tags.focus();
+                    tags.status = 1;
+                }.bindWithEvent(this, [n,tags]));
+                r.get({'do': 'gettags', 'id': id});
+            } else {
+                tags.removeClass('hidden');
+            }
         } else {
             tags.addClass('hidden');
         }

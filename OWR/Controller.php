@@ -850,6 +850,36 @@ class Controller extends Singleton
                 unset($streamsToDisplay, $request);
                 break;
 
+            case 'news_tags_contents':
+                $request = new Request(array(), true);
+                Logic::getCachedLogic('news_tags')->view($request, array('newsid' => $datas['id']));
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $tags = $response->getDatas();
+                    if(empty($tags))
+                    {
+                        $empty = true;
+                        break;
+                    }
+
+                    if($response->isMultiple())
+                    {
+                        $page = array();
+                        foreach($tags as $tag)
+                            $page[] = $tag['name'];
+                        $page = join(',', $page);
+                    }
+                    else $page .= $tags['name'];
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    $empty = true;
+                }
+                unset($response, $request);
+                break;
+
             case 'menu_part_stream':
                 $request = new Request(array('id' => $datas['id']));
                 Logic::getCachedLogic('streams')->view($request);
@@ -921,7 +951,7 @@ class Controller extends Singleton
                 {
                     $request = new Request(array('id' => null, 'getContents' => false));
                     Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
-                    $datas['nbNews'] = $this->_request->unreads[0];
+                    $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
                 }
                 else
                 {
@@ -990,10 +1020,11 @@ class Controller extends Singleton
                 }
                 unset($response, $request, $result);
 
-                $pager = array('nbNews'     => (int) $datas['nbNews'],
-                                'offset'    => $datas['offset'],
-                                'sort'      => !empty($datas['sort']) ? $datas['sort'] : null,
-                                'dir'       => !empty($datas['dir']) ? $datas['dir'] : null);
+                $pager = array('nbNews'         => (int) $datas['nbNews'],
+                                'offset'        => $datas['offset'],
+                                'sort'          => !empty($datas['sort']) ? $datas['sort'] : null,
+                                'dir'           => !empty($datas['dir']) ? $datas['dir'] : null,
+                                'nbNewsByPage'  => $this->_user->getConfig('nbnews'));
 
                 if(empty($datas['search']))
                 {
@@ -1732,17 +1763,19 @@ class Controller extends Singleton
         $this->_db->set($query);
 
         $query = '
-    OPTIMIZE TABLES 
-        news, 
-        news_relations, 
-        objects, 
-        streams, 
-        streams_groups, 
-        streams_relations, 
-        streams_relations_name, 
-        sessions, 
-        news_contents, 
-        users, 
+    OPTIMIZE TABLES
+        news,
+        news_tags,
+        news_relations,
+        news_relations_tags,
+        objects,
+        streams,
+        streams_groups,
+        streams_relations,
+        streams_relations_name,
+        sessions,
+        news_contents,
+        users,
         users_tokens';
         // PDO bug : need to set method to 'query' else it trows exception
         // http://bugs.php.net/bug.php?id=34499
@@ -1964,6 +1997,22 @@ class Controller extends Singleton
         {
             Logs::iGet()->log(Utilities::iGet()->_('No results found. Try again by simplifying the request'), 204);
         }
+        return $this;
+    }
+
+    /**
+     * Renders tags from a new
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getTags()
+    {
+        if(empty($this->_request->id))
+            throw new Exception('Missing id', Exception::E_OWR_BAD_REQUEST);
+
+        $this->_getPage('news_tags_contents', array('id' => $this->_request->id));
         return $this;
     }
 
