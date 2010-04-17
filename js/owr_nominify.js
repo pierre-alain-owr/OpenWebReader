@@ -1041,12 +1041,15 @@ OWR.prototype = {
                     var element = $('new__'+id[1]+'_'+id[2]+'_'+id[3]);
                     if(!element) {return false;} // hu ?
                     if(!element.get('html').trim()) {
+                        if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).addClass('hidden'); }
                         this.getNew(el.get('id'));
                     } else {
                         var cur = el.getStyle('color');
                         if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur || '#ffffff' === cur || '#FFFFFF' === cur || '#fff' === cur || '#ffffff' === cur) {
+                            if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).removeClass('hidden'); }
                             el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
                         } else {
+                            if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).addClass('hidden'); }
                             el.setStyles({'background-color': '#666666', 'color':'white'});
                         }
                         element.toggle();

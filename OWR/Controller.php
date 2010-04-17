@@ -904,6 +904,7 @@ class Controller extends Singleton
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
 
+                $datas['abstract'] = $this->_user->getConfig('abstract');
                 $ids = null;
                 $uid = $this->_user->getUid();
 
@@ -943,13 +944,13 @@ class Controller extends Singleton
                         $empty = true;
                         break;
                     }
-                    $request = new Request(array('ids' => $datas['id'], 'getContents' => false));
+                    $request = new Request(array('ids' => $datas['id'], 'getContents' => $datas['abstract']));
                     Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
                     $datas['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
                 {
-                    $request = new Request(array('id' => null, 'getContents' => false));
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
                     $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
                 }
@@ -973,7 +974,7 @@ class Controller extends Singleton
                         }
                     }
 
-                    $request = new Request(array('id' => null, 'getContents' => false));
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     if('streams' === $table)
                     {
                         Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
@@ -1039,6 +1040,7 @@ class Controller extends Singleton
                     if(isset($datas['searchResults'][$new['id']]))
                         $new['search_result'] = (float) $datas['searchResults'][$new['id']];
                     $new['pubDate'] = $this->_getDate($new['pubDate']);
+                    $new['abstract'] = $datas['abstract'];
                     $page .= $this->_view->get('new_title', $new, $cacheTime);
                 }
                 unset($news);

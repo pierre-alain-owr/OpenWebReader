@@ -791,16 +791,26 @@ class Parser extends XMLReader
      */
     private function _clean(&$data)
     {
-        $data = nl2br(trim((string) $data));
-        $data = preg_replace(   array(  "/<!\[CDATA\[(.*?)\]\]/is", // theorically useless here
+//         $data = nl2br(trim((string) $data));
+        $data = trim((string) $data);
+/*        $data = preg_replace(   array(  "/<!\[CDATA\[(.*?)\]\]/is", // theorically useless here
                                         '/(<img\b[^>]*)(src\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)\/?>/si',
                                         "/<div([^>]*>.*?)<\/div>/si"
+                                ),
+                                array(  "\\1",
+                                        "\\1src=\"".$this->_currentHost."\\4\"\\5/>",
+                                        "<p\\1</p>"
+                                ), $data);*/
+        $data = preg_replace(   array(  "/<!\[CDATA\[(.*?)\]\]/is", // theorically useless here
+                                        '/(<img\b[^>]*)(src\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)\/?>/si', // full uri
+                                        '/(<a\b[^>]*)(href\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)>/si', // full uri
+//                                         "/<div([^>]*>.*?)<\/div>/si"
                                 ), 
                                 array(  "\\1", 
                                         "\\1src=\"".$this->_currentHost."\\4\"\\5/>",
-                                        "<p\\1</p>"
+                                        "\\1href=\"".$this->_currentHost."\\4\"\\5/>",
+//                                         "<p\\1</p>"
                                 ), $data);
-
         $data = static::$_filter->purify($data);
     }
 }

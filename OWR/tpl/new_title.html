@@ -21,6 +21,15 @@
                 }
                 echo $this->_utilities->_('Posted').' '.$this->_utilities->_('In').' "'.$name.'"'.('Root' !== $gname ? ' ('.$gname.')' : '').(!empty($author) ? ', '.$this->_utilities->_('By').' "'.$author.'"' : '').', '.$this->_utilities->_('On').' '.$pubDate; 
 ?>
+<?php           if(!empty($abstract)) {?>
+                <div class="new_abstract verysmall" id="new_abstract_<?php echo $id;?>">
+<?php               if(!empty($contents['encoded'])) {
+                        echo $this->_utilities->asAbstract($contents['encoded']['contents'], 350);
+                    } elseif(!empty($contents['description'])) {
+                        echo $this->_utilities->asAbstract($contents['description']['contents'], 350);
+                    } ?>
+                </div>
+<?php           } ?>
                     </div>
                 </div>
                 <div class="article_contents full_rounded hidden" id="new__<?php echo $id.'_'.$streamid.'_'.$gid;?>"></div>

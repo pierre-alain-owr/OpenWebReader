@@ -39,13 +39,15 @@ namespace OWR\View;
 use OWR\Singleton as Singleton,
     OWR\Cache as Cache,
     OWR\Config as Config,
-    OWR\User as User;
+    OWR\User as User,
+    OWR\Strings as Strings;
 /**
  * This object is used to render page with Dwoo
  * @uses Singleton implements the singleton pattern
  * @uses Cache check dwoo cache directories
  * @uses User the current user
  * @uses OWR\Config get the cachetime
+ * @uses OWR\Strings multi-byte wordwrap for abstract
  * @package OWR
  * @subpackage Renderer
  */
@@ -167,10 +169,30 @@ class Utilities extends Singleton
         $name = (string) $name;
         if(!isset($this->_translations[$name]))
         {
-            $this->_translations[$name] = gettext($name);
-            $this->_transChanged = true;
+            if($translation = @gettext($name))
+            {
+                $this->_translations[$name] = $translation;
+                $this->_transChanged = true;
+            }
         }
 
         return $this->_translations[$name];
+    }
+
+    /**
+     * Returns an abstract of a text
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param string $text the text to troncate
+     * @param int $width the width to cut
+     * @return string the abstract of $text
+     */
+    public function asAbstract($text, $width)
+    {
+        $text = strip_tags((string) $text, '<em><strong><sup><sub><span>');
+        $length = mb_strlen($text, 'UTF-8');
+        $text = explode("\n", Strings::mb_wordwrap($text, $width, "\n"));
+        return $text[0].($length > mb_strlen($text[0], 'UTF-8') ? ' [...]' : '');
     }
 }

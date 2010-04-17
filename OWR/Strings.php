@@ -883,4 +883,35 @@ class Strings
     
         return $str;
     }
+
+    /**
+     * Multi-byte equivalent of php wordwrap() function
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param string $str the string to wordwrap
+     * @param int $width the width to cut
+     * @param string $break on what character to break
+     * @return string the wordwraped string
+     */
+    static public function mb_wordwrap($str, $width = 75, $break = "\n")
+    {
+        $str = preg_split('/([\x20\r\n\t]++|\xc2\xa0)/sSX', $str, -1, PREG_SPLIT_NO_EMPTY);
+        $length = 0;
+        $return = '';
+        foreach($str as $val)
+        {
+            $val .= ' ';
+            $tmp = mb_strlen($val, 'UTF-8');
+            $length += $tmp;
+            if($length >= $width)
+            {
+                $return .= $break.$val;
+                $length = $tmp;
+            }
+            else $return .= $val;
+        }
+
+        return $return;
+    }
 }

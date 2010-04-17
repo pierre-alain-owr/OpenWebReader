@@ -437,6 +437,8 @@ class Streams extends Logic
 
         try
         {
+            Threads::iGet()->add(array('do' => 'managefavicons', 'id' => $request->id));
+
             if(!$request->escape)
             {
                 $cron->manage(array('type'=>'managefavicons'));

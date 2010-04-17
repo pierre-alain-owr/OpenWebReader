@@ -405,6 +405,14 @@ div.new_container_nread
     font-weight:bold;
 }
 
+div.new_abstract
+{
+    font-weight:normal;
+    margin:5px 6px 0 5px;
+    border-top:1px solid #808080;
+    padding-top:5px;
+}
+
 div.new_container_read
 {
     font-weight:normal;
@@ -424,6 +432,11 @@ img.article_image
 div#sprites_0
 {
     margin:0;
+}
+
+div.sprites_actions a
+{
+    margin-right:3px;
 }
 
 div.spacer
@@ -757,6 +770,13 @@ li.menu_part_title
     text-shadow:1px 1px 0 gray;
     font-size:130%;
     cursor:pointer;
+    background-color:#BBBBBB;
+}
+
+ul.menu_container li.menu_part_title
+{
+    border:1px solid #666666;
+    text-align:center;
 }
 
 img.favicon, a.favicon
