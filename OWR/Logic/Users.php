@@ -453,8 +453,8 @@ class Users extends Logic
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param string $newLang the new lang
-     * @param mixed $uid the id of the user
+     * @param mixed $request the Request instance
+     * @return $this
      */
     public function changeLang(Request $request)
     {
@@ -484,6 +484,35 @@ class Users extends Logic
         $dao->save();
 
         $request->setResponse(new Response);
+
+        return $this;
+    }
+
+    /**
+     * Return some few statistics about current user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param mixed $request the Request instance
+     * @return $this
+     */
+    public function stat(Request $request)
+    {
+        $datas = array();
+        $datas['nbCategories'] = DAO::getCachedDAO('streams_groups')->count()->nb;
+        $datas['nbStreams'] = DAO::getCachedDAO('streams_relations')->count()->nb;
+        $datas['nbNews'] = DAO::getCachedDAO('news_relations')->count()->nb;
+        $datas['nbUnreads'] = DAO::getCachedDAO('news_relations')->count(array('status' => 1))->nb;
+        $datas['nbTags'] = DAO::getCachedDAO('news_tags')->count()->nb;
+        if(User::iGet()->isAdmin())
+        {
+            $datas['nbUsers'] = $this->_dao->count()->nb;
+        }
+
+        $request->setResponse(new Response(array(
+            'datas'     => $datas,
+            'tpl'       => 'stats'
+        )));
 
         return $this;
     }

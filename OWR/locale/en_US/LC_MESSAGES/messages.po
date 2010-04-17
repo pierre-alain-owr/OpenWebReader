@@ -636,3 +636,24 @@ msgstr "Can not create the directory \"%s\""
 
 msgid "Display an abstract for each news"
 msgstr "Display an abstract for each news"
+
+msgid "Display some statistics"
+msgstr "Display some statistics"
+
+msgid "Show statistics"
+msgstr "Statistics"
+
+msgid "Categories"
+msgstr "Categories"
+
+msgid "Unreads news"
+msgstr "Unreads news"
+
+msgid "News"
+msgstr "News"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Total"
+msgstr "Total"

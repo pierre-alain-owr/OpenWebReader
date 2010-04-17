@@ -611,23 +611,23 @@ div#edituser
 	width:310px;
 }
 
-table.users
+table.users, table.stats
 {
     width:85%;
     text-align:right;
     font-size:90%;
 }
 
-table.users thead
+table.users thead, table.stats thead
 {
     height:30px;
 }
 
-table.users th
+table.users th, table.stats th
 {
     text-align:center;
     background-color:#BBBBBB;
-    border:1px solid #BBBBBB;
+    border:1px solid #666666;
 }
 
 table.users th.empty
@@ -636,7 +636,7 @@ table.users th.empty
     border:none;
 }
 
-table.users td
+table.users td, table.stats td
 {
     height:35px;
     padding:5px;
@@ -648,13 +648,13 @@ table.users td.actions:hover
     background-color:#BBBBBB;
 }
 
-table.users caption
+table.users caption, table.stats caption
 {
     margin:0 0 25px 0;
     font-size:medium;
 }
 
-div.users
+div.users, div.stats
 {
     margin:16px;
 }

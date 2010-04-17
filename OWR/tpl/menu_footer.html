@@ -90,6 +90,9 @@
                             <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id=<OWR:NOCACHE NAME=\'uid\'/>&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit your informations').'">'.$this->_utilities->_('Edit your informations');?></a>
                             <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id=<OWR:NOCACHE NAME=\'uid\'/>&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit your informations');?>" class="icon_edit_user right backgrounded opac"></a>
                         </li>
+                        <li>
+                            <a href="javascript:;" onclick="rP.getStats();" title="<?php echo $this->_utilities->_('Display some statistics');?>"><?php echo $this->_utilities->_('Show statistics');?></a>
+                        </li>
                     </ul>
                 </li>
 <?php          if($userrights > 1) { ?>

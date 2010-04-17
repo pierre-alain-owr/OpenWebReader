@@ -636,3 +636,24 @@ msgstr "Je ne peux pas créer le répertoire \"%s\""
 
 msgid "Display an abstract for each news"
 msgstr "Afficher un extrait des nouvelles"
+
+msgid "Display some statistics"
+msgstr "Afficher les statistiques"
+
+msgid "Show statistics"
+msgstr "Statistiques"
+
+msgid "Categories"
+msgstr "Catégories"
+
+msgid "Unreads news"
+msgstr "Nouvelles non-lues"
+
+msgid "News"
+msgstr "Nouvelles"
+
+msgid "Users"
+msgstr "Utilisateurs"
+
+msgid "Total"
+msgstr "Total"

@@ -488,7 +488,7 @@ class Controller extends Singleton
                 $now = microtime(true);
                 $this->_request->page .= '<!-- Execution time: '.round($now - $this->_cfg->get('begintime'), 6).'s (Request time: '. round($now - $this->_request->begintime, 6).'s => '.round(DB::getTime(), 6).'s of SQL, '.round(View::getTime(), 6).'s of page rendering) -->';
             }
-            
+
             $page =& $this->_request->page;
         }
 
@@ -1366,7 +1366,7 @@ class Controller extends Singleton
         {
             if($return) 
                 return $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
-            else 
+            else
                 $this->_request->page .= $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
         }
     }
@@ -2032,6 +2032,20 @@ class Controller extends Singleton
     protected function do_changeLang()
     {
         Logic::getCachedLogic('users')->changeLang($this->_request);
+        $this->processResponse($this->_request->getResponse());
+        return $this;
+    }
+
+    /**
+     * Returns a few statistics for current user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_stats()
+    {
+        Logic::getCachedLogic('users')->stat($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
