@@ -1459,7 +1459,7 @@ class Streams extends Logic
         {
             $url = isset($stream['xmlUrl']) ? $stream['xmlUrl'] :
                 (isset($stream['htmlUrl']) ? $stream['htmlUrl'] : null);
-                
+
             if(!$url)
             {
                 Logs::iGet()->log('Passing stream, missing url', Exception::E_OWR_WARNING);
@@ -1511,7 +1511,7 @@ class Streams extends Logic
                         }
                     }
                     else $folderId = $folderId->id;
-                
+
                     $currentGroup[$stream['folder']] = $folderId;
                     unset($folderId);
                 }
@@ -1571,7 +1571,7 @@ class Streams extends Logic
     {
         $url = (string)$url;
         isset($this->_streamParser) || $this->_streamParser = new StreamParser();
-        
+
         try
         {
             if($src)

@@ -504,9 +504,12 @@ class Users extends Logic
         $datas['nbNews'] = DAO::getCachedDAO('news_relations')->count()->nb;
         $datas['nbUnreads'] = DAO::getCachedDAO('news_relations')->count(array('status' => 1))->nb;
         $datas['nbTags'] = DAO::getCachedDAO('news_tags')->count()->nb;
+
         if(User::iGet()->isAdmin())
         {
             $datas['nbUsers'] = $this->_dao->count()->nb;
+            $datas['nbTotalStreams'] = DAO::getCachedDAO('streams')->count()->nb;
+            $datas['nbTotalNews'] = DAO::getCachedDAO('news')->count()->nb;
         }
 
         $request->setResponse(new Response(array(

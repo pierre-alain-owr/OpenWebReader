@@ -63,6 +63,7 @@ table tr, table td, table th
 .error
 {
     color:red;
+    text-align:center;
 }
 
 .hidden
