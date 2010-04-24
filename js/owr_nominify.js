@@ -977,14 +977,20 @@ OWR.prototype = {
     {
         var board = $('board');
         if(this.boardTogglerStatus === 0) {
-            $('menu').setStyle('top', '75px');
-            $('contents').setStyle('margin-top', '80px');
+            $('menu').setStyle('top', '65px');
+            $('contents').setStyle('margin-top', '65px');
+            if($('news_ordering')) {
+                $('news_ordering').setStyle('top', '60px');
+            }
             board.setStyle('display', 'block');
             $('board_toggler').setStyle('background-position', '-692px 0px');
             this.boardTogglerStatus = 1;
         } else {
-            $('menu').setStyle('top', '0px');
-            $('contents').setStyle('margin-top', '0px');
+            if($('news_ordering')) {
+                $('news_ordering').setStyle('top', '10px');
+            }
+            $('menu').setStyle('top', '10px');
+            $('contents').setStyle('margin-top', '10px');
             board.setStyle('display', 'none');
             $('board_toggler').setStyle('background-position', '-675px 0px');
             this.boardTogglerStatus = 0;
@@ -1933,9 +1939,15 @@ OWR.prototype = {
         }.bindWithEvent(this, [n, id]));
         r.get({'do': 'delete', 'id': id});
     },
-    moveToPage: function(offset) {
+    moveToPage: function(offset, status) {
         if(!offset) { offset = 0; }
         if(this.pageOffset == offset) { return; }
+        if(status) {
+            ids = [];
+            $$('div.new_container_nread').each(function(item) {
+                this.push(item.get('id').split('_')[1]);
+            }, ids);
+        }
         this.loading(true);
         if('next' === offset) {
             offset = this.pageOffset >= 0 ? this.pageOffset + 1 : 0;
@@ -1968,7 +1980,11 @@ OWR.prototype = {
         if(typeof this.currentId === 'string' && -1 !== this.currentId.indexOf('search_')) {
             r.get({'do':'search', 'keywords':this.keywords, 'offset': offset, 'sort':this.sort, 'dir':this.dir, 'id':this.currentId.split('_')[1]});
         } else {
-            r.get({'do': 'getstream', 'id': this.currentId, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
+            if(status && ids.length) {
+                r.get({'do': 'getstream', 'id': this.currentId, 'offset': offset, 'sort':this.sort, 'dir':this.dir, 'status':0, 'ids':ids});
+            } else {
+                r.get({'do': 'getstream', 'id': this.currentId, 'offset': offset, 'sort':this.sort, 'dir':this.dir});
+            }
         }
     },
     clearStream: function(id) {

@@ -880,7 +880,7 @@ class Strings
             // we must keep '<', '>' and quotes
             $str = preg_replace('/&(?!amp;|#[0-9]+;)/', '&amp;', $str);
         }
-    
+
         return $str;
     }
 
@@ -892,13 +892,17 @@ class Strings
      * @param string $str the string to wordwrap
      * @param int $width the width to cut
      * @param string $break on what character to break
+     * @param int $lines maximum number of lines to return, optionnal
      * @return string the wordwraped string
      */
-    static public function mb_wordwrap($str, $width = 75, $break = "\n")
+    static public function mb_wordwrap($str, $width = 75, $break = "\n", $lines = null)
     {
+        if(isset($lines))
+            $lines = (int) $lines;
         $str = preg_split('/([\x20\r\n\t]++|\xc2\xa0)/sSX', $str, -1, PREG_SPLIT_NO_EMPTY);
         $length = 0;
         $return = '';
+        $nbLines = 1;
         foreach($str as $val)
         {
             $val .= ' ';
@@ -907,6 +911,8 @@ class Strings
             if($length >= $width)
             {
                 $return .= $break.$val;
+                ++$nbLines;
+                if(isset($lines) && $nbLines > $lines) return $return;
                 $length = $tmp;
             }
             else $return .= $val;

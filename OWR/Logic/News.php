@@ -318,7 +318,16 @@ class News extends Logic
     public function update(Request $request)
     {
         $status = (int) $request->status;
-        if(0 < $request->id)
+
+        if(!empty($request->ids) && is_array($request->ids))
+        {
+            $query = '
+    UPDATE news_relations
+        SET status='.$status.'
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        AND newsid IN ('.join(',', $request->ids).')';
+        }
+        elseif(0 < $request->id)
         {
             $table = DAO::getType($request->id);
 
@@ -399,14 +408,6 @@ class News extends Logic
                 )));
                 return $this;
             }
-        }
-        elseif(!empty($request->ids) && is_array($request->ids))
-        {
-            $query = '
-    UPDATE news_relations
-        SET status='.$status.'
-        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
-        AND newsid IN ('.join(',', $request->ids).')';
         }
         else
         {

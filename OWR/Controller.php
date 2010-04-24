@@ -1029,8 +1029,7 @@ class Controller extends Singleton
 
                 if(empty($datas['search']))
                 {
-                    $pager = $this->_view->get('news_tools', $pager, $cacheTime);
-                    $page .= $pager;
+                    $page .= $this->_view->get('news_tools', $pager, $cacheTime);
                 }
 
                 unset($news['ids']);
@@ -1044,12 +1043,6 @@ class Controller extends Singleton
                     $page .= $this->_view->get('new_title', $new, $cacheTime);
                 }
                 unset($news);
-
-                if(empty($datas['search']))
-                {
-                    $page .= $pager;
-                    unset($pager);
-                }
             break;
 
             case 'index':
@@ -1488,8 +1481,14 @@ class Controller extends Singleton
                 throw new Exception('Invalid Id', Exception::E_OWR_BAD_REQUEST);
         }
 
+        if(isset($this->_request->status) && !empty($this->_request->ids))
+        {
+            $this->do_upNew();
+            --$this->_request->offset;
+        }
+
         $this->_getPage('news', array( 
-                            'id'        => $this->_request->id, 
+                            'id'        => $this->_request->id,
                             'offset'    => $this->_request->offset,
                             'sort'      => $this->_request->sort,
                             'dir'       => $this->_request->dir
@@ -1652,7 +1651,7 @@ class Controller extends Singleton
         {
             try
             {
-                $this->do_upNew(false, 'news');
+                $this->do_upNew();
             }
             catch(Exception $e)
             {

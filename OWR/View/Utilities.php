@@ -181,6 +181,7 @@ class Utilities extends Singleton
 
     /**
      * Returns an abstract of a text
+     * This method takes care of open/closed tags
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
@@ -192,7 +193,30 @@ class Utilities extends Singleton
     {
         $text = strip_tags((string) $text, '<em><strong><sup><sub><span>');
         $length = mb_strlen($text, 'UTF-8');
-        $text = explode("\n", Strings::mb_wordwrap($text, $width, "\n"));
-        return $text[0].($length > mb_strlen($text[0], 'UTF-8') ? ' [...]' : '');
+        $text = preg_split("/(<\/?)([a-z:]+)([^>]*)(\/?>)/", trim(Strings::mb_wordwrap($text, $width, "\n", 1)), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $tags = array();
+        foreach($text as $k => $t)
+        {
+            if('<' === $t)
+            {
+                $tags[] = $text[$k + 1];
+            }
+            elseif('/>' === $t || '</' === $t)
+            {
+                array_pop($tags);
+            }
+        }
+
+        if(!empty($tags))
+        {
+            foreach($tags as $tag)
+            {
+                $text[] = '</'.$tag.'>';
+            }
+        }
+
+        $text = join('', $text);
+
+        return $text.($length > mb_strlen($text, 'UTF-8') ? ' [...]' : '');
     }
 }

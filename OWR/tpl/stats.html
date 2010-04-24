@@ -1,0 +1,51 @@
+<div class="stats">
+    <table id="stats" class="stats">
+        <caption><?php echo $this->_utilities->_('Statistiques');?></caption>
+        <thead>
+            <tr>
+                <th class="full_rounded"><?php echo $this->_utilities->_('Type');?></th>
+                <th class="full_rounded"><?php echo $this->_utilities->_('Total');?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Categories');?></td>
+                <td class="full_rounded"><?php echo $nbCategories;?></td>
+            </tr>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Streams');?></td>
+                <td class="full_rounded"><?php echo $nbStreams;?></td>
+            </tr>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('News');?></td>
+                <td class="full_rounded"><?php echo $nbNews;?></td>
+            </tr>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Unreads news');?></td>
+                <td class="full_rounded"><?php echo $nbUnreads;?></td>
+            </tr>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Tags');?></td>
+                <td class="full_rounded"><?php echo $nbTags;?></td>
+            </tr>
+<?php if(isset($nbUsers)) {?>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Users');?></td>
+                <td class="full_rounded"><?php echo $nbUsers;?></td>
+            </tr>
+<?php }
+      if(isset($nbTotalStreams)) {?>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Total streams');?></td>
+                <td class="full_rounded"><?php echo $nbTotalStreams;?></td>
+            </tr>
+<?php }
+      if(isset($nbTotalNews)) {?>
+            <tr>
+                <td class="full_rounded"><?php echo $this->_utilities->_('Total news');?></td>
+                <td class="full_rounded"><?php echo $nbTotalNews;?></td>
+            </tr>
+<?php }?>
+        </tbody>
+    </table>
+</div>
