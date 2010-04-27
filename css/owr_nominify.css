@@ -603,9 +603,11 @@ div#loginbox fieldset, div#loginOpenID fieldset, div#edituser fieldset
 
 div#loginbox legend, div#loginOpenID legend, div#edituser legend
 {
-    font-size:120%;
+    font-size:150%;
     text-shadow:1px 1px 0 gray;
     border-bottom:1px solid gray;
+    margin-bottom:.8em;
+    font-weight:normal;
 }
 
 div#edituser
