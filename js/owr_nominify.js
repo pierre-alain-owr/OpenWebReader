@@ -1951,6 +1951,9 @@ OWR.prototype = {
         this.loading(true);
         if('next' === offset) {
             offset = this.pageOffset >= 0 ? this.pageOffset + 1 : 0;
+            if(status && !this.currentId && offset > 0) {
+                --offset;
+            }
         } else {
             if('prev' === offset) {
                 offset = this.pageOffset > 0 ? this.pageOffset - 1 : 0;

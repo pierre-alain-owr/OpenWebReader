@@ -1484,7 +1484,6 @@ class Controller extends Singleton
         if(isset($this->_request->status) && !empty($this->_request->ids))
         {
             $this->do_upNew();
-            --$this->_request->offset;
         }
 
         $this->_getPage('news', array( 
