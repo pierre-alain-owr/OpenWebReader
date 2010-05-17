@@ -361,10 +361,13 @@ class Streams extends Logic
             $this->_db->rollback();
             throw new Exception($e->getContent(), $e->getCode());
         }
-        
+
         $this->_db->commit();
         unset($streams_contents);
+        // ok stream is fully saved, we try to find the favicon, in background
+        Threads::iGet()->add(array('do' => 'managefavicons', 'id' => $request->id));
 
+        // save user relations
         $streams_relation = DAO::getDAO('streams_relations');
         $streams_relation->rssid = $request->id;
         $streams_relation->gid = $request->gid;
@@ -403,7 +406,7 @@ class Streams extends Logic
         unset($streams_name);
 
         if(!$request->escapeNews)
-        {
+        { // save the news
             $logic = parent::getCachedLogic('news');
             $r = clone($request);
             $r->streamid = $request->id;
@@ -432,13 +435,11 @@ class Streams extends Logic
                 }
             }
         }
-        
+
         unset($stream);
 
         try
         {
-            Threads::iGet()->add(array('do' => 'managefavicons', 'id' => $request->id));
-
             if(!$request->escape)
             {
                 $cron->manage(array('type'=>'managefavicons'));
@@ -474,7 +475,7 @@ class Streams extends Logic
                 'datas' => array('id' => $request->id, 'ids' => $ids)
             )));
         }
-        
+
         $request->new = true;
 
         return $this;

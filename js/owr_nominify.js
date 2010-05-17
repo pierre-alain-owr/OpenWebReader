@@ -1790,6 +1790,9 @@ OWR.prototype = {
             this.initCurrent();
             this.parseResponse(json, null, 'body_container');
             this.initContents();
+            if(!this.boardTogglerStatus && $('news_ordering')) {
+                $('news_ordering').setStyle('top', '10px');
+            }
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
             this.setTS();
@@ -1951,12 +1954,15 @@ OWR.prototype = {
         this.loading(true);
         if('next' === offset) {
             offset = this.pageOffset >= 0 ? this.pageOffset + 1 : 0;
-            if(status && !this.currentId && offset > 0) {
+            if(status && (!this.currentId || (this.sort == "status" && ids.length > 0)) && offset > 0) {
                 --offset;
             }
         } else {
             if('prev' === offset) {
                 offset = this.pageOffset > 0 ? this.pageOffset - 1 : 0;
+                if(status && this.currentId > 0 && this.sort == "status" && ids.length > 0) {
+                    ++offset;
+                }
             }
         }
         var n = this.setLog(['Moving to page ',offset+1]);
@@ -1976,6 +1982,9 @@ OWR.prototype = {
             $$('div.links[id^=moveToPage_]').destroy();
             this.parseResponse(json, null, 'body_container');
             this.initContents();
+            if(!this.boardTogglerStatus && $('news_ordering')) {
+                $('news_ordering').setStyle('top', '10px');
+            }
             var s = new Fx.Scroll(document.body, {'wheelStops':true});
             s.toTop();
             this.pageOffset = offset;
