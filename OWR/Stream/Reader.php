@@ -199,8 +199,11 @@ class Reader
                         $this->_stream['channel']['updatePeriod']['contents'] = 'daily';
                     if(empty($this->_stream['channel']['updateFrequency']['contents']))
                         $this->_stream['channel']['updateFrequency']['contents'] = 1;
+                    elseif(is_array($this->_stream['channel']['updateFrequency']['contents']))
+                        $this->_stream['channel']['updateFrequency']['contents'] = (int) array_shift($this->_stream['channel']['updateFrequency']['contents']);
 
-                    $ttl = (int) $periodMinutes[$this->_stream['channel']['updatePeriod']['contents']] / $this->_stream['channel']['updateFrequency']['contents'];
+                    $ttl =  (int) $periodMinutes[$this->_stream['channel']['updatePeriod']['contents']] /
+                            (int) $this->_stream['channel']['updateFrequency']['contents'];
 
                     return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl  ? 
                         $ttl : Config::iGet()->get('defaultMinStreamRefreshTime'));
