@@ -785,12 +785,12 @@ class Streams extends Logic
             switch($table)
             {
                 case 'streams': 
-                    $this->_dao->delete($request->id);
+                    DAO::getCachedDAO('news_relations')->delete(array('rssid' => $request->id));
                     break;
 
                 case 'streams_groups': 
                     $query = '
-    DELETE FROM news_relations nr
+    DELETE nr FROM news_relations nr
         JOIN streams_relations sr ON (nr.rssid=sr.rssid)
         WHERE gid='.$request->id.' AND nr.uid='.User::iGet()->getUid().' AND sr.uid='.User::iGet()->getUid();
 
