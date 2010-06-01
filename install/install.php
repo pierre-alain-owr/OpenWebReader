@@ -5,7 +5,7 @@ die('COMMENT THIS LINE TO START INSTALL PROCESS');
 define('PATH', dirname(__DIR__).DIRECTORY_SEPARATOR); // define root path
 define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
-$libraries = array('curl' => false, 'imagick' => false, 'pdo' => true, 'mbstring'=>true, 'xmlreader'=>true, 'pdo_mysql'=>true, 'pcre'=>true, 'json' => true, 'libxml' => true, 'gettext' => true, 'date'=>true,'intl'=>true, 'spl' => true); // 'true' is required, but others are really needed :)
+$libraries = array('curl' => false, 'imagick' => false, 'pdo' => true, 'mbstring'=>true, 'xmlreader'=>true, 'pdo_mysql'=>true, 'pcre'=>true, 'json' => true, 'libxml' => true, 'gettext' => true, 'date'=>true,'intl'=>true, 'spl' => true, 'filter' => true); // 'true' is required, but others are really needed :)
 
 $messages = array();
 $messages['PHP extensions'] = array();
