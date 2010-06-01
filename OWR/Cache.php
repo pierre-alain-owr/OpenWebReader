@@ -35,6 +35,7 @@
  * @package OWR
  */
 namespace OWR;
+use OWR\View\Utilities as Utilities;
 /**
  * This object manages cache files
  * @package OWR
