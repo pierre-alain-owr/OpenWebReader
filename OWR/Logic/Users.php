@@ -205,7 +205,7 @@ class Users extends Logic
         // TODO : check this dynamicly
         $cfg = Object::toArray($request->config);
         $cfg['nbnews'] = (int) (isset($cfg['nbnews']) && $cfg['nbnews'] > 0 && $cfg['nbnews'] <= 50 && !($cfg['nbnews']%10) ? $cfg['nbnews'] : 10);
-        $cfg['blockimg'] = (bool) (isset($cfg['blockimg']) ? $cfg['blockimg'] : true);
+        $cfg['blockimg'] = (bool) (isset($cfg['blockimg']) ? $cfg['blockimg'] : false);
         $cfg['abstract'] = (bool) (isset($cfg['abstract']) ? $cfg['abstract'] : false);
 
         if(!empty($request->passwd) && !empty($request->confirmpasswd))
