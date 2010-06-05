@@ -214,8 +214,6 @@ class News extends Logic
             return $this;
         }
 
-        $dao = DAO::getCachedDAO('news_relations_tags');
-
         if(!isset($datas['id']))
         {
             $multiple = true;

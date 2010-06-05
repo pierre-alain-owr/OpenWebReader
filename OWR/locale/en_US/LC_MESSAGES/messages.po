@@ -26,7 +26,7 @@ msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: pierre-alain@openwebreader.org\n"
 "POT-Creation-Date: 2009-03-21 17:52+0100\n"
-"PO-Revision-Date: 2010-04-23 22:18+0100\n"
+"PO-Revision-Date: 2010-06-05 13:22+0100\n"
 "Last-Translator: Pierre-Alain Mignot <pierre-alain@openwebreader.org>\n"
 "Language-Team: en_US\n"
 "MIME-Version: 1.0\n"
@@ -662,4 +662,13 @@ msgstr "Total streams for all users"
 
 msgid "Total news"
 msgstr "Total news for all users"
+
+msgid "Can not execute all threads for action \"%s\" : request timeout"
+msgstr "Can not execute all threads for action \"%s\" : request timeout"
+
+msgid "Show all news"
+msgstr "Show all news"
+
+msgid "All news"
+msgstr "All news"
 

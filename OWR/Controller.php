@@ -920,6 +920,7 @@ class Controller extends Singleton
                 }
 
                 $offset = 0;
+                $nbNewsByPage = (int) $this->_user->getConfig('nbnews');
 
                 if(isset($datas['offset']))
                 {
@@ -927,7 +928,7 @@ class Controller extends Singleton
 
                     if($datas['offset'] > 0)
                     {
-                        $offset = (int)($datas['offset']*10);
+                        $offset = (int)($datas['offset'] * $nbNewsByPage);
                     }
                 }
                 else
@@ -935,7 +936,7 @@ class Controller extends Singleton
                     $datas['offset'] = 0;
                 }
 
-                $offset = $offset.','.$this->_user->getConfig('nbnews');
+                $offset = $offset.','.$nbNewsByPage;
 
                 if(isset($datas['id']) && is_array($datas['id']))
                 {
@@ -953,6 +954,13 @@ class Controller extends Singleton
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
                     $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
+                }
+                elseif(-1 === $datas['id'])
+                { // all news
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
+                    Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
+                    $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
+                    $datas['nbNews'] = $nb ? $nb->nb : 0;
                 }
                 else
                 {
@@ -1025,7 +1033,7 @@ class Controller extends Singleton
                                 'offset'        => $datas['offset'],
                                 'sort'          => !empty($datas['sort']) ? $datas['sort'] : null,
                                 'dir'           => !empty($datas['dir']) ? $datas['dir'] : null,
-                                'nbNewsByPage'  => $this->_user->getConfig('nbnews'));
+                                'nbNewsByPage'  => $nbNewsByPage);
 
                 if(empty($datas['search']))
                 {
@@ -1053,9 +1061,9 @@ class Controller extends Singleton
                 $ulang = $this->_user->getLang();
                 $uid = $this->_user->getUid();
                 $page .= $this->_view->get('header', array(
-                                                        'surl'      =>$surl, 
-                                                        'xmlLang'   =>$this->_user->getXMLLang(),
-                                                    ), 
+                                                        'surl'      => $surl,
+                                                        'xmlLang'   => $this->_user->getXMLLang(),
+                                                    ),
                                                     $cacheTime,
                                                     array(
                                                         'token' => $token
@@ -1064,7 +1072,7 @@ class Controller extends Singleton
                 $page .= $this->_view->get('board', array(
                                                         'lang' => $ulang,
                                                         'surl' => $surl,
-                                                    ), 
+                                                    ),
                                                     $cacheTime,
                                                     array(
                                                         'userlogin' => htmlentities($this->_user->getLogin(), ENT_COMPAT, 'UTF-8'),
