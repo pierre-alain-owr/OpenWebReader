@@ -37,7 +37,7 @@
 namespace OWR;
 use OWR\DB\Request as DBRequest,
     OWR\Logic\Response as LogicResponse,
-    OWR\View\Utilities as Utilities;
+    OWR\View\Utilities;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -144,13 +144,13 @@ class Controller extends Singleton
 
         set_error_handler(array(__NAMESPACE__.'\Error', 'error_handler')); // errors
         set_exception_handler(array(__NAMESPACE__.'\Exception', 'exception_handler')); // exceptions not catched
-        error_reporting(DEBUG ? -1 :    E_CORE_ERROR | 
-                                        E_COMPILE_ERROR | 
-                                        E_ERROR | 
-                                        E_PARSE | 
-                                        E_USER_ERROR | 
-                                        E_USER_WARNING | 
-                                        E_USER_NOTICE | 
+        error_reporting(DEBUG ? -1 :    E_CORE_ERROR |
+                                        E_COMPILE_ERROR |
+                                        E_ERROR |
+                                        E_PARSE |
+                                        E_USER_ERROR |
+                                        E_USER_WARNING |
+                                        E_USER_NOTICE |
                                         E_USER_DEPRECATED);
 
         try
@@ -163,7 +163,7 @@ class Controller extends Singleton
         }
 
         $this->_sh = Session::iGet(); // init session
-        
+
         try
         {
             $this->_sh->init(array('sessionLifeTime' => $this->_cfg->get('sessionLifeTime'),
@@ -183,7 +183,7 @@ class Controller extends Singleton
             $this->_user->reg(); // populate into the session
         }
     }
-    
+
     /**
      * Executes the given action
      * This method only accepts a Request object
@@ -203,7 +203,7 @@ class Controller extends Singleton
         $this->_request = $request;
         $this->_request->begintime = microtime(true);
 
-        try 
+        try
         {
             if(!empty($this->_request->identifier) || 'verifyopenid' === $this->_request->do)
             { // openid, add it to include_path
@@ -220,11 +220,11 @@ class Controller extends Singleton
                         case 'getrss':
                         case 'getopml':
                             break;
-                        default: 
+                        default:
                             throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
                             break;
                     }
-                   
+
                     $this->do_login(true);
                 }
                 elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login' && $this->_request->do !== 'verifyopenid')
@@ -251,12 +251,12 @@ class Controller extends Singleton
                 }
                 unset($token);
             }
-    
+
             $action = 'do_'.$this->_request->do;
-    
+
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin
                 throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
-        
+
             if($this->_user->isAdmin())
             {
                 // we redirect if some clear caching is asked
@@ -279,8 +279,11 @@ class Controller extends Singleton
             }
 
             $this->$action(); // execute the given action
-        } 
-        catch(Exception $e) 
+
+            // wait for all the threads for this action to ends properly if any
+            $this->_wait();
+        }
+        catch(Exception $e)
         {
             $this->_db->rollback();
 
@@ -355,7 +358,7 @@ class Controller extends Singleton
                 {
                     Logs::iGet()->writeLogs();
                     $errors = Logs::iGet()->getLogs();
-    
+
                     foreach($errors as $errcode=>$errmsg)
                     {
                         if(Exception::E_OWR_DIE === $errcode)
@@ -369,7 +372,7 @@ class Controller extends Singleton
                     if(empty($page['errors'])) $page['errors'][] = Utilities::iGet()->_('Non-blocking error(s) occured');
                 }
             }
-            
+
             if(empty($page['errors']) && isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
             {
                 $etag = '"owr-'.md5(serialize($page)).'"';
@@ -563,7 +566,7 @@ class Controller extends Singleton
         elseif(!$this->_isFrame && !headers_sent())
         {
             header('Location: '.$surl);
-        } 
+        }
         else
         {
             $page = '<a href="'.$surl.'">Redirection</a>';
@@ -584,7 +587,7 @@ class Controller extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed LogicResponse the response of the 
+     * @param mixed LogicResponse the response of the
      */
     public function processResponse(LogicResponse $response)
     {
@@ -638,7 +641,7 @@ class Controller extends Singleton
     {
         isset($this->_dateFormatter) ||
         $this->_dateFormatter = new \IntlDateFormatter(
-            $this->_user->getLang(), 
+            $this->_user->getLang(),
             \IntlDateFormatter::FULL,
             \IntlDateFormatter::MEDIUM
         );
@@ -810,7 +813,7 @@ class Controller extends Singleton
                             break;
                         }
                         $stream['groups'] = $groups;
-                        if($stream['status'] > 0) 
+                        if($stream['status'] > 0)
                         {
                             $stream['unavailable'] = $this->_getDate($stream['status']);
                         }
@@ -1120,9 +1123,9 @@ class Controller extends Singleton
                 $page .= $this->_view->get('contents_header', array(), $cacheTime);
                 $page .= $this->_getPage('news', $datas, true);
                 $page .= $this->_view->get('contents_footer', array(), $cacheTime);
-                $page .= $this->_view->get('menu_header', array(), $cacheTime, 
+                $page .= $this->_view->get('menu_header', array(), $cacheTime,
                                             array(
-                                                'unread' => $this->_request->unreads[0], 
+                                                'unread' => $this->_request->unreads[0],
                                                 'bold' => $this->_request->unreads[0] > 0 ? ' class="bold"' : ''
                                             ));
                 $page .= $tmpPage;
@@ -1132,11 +1135,11 @@ class Controller extends Singleton
                 $page .= $this->_getPage('menu_tags_contents', $datas, true);
 
                 $page .= $this->_view->get('menu_footer', array(
-                                                            'groups'            => $groups, 
+                                                            'groups'            => $groups,
                                                             'userrights'        => $this->_user->getRights(),
                                                             'surl'              => $surl,
                                                             'maxuploadfilesize' => $this->_cfg->get('maxUploadFileSize')
-                                                        ), 
+                                                        ),
                                                         $cacheTime,
                                                         array(
                                                             'token'             => $token,
@@ -1150,7 +1153,7 @@ class Controller extends Singleton
                 $page .= $this->_view->get('footer', array(
                                                         'lang'=>$ulang,
                                                         'surl'=>$surl
-                                                        ), 
+                                                        ),
                                                         $cacheTime,
                                                     array(
                                                         'token'=>$token,
@@ -1352,7 +1355,7 @@ class Controller extends Singleton
                 $noCacheDatas['back'] = $this->_request->back;
                 break;
 
-            default: 
+            default:
                 break;
         }
 
@@ -1365,10 +1368,47 @@ class Controller extends Singleton
         }
         elseif(!$empty)
         {
-            if($return) 
+            if($return)
                 return $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
             else
                 $this->_request->page .= $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
+        }
+    }
+
+    /**
+     * Waits for all threads to ends up properly if any,
+     * or throw an 408 exception if we waited too long
+     * to avoid having ghost processes
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     */
+    protected function _wait()
+    {
+        $i = $sec = 0;
+        $threads = Threads::iGet();
+        while($threads->getQueueCount() && $sec <= 10)
+        {
+            if(!$threads->exec())
+            { // have to wait a bit
+                if($i > 5)
+                {
+                    $i = 0; // reset the timer every 1+2+3+4+5s
+                    // security inc to not have infinite sleeping threads
+                    // 150s will ends up with timeout
+                    ++$sec;
+                }
+                sleep(++$i);
+            }
+            else
+            {
+                $i = $sec = 0; // resetting timer and inc
+            }
+        }
+
+        if($threads->getQueueCount())
+        { // we did not execute all threads, timeout
+            throw new Exception(sprintf(Utilities::iGet()->_("Can not execute all threads for action \"%s\" : request timeout"), $action.'_'.$id), 408);
         }
     }
 
@@ -1494,7 +1534,7 @@ class Controller extends Singleton
             $this->do_upNew();
         }
 
-        $this->_getPage('news', array( 
+        $this->_getPage('news', array(
                             'id'        => $this->_request->id,
                             'offset'    => $this->_request->offset,
                             'sort'      => $this->_request->sort,
@@ -1853,7 +1893,7 @@ class Controller extends Singleton
         $query = '
     SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
-        WHERE id IN 
+        WHERE id IN
             (';
 
         if(empty($this->_request->id))
@@ -1891,12 +1931,12 @@ class Controller extends Singleton
             }
         }
 
-        $query .= ') 
+        $query .= ')
             AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
 
-        $results = $this->_db->getAllP($query, 
+        $results = $this->_db->getAllP($query,
                     new DBRequest(array($this->_request->oskeywords, $this->_request->oskeywords)));
         $datas = array('id' => array(), 'opensearch' => htmlspecialchars($this->_request->oskeywords, ENT_COMPAT, 'UTF-8', false));
         if($results->count())
@@ -1940,7 +1980,7 @@ class Controller extends Singleton
         $query = '
     SELECT id, MATCH(contents) AGAINST(?) AS result
         FROM news_contents
-        WHERE id IN 
+        WHERE id IN
             (';
 
         if(empty($this->_request->id))
@@ -1978,12 +2018,12 @@ class Controller extends Singleton
             }
         }
 
-        $query .= ') 
+        $query .= ')
             AND MATCH(contents) AGAINST(? IN BOOLEAN MODE)
         ORDER BY result DESC
         LIMIT 50'; // limit here, 50 is just enough.
 
-        $results = $this->_db->getAllP($query, 
+        $results = $this->_db->getAllP($query,
                     new DBRequest(array($this->_request->keywords, $this->_request->keywords)));
 
         if($results->count())
@@ -2119,7 +2159,7 @@ class Controller extends Singleton
             if(0 !== mb_strpos($login, 'http://', 0, 'UTF-8'))
                 $login = 'http://'.$login;
             if('/' !== mb_substr($login, -1, 1, 'UTF-8'))
-                    $login .= '/'; 
+                    $login .= '/';
 
             class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
             $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
@@ -2209,7 +2249,7 @@ class Controller extends Singleton
 
         foreach(array('uid', 'tlogin', 'key', $session) as $name)
         {
-            if(isset($_COOKIE[$name])) 
+            if(isset($_COOKIE[$name]))
             {
                 setcookie($name, '', $this->_request->begintime - 42000, $this->_cfg->get('path'), $this->_cfg->get('url'), $this->_cfg->get('httpsecure'), true);
             }
@@ -2416,7 +2456,7 @@ class Controller extends Singleton
         else $tokens = (array)$tokensObj;
 
         unset($tokensObj);
-        
+
         $url = $this->_cfg->get('surl').'?do=getrss&uid='.$this->_user->getUid().'&tlogin='.$tokens['tlogin'].'&key='.$tokens['tlogin_key'];
         unset($tokens);
         $this->addToPage($url);
@@ -2439,11 +2479,11 @@ class Controller extends Singleton
             $tokens = $this->_user->regenerateActionToken('getopml');
         }
         else $tokens = (array)$tokensObj;
-        
+
         unset($tokensObj);
-        
+
         $url = $this->_cfg->get('surl').'?do=getopml&uid='.$this->_user->getUid().'&tlogin='.$tokens['tlogin'].'&key='.$tokens['tlogin_key'];
-        unset($tokens); 
+        unset($tokens);
         $this->addToPage($url);
         return $this;
     }

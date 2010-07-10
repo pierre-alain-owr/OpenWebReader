@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  * Controller class for the CLI interface
  * Get the request, clean it and execute the given action
  *
@@ -94,13 +94,13 @@ class Controller extends MainController
 
         set_error_handler(array('OWR\Error', 'error_handler')); // errors
         set_exception_handler(array('OWR\Exception', 'exception_handler')); // exceptions not catched
-        error_reporting(DEBUG ? -1 :    E_CORE_ERROR | 
-                                        E_COMPILE_ERROR | 
-                                        E_ERROR | 
-                                        E_PARSE | 
-                                        E_USER_ERROR | 
-                                        E_USER_WARNING | 
-                                        E_USER_NOTICE | 
+        error_reporting(DEBUG ? -1 :    E_CORE_ERROR |
+                                        E_COMPILE_ERROR |
+                                        E_ERROR |
+                                        E_PARSE |
+                                        E_USER_ERROR |
+                                        E_USER_WARNING |
+                                        E_USER_NOTICE |
                                         E_USER_DEPRECATED);
 
         try
@@ -126,15 +126,15 @@ class Controller extends MainController
      */
     public function execute(Request $request)
     {
-        try 
+        try
         {
             $this->_request = $request;
             $this->_request->begintime = microtime(true);
             $id = $this->_request->id;
 
             $authorized = array(
-                'refreshstream'             => true, 
-                'managefavicons'            => true, 
+                'refreshstream'             => true,
+                'managefavicons'            => true,
                 'checkstreamsavailability'  => true
             );
             if(!isset($authorized[$this->_request->do])) // hu ?
@@ -156,21 +156,8 @@ class Controller extends MainController
 
             $this->$action(); // execute the given action
 
-            // wait for all the threads for this action to be finished
-            $i = 0;
-            $threads = Threads::iGet();
-            while($threads->getQueueCount())
-            {
-                if(!$threads->exec())
-                { // have to wait a bit
-                    if($i > 5) $i = 0; // reset the timer every 1+2+3+4+5s
-                    sleep(++$i);
-                }
-                else
-                {
-                    $i = 0; // resetting timer
-                }
-            }
+            // wait for all the threads for this action to ends properly if any
+            $this->_wait();
 
             $this->_cron->unlock($action.'_'.$id); // unlink file lock for next processing
         }
