@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic Object base class 
+ * Logic Object base class
  *
  * PHP 5
  *
@@ -35,7 +35,7 @@
  */
 namespace OWR;
 use OWR\Interfaces\Logic as iLogic,
-    OWR\User as User;
+    OWR\User;
 /**
  * This class is used as base class for all DAO objects and defines all usefull functions
  * Please ensure that all the non-static public functions returns $this

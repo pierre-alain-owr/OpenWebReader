@@ -78,7 +78,7 @@ abstract class PrivateSingleton implements iPrivateSingleton
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @return mixed the instance
      */
-    final static public function iGet() 
+    final static public function iGet()
     {
         $c = get_called_class();
         if(!isset(self::$_instances[$c]))
@@ -178,7 +178,7 @@ abstract class PrivateSingleton implements iPrivateSingleton
         }
 
         $arrays = explode('.', $var);
-        
+
         $datas = $this->_datas;
 
         foreach($arrays as $arr)
@@ -213,7 +213,7 @@ abstract class PrivateSingleton implements iPrivateSingleton
         $var = explode('.', $var);
 
         $datas =& $this->_datas;
-        
+
         foreach($var as $arr)
         {
             if(!is_array($datas) || !isset($datas[(string)$arr])) return false;

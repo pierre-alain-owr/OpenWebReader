@@ -35,10 +35,10 @@
  * @subpackage DB
  */
 namespace OWR\DB;
-use \ArrayObject as ArrayObject,
-    OWR\Exception as Exception,
-    OWR\User as User,
-    OWR\View\Utilities as Utilities;
+use \ArrayObject,
+    OWR\Exception,
+    OWR\User,
+    OWR\View\Utilities;
 /**
  * This object is sent to DB to be executed
  * @uses OWR\Exception the exceptions handler
@@ -164,7 +164,7 @@ class Request extends ArrayObject
                                 case \PDO::PARAM_INT : $request[$i]['value'] = 0; break;
                                 case \PDO::PARAM_STR : $request[$i]['value'] = ''; break;
                                 case \PDO::PARAM_BOOL : $request[$i]['value'] = false; break;
-                                
+
                                 case self::PARAM_CURRENT_TIMESTAMP : $request[$i]['value'] = time(); $request[$i]['type'] = \PDO::PARAM_INT; break;
                                 case self::PARAM_EMAIL :
                                 case self::PARAM_URL :
@@ -172,11 +172,11 @@ class Request extends ArrayObject
                                 case self::PARAM_LANG :
                                 case self::PARAM_LOGIN :
                                 case self::PARAM_HASH : $request[$i]['value'] = ''; $request[$i]['type'] = \PDO::PARAM_STR; break;
-                                
+
                                 case self::PARAM_SERIALIZED: $request[$i]['value'] = serialize(array()); $request[$i]['type'] = \PDO::PARAM_STR; break;
 
                                 case \PDO::PARAM_NULL :
-                                case \PDO::PARAM_LOB : 
+                                case \PDO::PARAM_LOB :
                                 case \PDO::PARAM_STMT:
                                 case self::PARAM_NULL:
                                 default : $request[$i]['value'] = null; break;
@@ -210,7 +210,7 @@ class Request extends ArrayObject
                             case \PDO::PARAM_INT : $request[$i]['value'] = 0; break;
                             case \PDO::PARAM_STR : $request[$i]['value'] = ''; break;
                             case \PDO::PARAM_BOOL : $request[$i]['value'] = false; break;
-                            
+
                             case self::PARAM_CURRENT_TIMESTAMP : $request[$i]['value'] = time(); $request[$i]['type'] = \PDO::PARAM_INT; break;
                             case self::PARAM_EMAIL :
                             case self::PARAM_URL :
@@ -218,11 +218,11 @@ class Request extends ArrayObject
                             case self::PARAM_LANG :
                             case self::PARAM_LOGIN :
                             case self::PARAM_HASH : $request[$i]['value'] = ''; $request[$i]['type'] = \PDO::PARAM_STR; break;
-                            
+
                             case self::PARAM_SERIALIZED: $request[$i]['value'] = serialize(array()); $request[$i]['type'] = \PDO::PARAM_STR; break;
 
                             case \PDO::PARAM_NULL :
-                            case \PDO::PARAM_LOB : 
+                            case \PDO::PARAM_LOB :
                             case \PDO::PARAM_STMT:
                             case self::PARAM_NULL:
                             default : $request[$i]['value'] = null; break;
@@ -279,7 +279,7 @@ class Request extends ArrayObject
                             $validUrl = filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
                         }
                     }
-                    
+
                     if($validUrl)
                     {
                         $scheme = @parse_url($validUrl, PHP_URL_SCHEME);
@@ -296,7 +296,7 @@ class Request extends ArrayObject
                 $type = \PDO::PARAM_STR;
                 break;
 
-            case self::PARAM_IP: 
+            case self::PARAM_IP:
                 $datas = (string) $datas;
                 if('' !== $datas)
                 {

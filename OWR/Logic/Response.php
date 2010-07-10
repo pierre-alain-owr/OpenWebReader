@@ -38,7 +38,7 @@
  */
 namespace OWR\Logic;
 use OWR\Interfaces\Logic\Response as iResponse,
-    OWR\Exception as Exception,
+    OWR\Exception,
     OWR\View\Utilities as ViewUtilities;
 /**
  * This class is an object response of every logic call

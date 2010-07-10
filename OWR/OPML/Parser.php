@@ -36,11 +36,11 @@
  * @subpackage OPML
  */
 namespace OWR\OPML;
-use \XMLReader as XMLReader,
-    OWR\Exception as Exception,
-    OWR\Strings as Strings,
-    OWR\cURLWrapper as cURLWrapper,
-    OWR\View\Utilities as Utilities;
+use \XMLReader,
+    OWR\Exception,
+    OWR\Strings,
+    OWR\cURLWrapper,
+    OWR\View\Utilities;
 /**
  * This object is used to parse OPML
  * @uses Exception the exceptions handler
@@ -57,7 +57,7 @@ class Parser extends XMLReader
     * @access protected
     */
     protected $_streams = array();
-    
+
     /**
     * @var array OPML structure
     * @access protected
@@ -69,8 +69,8 @@ class Parser extends XMLReader
         'ownerName'         => array('required' => FALSE),
         'ownerEmail'        => array('required' => FALSE),
         'ownerId'           => array('required' => FALSE),
-        
-        'outline'      => array(   
+
+        'outline'      => array(
             'type'          => array('required' => TRUE),
             'text'          => array('required' => TRUE),
             'xmlUrl'        => array('required' => TRUE),
@@ -83,13 +83,13 @@ class Parser extends XMLReader
             'category'      => array('required' => FALSE),
         )
     );
-    
+
     /**
     * @var int number of streams in OPML
     * @access protected
     */
     protected $_itemDepth;
-    
+
     /**
     * @var string the name of the current folder if any
     * @access protected
@@ -101,7 +101,7 @@ class Parser extends XMLReader
     * @access protected
     */
     protected $_localName;
-    
+
     /**
     * @var string the name of the parent node
     * @access protected
@@ -120,7 +120,7 @@ class Parser extends XMLReader
     public function parse($opml, $isUploaded = false)
     {
         $this->_itemDepth = 0;
-    
+
         libxml_use_internal_errors(true);
 
         if(isset($this->_streams[$opml])) return true;
@@ -146,18 +146,18 @@ class Parser extends XMLReader
         }
 
         $this->_currentStream = $opml;
-        
+
         $this->_streams[$opml] = array();
-        
+
         $this->_parentLocalName = $this->_localName = $this->_folder = null;
-        
+
         while(@$this->read())
         {
             if(self::ELEMENT === $this->nodeType)
             {
                 if('opml' === $this->localName || 'head' === $this->localName || 'body' === $this->localName)
                     continue;
-                
+
                 if('outline' === $this->localName)
                 {
                     $type = $this->getAttribute('type');
@@ -165,7 +165,7 @@ class Parser extends XMLReader
                     {
                         $this->_nodeTree[$this->depth] = $this->_localName = $this->localName;
                         $this->_itemDepth++;
-                        
+
                         if($this->hasAttributes)
                         {
                             if(!$this->_parseAttributes())
@@ -182,8 +182,8 @@ class Parser extends XMLReader
                         $title = $this->getAttribute('title');
                         if(!$title)
                             $title = $this->getAttribute('text');
-                        
-                        if(!$title) 
+
+                        if(!$title)
                         {
                             throw new Exception('Missing title for folder', Exception::E_OWR_WARNING);
                             $this->_folder = null;
@@ -194,13 +194,13 @@ class Parser extends XMLReader
                 else
                 {
                     $this->_nodeTree[$this->depth] = $this->_localName = $this->localName;
-                    
+
                     if($this->hasAttributes)
                     {
                         $this->_parseAttributes();
                     }
-                    
-                    if($this->isEmptyElement) 
+
+                    if($this->isEmptyElement)
                     {
                         $this->_parentLocalName = isset($this->_nodeTree[$this->depth - 1]) ? $this->_nodeTree[$this->depth - 1] : null;
                         continue;
@@ -219,10 +219,10 @@ class Parser extends XMLReader
                 if('opml' === $this->localName || 'head' === $this->localName || 'body' === $this->localName
                     || ('outline' === $this->localName && ('rss' !== $type || 'pie' !== $type) && 'folder' !== $type))
                     continue;
-                
-                if(!isset($this->_nodeTree[$this->depth - 1]) || 'folder' === $this->_nodeTree[$this->depth - 1]) 
+
+                if(!isset($this->_nodeTree[$this->depth - 1]) || 'folder' === $this->_nodeTree[$this->depth - 1])
                     $this->_folder = null;
-                
+
                 $this->_parentLocalName = isset($this->_nodeTree[$this->depth - 2]) ? $this->_nodeTree[$this->depth - 2] : null;
             }
         }
@@ -246,7 +246,7 @@ class Parser extends XMLReader
 
         return true;
     }
-    
+
     /**
      * Gets the attributes of the current node
      *
@@ -263,23 +263,23 @@ class Parser extends XMLReader
             if(!is_null($this->_parentLocalName))
             {
                 if(!isset($this->_trees[$this->_parentLocalName][$this->_localName])) return false;
-                
+
                 $attributes =& $this->_trees[$this->_parentLocalName][$this->_localName];
-                
+
                 if(!isset($this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName]))
                     $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName] = array();
-    
+
                 $node =& $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName];
             }
             else
             {
                 if(!isset($this->_trees[$this->_localName])) return false;
-                
+
                 $attributes =& $this->_trees[$this->_localName];
-                
+
                 if(!isset($this->_streams[$this->_currentStream]['item'][$this->_itemDepth]))
                     $this->_streams[$this->_currentStream]['item'][$this->_itemDepth] = array();
-                    
+
                 $node =& $this->_streams[$this->_currentStream]['item'][$this->_itemDepth];
             }
         }
@@ -290,24 +290,24 @@ class Parser extends XMLReader
                 if(!isset($this->_trees[$this->_parentLocalName]) ||
                    !isset($this->_trees[$this->_parentLocalName][$this->_localName]))
                     return false;
-    
+
                 $attributes =& $this->_trees[$this->_parentLocalName][$this->_localName];
-                
+
                 if(!isset($this->_streams[$this->_currentStream][$this->_parentLocalName]))
                 {
                     $this->_streams[$this->_currentStream][$this->_parentLocalName] = array();
                     $this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName] = array();
                     $this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName]['attributes'] = array();
                 }
-    
+
                 $node =& $this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName]['attributes'];
             }
             else
             {
                 if(!isset($this->_trees[$this->_localName])) return false;
-                
+
                 $attributes =& $this->_trees[$this->_localName];
-                
+
                 if(!isset($this->_streams[$this->_currentStream][$this->_localName]))
                 {
                     $this->_streams[$this->_currentStream][$this->_localName] = array();
@@ -334,13 +334,13 @@ class Parser extends XMLReader
                 $node[$attribute] = $attrValue;
             }
         }
-        
+
         if($this->_itemDepth > 0 && isset($this->_folder))
             $node['folder'] = $this->_folder;
-        
+
         return true;
     }
-    
+
     /**
      * Gets the contents of the current node
      *
@@ -357,14 +357,14 @@ class Parser extends XMLReader
                     $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName] = array();
                 if(!isset($this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName][$this->_localName]))
                     $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName][$this->_localName] = array();
-    
+
                 $node =& $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_parentLocalName][$this->_localName];
             }
             else
             {
                 if(!isset($this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_localName]))
                     $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_localName] = array();
-                    
+
                 $node =& $this->_streams[$this->_currentStream]['item'][$this->_itemDepth][$this->_localName];
             }
         }
@@ -376,18 +376,18 @@ class Parser extends XMLReader
                     $this->_streams[$this->_currentStream][$this->_parentLocalName] = array();
                 if(!isset($this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName]))
                     $this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName] = array();
-    
+
                 $node =& $this->_streams[$this->_currentStream][$this->_parentLocalName][$this->_localName];
             }
             else
             {
                 if(!isset($this->_streams[$this->_currentStream][$this->_localName]))
                     $this->_streams[$this->_currentStream][$this->_localName] = array();
-                    
+
                 $node =& $this->_streams[$this->_currentStream][$this->_localName];
             }
         }
-        
+
         if(!isset($node['contents']))
         {
             $node['contents'] = preg_replace("/<!\[CDATA\[(.*?)\]\]/", "\\1", $this->value);
@@ -397,7 +397,7 @@ class Parser extends XMLReader
             $node['contents'] .= preg_replace("/<!\[CDATA\[(.*?)\]\]/", "\\1", $this->value);
         }
     }
-    
+
     /**
      * Returns the stream(s)
      *
@@ -412,7 +412,7 @@ class Parser extends XMLReader
         {
             return (!isset($this->_streams[$stream]) ? $this->_streams : $this->_streams[$stream]);
         }
-        
+
         return $this->_streams;
     }
 }

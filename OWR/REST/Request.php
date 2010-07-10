@@ -36,10 +36,10 @@
  * @subpackage Rest
  */
 namespace OWR\REST;
-use OWR\Request as R, 
-    OWR\Config as Config,
-    OWR\Object as Object,
-    OWR\XML as XML;
+use OWR\Request as R,
+    OWR\Config,
+    OWR\Object,
+    OWR\XML;
 /**
  * This object is sent to the Controller to be executed
  * @uses OWR\String convert M$ bad chars
@@ -128,7 +128,7 @@ class Request extends R
 //                     case 'getopml':
 //                         if(isset($path[0]))
 //                             $datas['dl'] = $path[0];
-// 
+//
 //                         break;
 
                     case 'getstream':
@@ -160,9 +160,9 @@ class Request extends R
                 switch($this->do)
                 {
                     case 'login':
-                        !isset($_POST['tlogin']) || 
+                        !isset($_POST['tlogin']) ||
                         ($datas['tlogin'] = (string) $_POST['tlogin']);
-                        !isset($_POST['key']) || 
+                        !isset($_POST['key']) ||
                         ($datas['key'] = (string) $_POST['key']);
                         !isset($_POST['key']) ||
                         ($datas['uid'] = $_POST['uid']);
@@ -284,7 +284,7 @@ class Request extends R
                 break;
 
             case 'delete':
-            default: 
+            default:
                 break;
         }
 

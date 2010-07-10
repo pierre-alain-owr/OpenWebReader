@@ -35,7 +35,7 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\View\Utilities as Utilities;
+use OWR\View\Utilities;
 /**
  * This object manages cache files
  * @package OWR
@@ -62,7 +62,7 @@ class Cache
     static public function clear($dir = '', $maintenance = false)
     {
         $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.(string)$dir;
-        
+
         $nb = 0;
 
         clearstatcache();
@@ -77,15 +77,15 @@ class Cache
             $cacheTime = Config::iGet()->get('cacheTime');
         }
 
-        foreach($cache as $file) 
+        foreach($cache as $file)
         {
-            if(!$cache->isDot() && !$cache->isDir() && $cache->isWritable()) 
+            if(!$cache->isDot() && !$cache->isDir() && $cache->isWritable())
             {
                 if($maintenance && ($cache->getMTime() + $cacheTime < $now))
                 {
                     continue;
                 }
-                
+
                 $nb += (int) unlink((string) $file);
             }
         }
@@ -133,23 +133,23 @@ class Cache
     static public function get($filename, $cacheTime=0)
     {
         $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
-    
+
         $cacheTime = (int)$cacheTime;
-    
+
         if(!file_exists($filename) || ($cacheTime > 0 && (time() > (@filemtime($filename) + $cacheTime))))
             return false;
-    
+
         if(!($fh = @fopen($filename, 'rb'))) return false;
-        
+
         @flock($fh, LOCK_SH);
         $datas = @stream_get_contents($fh);
         @fclose($fh);
-        
+
         if(false === $datas) return false;
-        
+
         return (@unserialize(base64_decode($datas, true)));
     }
-    
+
     /**
      * Try to write serialized datas into cache
      * This function uses file locking
@@ -164,21 +164,21 @@ class Cache
     static public function write($filename, $datas)
     {
         $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
-        
+
         $dir = dirname($filename);
-        if(!is_dir($dir)) 
+        if(!is_dir($dir))
         {
             if(file_exists($dir) && !@unlink($dir)) return false;
             if(!@mkdir($dir)) return false;
         }
-        
+
         $fh = @fopen($filename, 'w+b');
         if(!$fh) return false;
-        
+
         @flock($fh, LOCK_EX);
         $ret = @fwrite($fh, base64_encode(serialize($datas)));
         @fclose($fh);
-            
+
         return $ret;
     }
 
@@ -195,7 +195,7 @@ class Cache
     static public function checkDir($dir)
     {
         $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$dir;
-        
+
         if(is_dir($dir))
         {
             if(!is_writeable($dir))
@@ -211,7 +211,7 @@ class Cache
                 Logs::iGet()->log(sprintf(Utilities::iGet()->_('The file "%s" exists, is not a dir and can not be removed'), $dir));
                 return false;
             }
-            
+
         }
         else
         {
@@ -219,12 +219,11 @@ class Cache
             {
                 if(!@mkdir($dir))
                 { // hu ?
-                    
                     Logs::iGet()->log(sprintf(Utilities::iGet()->_('Can not create the directory "%s"'), $dir));
                     return false;
                 }
-            } 
-            else 
+            }
+            else
             {
                 Logs::iGet()->log(Utilities::iGet()->_('The directory "%s" is not writeable', HOME_PATH.'cache'));
                 return false;
@@ -243,7 +242,7 @@ class Cache
      * @return string the file name
      * @access public
      */
-    static public function getRandomFilename($tmp=false)
+    static public function getRandomFilename($tmp = false)
     {
         $dir = $tmp ? Config::iGet()->get('defaultTmpDir') : PATH.'cache/';
         return tempnam($dir, 'OWR');

@@ -35,9 +35,9 @@
  * @package OWR
  */
 namespace OWR;
-use \PDO as PDO,
+use \PDO,
     OWR\DB\Request as DBRequest,
-    OWR\DB\Result as Result,
+    OWR\DB\Result,
     OWR\Interfaces\DB as iDB;
 /**
  * This object is the link to the database
@@ -56,25 +56,25 @@ class DB extends PDO implements iDB
     * @static
     */
     static protected $_instance;
-    
+
     /**
     * @var array stored prepared statements
     * @access protected
     */
     protected $_stmts = array();
-    
+
     /**
     * @var boolean have we made modifications in the database ?
     * @access protected
     */
     protected $_hasSet = false;
-    
+
     /**
     * @var int are we in transaction mode ?
     * @access protected
     */
     protected $_transaction = 0;
-    
+
     /**
     * @var int cache time
     * @access protected
@@ -87,7 +87,7 @@ class DB extends PDO implements iDB
     * @static
     */
     static protected $_queryTime = 0;
-    
+
     /**
      * Constructor
      * It will try to connect to the database and set utf8 character set
@@ -96,7 +96,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      */
-    public function __construct() 
+    public function __construct()
     {
         $cfg = Config::iGet();
         try
@@ -141,7 +141,7 @@ class DB extends PDO implements iDB
         }
         return self::$_instance;
     }
-    
+
     /**
      * Sets the cache lifetime
      *
@@ -153,7 +153,7 @@ class DB extends PDO implements iDB
     {
         $this->_cacheTime = (int) $cacheTime;
     }
-    
+
     /**
      * Commits to the database
      *
@@ -172,7 +172,7 @@ class DB extends PDO implements iDB
             catch(\Exception $e)
             {
                 $error = 'SQL Error: Q="COMMIT", R="'.$e->getMessage().'"';
-    
+
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
@@ -181,14 +181,14 @@ class DB extends PDO implements iDB
                 {
                     $error = 'SQL error';
                 }
-    
+
                 throw new Exception($error);
             }
 
             $this->_transaction = 0;
             $this->_hasSet = false;
         }
-            
+
         if(!isset($stmt)) return;
 
         if($stmt instanceof \PDOStatement)
@@ -201,7 +201,7 @@ class DB extends PDO implements iDB
             catch(\Exception $e)
             {
                 $error = 'SQL Error: Q="COMMIT::CLOSECURSOR", R="'.$e->getMessage().'"';
-    
+
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
@@ -210,7 +210,7 @@ class DB extends PDO implements iDB
                 {
                     $error = 'SQL error';
                 }
-    
+
                 throw new Exception($error);
             }
         }
@@ -224,7 +224,7 @@ class DB extends PDO implements iDB
             catch(\Exception $e)
             {
                 $error = 'SQL Error: Q="COMMIT::CLOSECURSOR", R="'.$e->getMessage().'"';
-    
+
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
@@ -233,12 +233,12 @@ class DB extends PDO implements iDB
                 {
                     $error = 'SQL error';
                 }
-    
+
                 throw new Exception($error);
             }
         }
     }
-    
+
     /**
      * Changes database
      *
@@ -246,7 +246,7 @@ class DB extends PDO implements iDB
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $db the database name to connect
      */
-    public function setDB($db) 
+    public function setDB($db)
     {
         try
         {
@@ -268,7 +268,7 @@ class DB extends PDO implements iDB
             throw new Exception($error);
         }
     }
-    
+
     /**
      * Starts transaction mode
      *
@@ -286,7 +286,7 @@ class DB extends PDO implements iDB
             catch(\Exception $e)
             {
                 $error = 'SQL Error: Q="BEGINTRANSACTION", R="'.$e->getMessage().'"';
-    
+
                 if(!DEBUG && !User::iGet()->isAdmin())
                 {
                     Logs::iGet()->log($error, Exception::E_OWR_DIE);
@@ -295,7 +295,7 @@ class DB extends PDO implements iDB
                 {
                     $error = 'SQL error';
                 }
-    
+
                 throw new Exception($error);
             }
             $this->_transaction = 1;
@@ -333,7 +333,7 @@ class DB extends PDO implements iDB
     public function cExecute($sql, DBRequest $datas = null, $prepare = false)
     {
         if(!$this->_cacheTime) return $this->execute($sql, $datas, $prepare);
-        
+
         $filename = md5(serialize(func_get_args()));
         if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
 
@@ -385,7 +385,7 @@ class DB extends PDO implements iDB
      * @param boolean $returnId if a row is inserted, returns the id
      * @return mixed the result/statement/id
      */
-    protected function _executeSQL($sql, DBRequest $datas = null, $action = "exec", 
+    protected function _executeSQL($sql, DBRequest $datas = null, $action = "exec",
                         $prepare = true, $returnId = false)
     {
         $sql = (string)$sql;
@@ -433,13 +433,13 @@ class DB extends PDO implements iDB
                 {
                     $error = 'SQL Error: Q="'.trim($sql).'", R="'.
                             var_export($this->_stmts[$sql]->errorInfo(), true).'", D='.var_export($datas, true);
-    
+
                     if(!DEBUG && !User::iGet()->isAdmin())
                     {
                         Logs::iGet()->log($error, Exception::E_OWR_DIE);
                         $error = 'SQL error';
                     }
-    
+
                     throw new Exception($error);
                 }
             }
@@ -474,7 +474,7 @@ class DB extends PDO implements iDB
                         Logs::iGet()->log($error, Exception::E_OWR_DIE);
                         $error = 'SQL error';
                     }
-    
+
                     throw new Exception($error);
                 }
             }
@@ -496,12 +496,12 @@ class DB extends PDO implements iDB
 
                 throw new Exception($error);
             }
-            
-            try 
+
+            try
             {
                 $ret = $this->$action($sql);
-            } 
-            catch (\Exception $e) 
+            }
+            catch (\Exception $e)
             {
                 $error = 'SQL Error: Q="'.trim($sql).'", R="'.$e->getMessage().'"';
 
@@ -526,8 +526,8 @@ class DB extends PDO implements iDB
 
                 throw new Exception($error);
             }
-            
-            if($returnId) 
+
+            if($returnId)
             {
                 try
                 {
@@ -536,13 +536,13 @@ class DB extends PDO implements iDB
                 catch(\Exception $e)
                 {
                     $error = 'SQL Error: Q="RETURNID '.$sql.'", R="'.$e->getMessage().'"';
-    
+
                     if(!DEBUG && !User::iGet()->isAdmin())
                     {
                         Logs::iGet()->log($error, Exception::E_OWR_DIE);
                         $error = 'SQL error';
                     }
-    
+
                     throw new Exception($error);
                 }
             }
@@ -581,10 +581,10 @@ class DB extends PDO implements iDB
     public function cGetAllP($sql, DBRequest $datas = null, $action = "query", $prepare = true)
     {
         if(!$this->_cacheTime) return $this->getAllP($sql, $datas, $action);
-        
+
         $filename = md5(serialize(func_get_args()));
         if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
-        
+
         $result = new Result($this->_executeSQL($sql, $datas, $action, $prepare) ?: null);
         Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
@@ -616,10 +616,10 @@ class DB extends PDO implements iDB
     public function cGetRowP($sql, DBRequest $datas = null, $prepared = true)
     {
         if(!$this->_cacheTime) return $this->getRowP($sql, $datas, $prepared);
-        
+
         $filename = md5(serialize(func_get_args()));
         if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
-        
+
         $result = new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ROW);
         Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
@@ -638,10 +638,10 @@ class DB extends PDO implements iDB
     public function cGetOneP($sql, DBRequest $datas = null, $prepared = true)
     {
         if(!$this->_cacheTime) return $this->getOneP($sql, $datas, false);
-        
+
         $filename = md5(serialize(func_get_args()));
         if($contents = Cache::get('db'.DIRECTORY_SEPARATOR.$filename, $this->_cacheTime)) return $contents;
-        
+
         $result = new Result($this->_executeSQL($sql, $datas, 'query', $prepared) ?: null, Result::FETCH_ONE);
         Cache::write('db'.DIRECTORY_SEPARATOR.$filename, $result);
         return $result;
@@ -704,7 +704,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a PDOStatement or the inserted ID
      */
-    public function get($sql, DBRequest $datas = null, $action = "query", $returnId = false) 
+    public function get($sql, DBRequest $datas = null, $action = "query", $returnId = false)
     {
         return $this->getP($sql, $datas, $action, false, $returnId);
     }
@@ -720,7 +720,7 @@ class DB extends PDO implements iDB
      * @param string $prepared prepare or not the query
      * @return mixed a PDOStatement or the inserted ID
      */
-    public function getP($sql, DBRequest $datas = null, $action = "query", $prepare = true, $returnId = false) 
+    public function getP($sql, DBRequest $datas = null, $action = "query", $prepare = true, $returnId = false)
     {
         return $this->_executeSQL($sql, $datas, $action, $prepare, $returnId);
     }
@@ -794,7 +794,7 @@ class DB extends PDO implements iDB
      * @param boolean $returnId returns the id of the inserted row
      * @return mixed the result/statement/id
      */
-    public function set($sql, DBRequest $datas = null, $action = "exec", 
+    public function set($sql, DBRequest $datas = null, $action = "exec",
                         $returnId = false)
     {
         return $this->_executeSQL($sql, $datas, $action, false, $returnId);
@@ -817,7 +817,7 @@ class DB extends PDO implements iDB
         $this->_hasSet = true;
         return $this->_executeSQL($sql, $datas, $action, true, $returnId);
     }
-    
+
     /**
      * Rollback function for transaction mode
      *
@@ -832,7 +832,7 @@ class DB extends PDO implements iDB
             $this->_transaction = 0;
         }
     }
-    
+
     /**
      * Function to quote values (sanitize)
      *

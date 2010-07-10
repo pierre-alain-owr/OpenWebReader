@@ -35,12 +35,12 @@
  * @package OWR
  */
 namespace OWR\Stream;
-use \XMLReader as XMLReader,
-    OWR\cURLWrapper as cURLWrapper,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
-    OWR\Strings as Strings,
-    OWR\View\Utilities as Utilities;
+use \XMLReader,
+    OWR\cURLWrapper,
+    OWR\Exception,
+    OWR\DAO,
+    OWR\Strings,
+    OWR\View\Utilities;
 /**
  * This object is used to parse stream (rss, atom, rdf, dc)
  * @uses Strings xml entities and M$ bad chars conversion
@@ -58,19 +58,19 @@ class Parser extends XMLReader
     * @access private
     */
     private $_stream;
-    
+
     /**
     * @var array list of streams structure (rss, atom, dc, rdf)
     * @access private
     */
     private $_trees;
-    
+
     /**
     * @var int number of items in stream
     * @access private
     */
     private $_itemCount;
-    
+
     /**
     * @var boolean current stream is atom
     * @access private
@@ -82,13 +82,13 @@ class Parser extends XMLReader
     * @access private
     */
     private $_isRDF;
-    
+
     /**
     * @var string host of the stream
     * @access private
     */
     private $_currentHost;
-    
+
     /**
     * @var mixed instance of HTMLPurifier
     * @access private
@@ -152,9 +152,9 @@ class Parser extends XMLReader
             self::$_filter = new \HTMLPurifier($config);
             unset($config);
         }
-        
+
         $this->_currentHost = '';
-        
+
         $this->_trees = array();
 
         $this->_trees['atom'] = array(
@@ -204,7 +204,7 @@ class Parser extends XMLReader
                 'rights'            => array('required' => false),
                 )
             );
-        
+
         $this->_trees['rss'] = array(
             'title'             => array('required' => true),
             'link'              => array('required' => true),
@@ -243,8 +243,8 @@ class Parser extends XMLReader
                 'link'          => true),
             'skipHours'         => array('required' => false),
             'skipDays'          => array('required' => false),
-            
-            'item'      => array(   
+
+            'item'      => array(
                 'title'         => array('required' => false),
                 'link'          => array('required' => false),
                 'description'   => array('required' => true),
@@ -267,7 +267,7 @@ class Parser extends XMLReader
                     'url'           => true)
             )
         );
-        
+
         $this->_trees['rdf'] = array(
             'channel'           => array(
                 'title'             => array('required' => true),
@@ -289,13 +289,13 @@ class Parser extends XMLReader
                 'title'         => true,
                 'link'          => true,
                 'about'         => true),
-            'item'      => array(   
+            'item'      => array(
                 'title'         => array('required' => false),
                 'link'          => array('required' => false),
                 'description'   => array('required' => true)
             )
         );
-        
+
         $this->_trees['dc'] = array(
             'title'         => 'title',
             'creator'       => 'creator',
@@ -369,7 +369,7 @@ class Parser extends XMLReader
     public function getSrc($url)
     {
         if(!$this->_getUri($url)) return false;
-        
+
         $src = @cURLWrapper::get($url);
 
         if(false === $src)
@@ -378,10 +378,10 @@ class Parser extends XMLReader
             if($dao) $dao->declareUnavailable();
             throw new Exception(sprintf(Utilities::iGet()->_('Aborting parsing of stream "%s" and declaring it as unavailable : can\'t get the content'), $url), Exception::E_OWR_WARNING);
         }
-        
+
         return $src;
     }
-    
+
     /**
      * Sets the host of the stream
      *
@@ -392,16 +392,16 @@ class Parser extends XMLReader
     private function _getUri($uri)
     {
         $url = @parse_url((string) $uri);
-        
+
         if(false === $url || !isset($url['scheme']) || 'file' === $url['scheme'])
         {
             throw new Exception(sprintf(Utilities::iGet()->_('Invalid uri "%s"'), $uri), Exception::E_OWR_WARNING);
         }
-        
+
         $this->_currentHost = $url['scheme'].'://'.$url['host'];
         return true;
     }
-    
+
     /**
      * Parse the stream
      *
@@ -435,14 +435,14 @@ class Parser extends XMLReader
             unset($src);
             throw new Exception('Invalid stream', Exception::E_OWR_WARNING);
         }
-        
+
         $this->_nodeTree = array();
         $this->_stream = array('channel'=>array('version'=>''), 'item'=>array(), 'src'=>$src);
         unset($src);
         $this->_itemCount = 0;
         $this->_isAtom = $this->_header = $this->_isRDF = $this->_isRSS = $this->_isItem = false;
         $this->_currentNode = $this->_localName = null;
-        
+
         while(@$this->read())
         {
             if(self::ELEMENT === $this->nodeType)
@@ -481,7 +481,7 @@ class Parser extends XMLReader
                 }
                 // encapsuled HTML
                 elseif($this->prefix === 'html' || $this->prefix === 'xhtml' ||
-                    'http://www.w3.org/1999/xhtml' === $this->namespaceURI || 
+                    'http://www.w3.org/1999/xhtml' === $this->namespaceURI ||
                     'http://www.w3.org/1999/xhtml/' === $this->namespaceURI)
                 {
                     $value = $this->_parseHTML();
@@ -509,12 +509,12 @@ class Parser extends XMLReader
                 elseif('item' === $this->localName || 'entry' === $this->localName)
                 {
                     $this->_isItem = true;
-                    $this->_localName = 'item'; 
+                    $this->_localName = 'item';
                     ++$this->_itemCount;
                 }
                 // dublin core
-                elseif($this->prefix === 'dc' || 'dublincore' === $this->prefix || 
-                    'http://purl.org/dc/elements/1.1/' === $this->namespaceURI || 
+                elseif($this->prefix === 'dc' || 'dublincore' === $this->prefix ||
+                    'http://purl.org/dc/elements/1.1/' === $this->namespaceURI ||
                     'http://purl.org/dc/elements/1.1' === $this->namespaceURI)
                 {
                     if(isset($this->_trees['dc'][$this->localName]))
@@ -685,7 +685,7 @@ class Parser extends XMLReader
             }
             elseif(self::END_ELEMENT === $this->nodeType)
             { // closing tag
-                if('channel' === $this->localName || 'rss' === $this->localName || 
+                if('channel' === $this->localName || 'rss' === $this->localName ||
                     'feed' === $this->localName || 'rdf' === $this->localName || 'RDF' === $this->localName)
                     continue;
                 elseif('item' === $this->localName || 'entry' === $this->localName)
@@ -722,7 +722,7 @@ class Parser extends XMLReader
 
         return true;
     }
-    
+
     /**
      * Parse XML like HTML
      *
@@ -748,7 +748,7 @@ class Parser extends XMLReader
             while($this->moveToNextAttribute());
             $this->moveToElement();
         }
-        
+
         if($this->isEmptyElement)
         {
             $html .= ' />';
@@ -780,7 +780,7 @@ class Parser extends XMLReader
 
         return $html;
     }
-    
+
     /**
      * Cleaning function
      * This function replaces some HTML and purify value
@@ -805,8 +805,8 @@ class Parser extends XMLReader
                                         '/(<img\b[^>]*)(src\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)\/?>/si', // full uri
                                         '/(<a\b[^>]*)(href\s*=\s*([\'"])?((?!https?:\/\/).*?)\\3\s*)([^>]*)>/si', // full uri
 //                                         "/<div([^>]*>.*?)<\/div>/si"
-                                ), 
-                                array(  "\\1", 
+                                ),
+                                array(  "\\1",
                                         "\\1src=\"".$this->_currentHost."\\4\"\\5/>",
                                         "\\1href=\"".$this->_currentHost."\\4\"\\5/>",
 //                                         "<p\\1</p>"

@@ -35,7 +35,7 @@
  * @subpackage Interfaces
  */
 namespace OWR\Interfaces;
-use OWR\Request as Request;
+use OWR\Request;
 /**
  * This class is used to declare public functions
  * @package OWR

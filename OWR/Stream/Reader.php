@@ -36,7 +36,7 @@
  * @subpackage Stream
  */
 namespace OWR\Stream;
-use OWR\Config as Config;
+use OWR\Config;
 /**
  * This object is used to deal with a parsed stream
  * @uses StreamItem an item from the stream
@@ -99,33 +99,33 @@ class Reader
         {
             case 'ttl':
                 // atom
-                if('atom' === $this->_version) 
+                if('atom' === $this->_version)
                     return (int) Config::iGet()->get('defaultStreamRefreshTime');
                 // rss 2
                 elseif(!empty($this->_stream['channel']['ttl']['contents']))
                 {
                     $ttl = (int) $this->_stream['channel']['ttl']['contents'];
 
-                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl ? 
+                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl ?
                         $ttl : Config::iGet()->get('defaultMinStreamRefreshTime'));
                 }
                 // rss 0.91
-                elseif(!empty($this->_stream['channel']['skipDays']['contents']) || 
+                elseif(!empty($this->_stream['channel']['skipDays']['contents']) ||
                     !empty($this->_stream['channel']['skipHours']['contents']))
                 {
                     $skipDaysByName = array(
-                        'Monday'=>0, 
-                        'Tuesday'=>1, 
-                        'Wednesday'=>2, 
-                        'Thursday'=>3, 
-                        'Friday'=>4, 
-                        'Saturday'=>5, 
+                        'Monday'=>0,
+                        'Tuesday'=>1,
+                        'Wednesday'=>2,
+                        'Thursday'=>3,
+                        'Friday'=>4,
+                        'Saturday'=>5,
                         'Sunday'=>6
                     );
-                
+
                     $date = new \DateTime();
                     $skipDays = $skipHours = array();
-                
+
                     if(!empty($this->_stream['channel']['skipDays']['contents']))
                     {
                         foreach($this->_stream['channel']['skipDays']['contents'] as $d)
@@ -135,7 +135,7 @@ class Reader
                                 $skipDays[$d] = true;
                         }
                     }
-                
+
                     if(!empty($this->_stream['channel']['skipHours']['contents']))
                     {
                         foreach($skipHour as $h)
@@ -145,7 +145,7 @@ class Reader
                                 $skipHours[$h] = true;
                         }
                     }
-                
+
                     if(empty($skipHours) && empty($skipDays))
                     {
                         $default = Config::iGet()->get('defaultStreamRefreshTime');
@@ -156,10 +156,10 @@ class Reader
                         if(!empty($skipDays) && count($skipDays) < 7)
                         {
                             !isset($skipDays[$date->format('l')]) || $date->setTime(0, 1);
-                
+
                             while(isset($skipDays[$date->format('l')]))
                                 $date->modify('+1 day');
-                
+
                             if(!empty($skipHours) && count($skipHours) < 24)
                             {
                                 while(isset($skipHours[$date->format('G')]))
@@ -173,7 +173,7 @@ class Reader
                         }
                         else return (int) Config::iGet()->get('defaultStreamRefreshTime');
                     }
-                
+
                     $dateinterval = $date->diff(new \DateTime());
                     unset($date);
                     $ttl = 0;
@@ -181,15 +181,15 @@ class Reader
                     $ttl += ($dateinterval->h * 60); // add hours
                     $ttl += $dateinterval->i; // add minutes
 
-                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl  ? 
+                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl  ?
                         $ttl : Config::iGet()->get('defaultMinStreamRefreshTime'));
                 }
                 elseif(!empty($this->_stream['channel']['updateFrequency']['contents']) ||
                     !empty($this->_stream['channel']['updatePeriod']['contents']))
                 { // rss 1.0
-                    $periodMinutes = array ( 
+                    $periodMinutes = array (
                         'hourly' => 60, // minutes in an hour
-                        'daily' => 1440, // minutes in a day 
+                        'daily' => 1440, // minutes in a day
                         'weekly' => 10080, // minutes in a week
                         'monthly' => 43200, // minutes in a month
                         'yearly' => 525600, // minutes in a year
@@ -205,20 +205,20 @@ class Reader
                     $ttl =  (int) $periodMinutes[$this->_stream['channel']['updatePeriod']['contents']] /
                             (int) $this->_stream['channel']['updateFrequency']['contents'];
 
-                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl  ? 
+                    return (int) (Config::iGet()->get('defaultMinStreamRefreshTime') <= $ttl  ?
                         $ttl : Config::iGet()->get('defaultMinStreamRefreshTime'));
                 }
-                
+
                 return (int) Config::iGet()->get('defaultStreamRefreshTime');
                 break;
 
             case 'title':
-                return (string) (empty($this->_stream['channel']['title']) ? 
+                return (string) (empty($this->_stream['channel']['title']) ?
                     'No title' : $this->_stream['channel']['title']['contents']);
                 break;
 
             case 'item': // warning : we release memory here, each item is only available one time
-                return empty($this->_stream['item']) ? 
+                return empty($this->_stream['item']) ?
                     false : new Item(array_shift($this->_stream['item']), $this->_version, $this);
                 break;
 
@@ -230,19 +230,19 @@ class Reader
                     {
                         $author .= $this->_stream['channel']['author']['name']['contents'];
                     }
-    
+
                     if(!empty($this->_stream['channel']['author']['email']['contents']))
                     {
-                        $author .= empty($author) ? $this->_stream['channel']['author']['email']['contents'] : 
+                        $author .= empty($author) ? $this->_stream['channel']['author']['email']['contents'] :
                             ', '.$this->_stream['channel']['author']['email']['contents'];
                     }
-    
+
                     if(!empty($this->_stream['channel']['author']['uri']['contents']))
                     {
-                        $author .= empty($author) ? $this->_stream['channel']['author']['uri']['contents'] : 
+                        $author .= empty($author) ? $this->_stream['channel']['author']['uri']['contents'] :
                             ', '.$this->_stream['channel']['author']['uri']['contents'];
                     }
-    
+
                     if(!empty($author))
                         return $author;
                     elseif(!empty($this->_stream['channel']['author']['contents']))
@@ -276,7 +276,7 @@ class Reader
                     {
                         foreach($this->_stream['channel']['link'] as $link)
                         {
-                            if(empty($link['attributes']) || empty($link['attributes']['href']) || 
+                            if(empty($link['attributes']) || empty($link['attributes']['href']) ||
                                empty($link['attributes']['type']) || 'text/html' !== $link['attributes']['type']) continue;
 
                             return $link['attributes']['href'];
@@ -300,7 +300,7 @@ class Reader
                 break;
         }
     }
-    
+
     /**
      * Checks the stream is not empty
      *

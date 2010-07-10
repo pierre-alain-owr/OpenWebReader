@@ -35,12 +35,12 @@
  * @subpackage Logic
  */
 namespace OWR\Logic\News;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
-    OWR\Logic\Response as Response,
-    OWR\Config as Config;
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO,
+    OWR\Logic\Response,
+    OWR\Config;
 /**
  * This class is used to add/edit/delete tags
  * @package OWR
@@ -73,10 +73,10 @@ class Tags extends Logic
             return $this;
         }
 
-        if(!$request->id)
+        if(empty($request->id))
         {
             $tag = $this->_dao->get(array('name' => $request->name), 'id');
-            if(!$tag)
+            if(empty($tag))
             {
                 $request->new = true;
                 $tag = DAO::getDAO('news_tags');
@@ -85,7 +85,7 @@ class Tags extends Logic
         else
         {
             $tag = $this->_dao->get($request->id, 'id'); // check
-            if(!$tag)
+            if(empty($tag))
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
@@ -145,7 +145,7 @@ class Tags extends Logic
         }
         catch(Exception $e)
         {
-            $this->_db->rollback(); 
+            $this->_db->rollback();
             throw new Exception($e->getContent(), $e->getCode());
         }
 
@@ -184,7 +184,7 @@ class Tags extends Logic
         }
 
         $datas = $this->_dao->get($args, 'id,name', $order, $tagby, $limit);
-        if(!$datas)
+        if(empty($datas))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204
@@ -219,7 +219,7 @@ class Tags extends Logic
         }
 
         $tag = $this->_dao->get(array('id'=>$request->id), 'id, uid');
-        if(!$tag)
+        if(empty($tag))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',

@@ -35,10 +35,10 @@
  * @subpackage Logic
  */
 namespace OWR\Logic;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO;
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO;
 /**
  * This class is used to add/delete objects
  * @package OWR
@@ -88,7 +88,7 @@ class Objects extends Logic
      */
     public function delete(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -143,7 +143,7 @@ class Objects extends Logic
         }
 
         $types = $this->_dao->get($args, '*', $order, $groupby, $limit);
-        if(!$types)
+        if(empty($types))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204

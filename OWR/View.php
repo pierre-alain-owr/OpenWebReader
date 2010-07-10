@@ -34,7 +34,7 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\View\Utilities as Utilities;
+use OWR\View\Utilities;
 /**
  * This object is used to render page
  * @uses Singleton implements the singleton pattern
@@ -101,7 +101,7 @@ class View extends Singleton
         if($cacheTime > 0)
         {
             $cachedTpl = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.User::iGet()->getLang().DIRECTORY_SEPARATOR.md5($tpl.serialize($datas));
-            if(file_exists($cachedTpl) && (@filemtime($cachedTpl) <= (int)(Config::iGet()->get('begintime') + $cacheTime)) && 
+            if(file_exists($cachedTpl) && (@filemtime($cachedTpl) <= (int)(Config::iGet()->get('begintime') + $cacheTime)) &&
                 ($f = @fopen($cachedTpl, 'rb')))
             {
                 @flock($f, LOCK_SH);
@@ -117,7 +117,7 @@ class View extends Singleton
             ob_start();
             include HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
             $contents = ob_get_clean();
-            
+
             if($cacheTime > 0)
             {
                 $f = @fopen($cachedTpl, 'w+b');
@@ -130,7 +130,7 @@ class View extends Singleton
                 }
             }
         }
-        
+
         if(!empty($noCacheDatas))
         {
             foreach($noCacheDatas as $name => $value)
@@ -140,7 +140,7 @@ class View extends Singleton
         }
 
         self::$_renderingTime += (float)microtime(true) - $t;
-        
+
         return $contents;
     }
 
@@ -292,17 +292,17 @@ class View extends Singleton
                 $encoding = 'gzhandler';
             elseif(!headers_sent() && isset($_SERVER['HTTP_ACCEPT_ENCODING']))
             {
-                if(mb_strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip', 0, 'UTF-8') !== false) 
+                if(mb_strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip', 0, 'UTF-8') !== false)
                 {
                     $encoding = 'x-gzip';
-                } 
-                elseif(mb_strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip', 0, 'UTF-8') !== false) 
+                }
+                elseif(mb_strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip', 0, 'UTF-8') !== false)
                 {
                     $encoding = 'gzip';
                 }
             }
         }
-        
+
         switch($encoding)
         {
             case 'gzhandler':

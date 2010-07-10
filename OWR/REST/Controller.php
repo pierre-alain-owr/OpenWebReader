@@ -36,22 +36,22 @@
  * @subpackage Rest
  */
 namespace OWR\REST;
-use OWR\Controller as C, 
-    OWR\Error as Error, 
-    OWR\Exception as Exception, 
-    OWR\Config as Config,
-    OWR\Logs as Logs,
-    OWR\DB as DB,
-    OWR\User as User,
-    OWR\cURLWrapper as cURLWrapper,
+use OWR\Controller as C,
+    OWR\Error,
+    OWR\Exception,
+    OWR\Config,
+    OWR\Logs,
+    OWR\DB,
+    OWR\User,
+    OWR\cURLWrapper,
     OWR\DB\Request as DBRequest,
-    OWR\Stream\Parser as Parser,
-    OWR\View as View,
-    OWR\DAO as DAO,
-    OWR\XML as XML,
+    OWR\Stream\Parser,
+    OWR\View,
+    OWR\DAO,
+    OWR\XML,
     OWR\Logic\Response as LogicResponse,
-    OWR\Cron as Cron,
-    OWR\Logic as Logic;
+    OWR\Cron,
+    OWR\Logic;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -93,15 +93,15 @@ class Controller extends C
 
         set_error_handler(array('OWR\Error', 'error_handler')); // errors
         set_exception_handler(array('OWR\Exception', 'exception_handler')); // exceptions not catched
-        error_reporting(DEBUG ? -1 :    E_CORE_ERROR | 
-                                        E_COMPILE_ERROR | 
-                                        E_ERROR | 
-                                        E_PARSE | 
-                                        E_USER_ERROR | 
-                                        E_USER_WARNING | 
-                                        E_USER_NOTICE | 
+        error_reporting(DEBUG ? -1 :    E_CORE_ERROR |
+                                        E_COMPILE_ERROR |
+                                        E_ERROR |
+                                        E_PARSE |
+                                        E_USER_ERROR |
+                                        E_USER_WARNING |
+                                        E_USER_NOTICE |
                                         E_USER_DEPRECATED);
-        
+
         try
         {
             $this->_db = DB::iGet();
@@ -112,7 +112,7 @@ class Controller extends C
         }
         $this->_user = User::iGet();
     }
-    
+
     /**
      * Executes the given action
      * This method only accepts a RestRequest object
@@ -124,7 +124,7 @@ class Controller extends C
      */
     public function execute(Request $request)
     {
-        try 
+        try
         {
             $this->_request = $request;
             $this->_request->begintime = microtime(true);
@@ -141,12 +141,12 @@ class Controller extends C
                         throw new Exception('Authentification required', 401);
                     }
                 }
-                elseif((empty($_COOKIE['auth']) && 
-                    ($method !== 'post' || $this->_request->do !== 'login' || empty($this->_request->tlogin) || 
+                elseif((empty($_COOKIE['auth']) &&
+                    ($method !== 'post' || $this->_request->do !== 'login' || empty($this->_request->tlogin) ||
                     empty($this->_request->key) || empty($this->_request->uid) ||
                     !$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, 'restauth'))) ||
-    
-                    (!empty($_COOKIE['auth']) && ($data = @unserialize(base64_decode($_COOKIE['auth'], true))) && 
+
+                    (!empty($_COOKIE['auth']) && ($data = @unserialize(base64_decode($_COOKIE['auth'], true))) &&
                     !empty($data['tlogin']) && !empty($data['key']) && !empty($data['uid']) &&
                     !$this->_user->checkToken(true, $data['uid'], $data['tlogin'], $data['key'], 'restauth')))
                 { // COOKIE, not stateless
@@ -159,7 +159,7 @@ class Controller extends C
                 $datas['tlogin'] = $this->_request->tlogin;
                 $datas['key'] = $this->_request->key;
                 $datas['uid'] = $this->_user->getUid();
-                setcookie('auth', base64_encode(serialize($datas)), $this->_cfg->get('sessionLifeTime'), 
+                setcookie('auth', base64_encode(serialize($datas)), $this->_cfg->get('sessionLifeTime'),
                     $this->_cfg->get('path'), $this->_cfg->get('url'), $this->_cfg->get('httpsecure'), true);
                 unset($datas);
                 return $this;
@@ -167,7 +167,7 @@ class Controller extends C
 
             switch($method)
             {
-                case 'get': 
+                case 'get':
                     $authorized = array(
                         'do_getlastnews'        => true,
                         'do_getlivenews'        => true,
@@ -190,7 +190,7 @@ class Controller extends C
                     );
                     break;
 
-                case 'post': 
+                case 'post':
                     $authorized = array(
                         'do_editopml'           => true,
                         'do_editstream'         => true,
@@ -199,7 +199,7 @@ class Controller extends C
                     );
                     break;
 
-                case 'put': 
+                case 'put':
                     $authorized = array(
                         'do_upnew'              => true,
                         'do_rename'             => true,
@@ -207,14 +207,14 @@ class Controller extends C
                         'do_edituser'           => true
                     );
                     break;
-                
-                case 'delete': 
+
+                case 'delete':
                     $authorized = array(
-                        'do_delete'=>true, 
+                        'do_delete'=>true,
                         'do_clearstream'=>true
                     );
                     break;
-                
+
                 default: throw new Exception('Method not supported', 405); break;
             }
 
@@ -232,7 +232,7 @@ class Controller extends C
 
             $this->$action();
         }
-        catch(Exception $e) 
+        catch(Exception $e)
         {
             $this->_db->rollback();
             $status = $e->getCode();
@@ -261,7 +261,7 @@ class Controller extends C
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed LogicResponse the response of the 
+     * @param mixed LogicResponse the response of the
      */
     public function processResponse(LogicResponse $response = null)
     {
@@ -336,7 +336,7 @@ class Controller extends C
             }
             while($error = @ob_get_clean());
         }
-        
+
         isset($this->_view) || $this->_view  = View::iGet();
         $page = array();
 
@@ -383,7 +383,7 @@ class Controller extends C
                 return true;
             }
         }
-        
+
         $now = microtime(true);
         $page['executionTime'] = round($now - $this->_cfg->get('begintime'), 6);
         $page['requestTime'] = round($now - $this->_request->begintime, 6);
@@ -409,7 +409,7 @@ class Controller extends C
         }
 
         $this->_view->render($page);
-        
+
         return true;
     }
 
@@ -439,7 +439,7 @@ class Controller extends C
 
         $xml = $empty = false;
         $page = array();
-        
+
         switch($tpl)
         {
             case 'new_contents':
@@ -492,18 +492,18 @@ class Controller extends C
                 }
                 unset($response, $request);
             break;
-                
+
             case 'menu_part_category':
                 $page['gname'] = $datas['name'];
                 $page['groupid'] = $datas['gid'];
-                
+
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
-                
+
                 $page['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
                 $tpl = 'menu_contents';
                 break;
-                
+
             case 'menu_part_group':
                 $streams = DAO::getDAO('streams_relations')->get(array('gid' => $datas['id']), 'rssid');
                 if(!$streams)
@@ -545,7 +545,7 @@ class Controller extends C
                     {
                         $stream = $response->getDatas();
                         $stream['groups'] = $groups;
-                        if($stream['status'] > 0) 
+                        if($stream['status'] > 0)
                         {
                             $stream['unavailable'] = $this->_getDate($stream['status']);
                         }
@@ -561,7 +561,7 @@ class Controller extends C
                 }
                 unset($streams, $request);
                 break;
-                
+
             case 'menu_part_stream':
                 $request = new Request($datas);
                 Logic::getCachedLogic('streams')->view($request);
@@ -578,7 +578,7 @@ class Controller extends C
                 }
                 unset($response, $request);
                 break;
-                
+
             case 'news':
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
@@ -602,7 +602,7 @@ class Controller extends C
                 if(isset($datas['offset']))
                 {
                     $page['offset'] = (int)$datas['offset'];
-                    
+
                     if($datas['offset'] > 0)
                     {
                         $offset = (int)($datas['offset']*10);
@@ -705,7 +705,7 @@ class Controller extends C
                 }
                 unset($news);
             break;
-                
+
             case 'index':
                 if(empty($this->_request->unreads))
                     $this->do_getunread(true);
@@ -727,7 +727,7 @@ class Controller extends C
             case 'opml':
                 $page = parent::_getPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")), true);
                 break;
-            
+
             case 'edituser':
                 if(empty($datas['id']))
                 {
@@ -755,7 +755,7 @@ class Controller extends C
                 }
                 unset($response, $request);
             break;
-            
+
             case 'users':
                 $request = new Request($datas);
                 $cacheTime = 0;
@@ -782,18 +782,18 @@ class Controller extends C
                 }
                 unset($response, $request);
             break;
-            
+
             case 'rss':
                 $page = parent::_getPage('rss', $datas, true);
             break;
-            
+
             case 'login':
                 $page['surl'] = $this->_cfg->get('surl');
                 $page['xmlLang'] = $this->_user->getXMLLang();
                 $page['back'] = $this->_request->back;
             default: break;
         }
-        
+
         if(!empty($page))
         {
             if($return)
@@ -813,11 +813,11 @@ class Controller extends C
      */
     protected function do_logout($redirect=true)
     {
-        if(isset($_COOKIE['auth'])) 
+        if(isset($_COOKIE['auth']))
         {
             setcookie('auth', '', $this->_request->begintime - 42000, $this->_cfg->get('path'), $this->_cfg->get('url'), $this->_cfg->get('httpsecure'), true);
         }
-        
+
         $this->redirect('login');
 
         return $this;

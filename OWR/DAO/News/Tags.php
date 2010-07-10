@@ -35,7 +35,8 @@
  * @subpackage DAO\news
  */
 namespace OWR\DAO\news;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table news_tags
  * @uses DAO extends the base class
@@ -74,8 +75,8 @@ class Tags extends DAO
         $this->_idField = 'id';
         $this->_uniqueFields = array('name' => true);
         $this->_fields = array(
-            'id'    => array('required' => true, 'type' => \PDO::PARAM_INT), 
-            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR), 
+            'id'    => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR),
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(

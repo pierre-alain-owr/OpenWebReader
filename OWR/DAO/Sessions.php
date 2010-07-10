@@ -35,7 +35,8 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table sessions
  * @uses DAO extends the base class

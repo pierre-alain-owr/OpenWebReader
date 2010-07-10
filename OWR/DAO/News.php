@@ -35,7 +35,8 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table news
  * @uses DAO extends the base class
@@ -106,7 +107,7 @@ class News extends DAO
         $this->_fields = array(
             'id'        =>  array('required' => true,     'type' => \PDO::PARAM_INT),
             'rssid'     =>  array('required' => true,     'type' => \PDO::PARAM_INT),
-            'title'     =>  array('required' => true,     'type' => \PDO::PARAM_STR), 
+            'title'     =>  array('required' => true,     'type' => \PDO::PARAM_STR),
             'link'      =>  array('required' => true,     'type' => DBRequest::PARAM_URL),
             'lastupd'   =>  array('required' => false,    'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
             'pubDate'   =>  array('required' => false,    'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),

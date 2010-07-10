@@ -36,11 +36,11 @@
  * @subpackage View
  */
 namespace OWR\View;
-use OWR\Singleton as Singleton,
-    OWR\Cache as Cache,
-    OWR\Config as Config,
-    OWR\User as User,
-    OWR\Strings as Strings;
+use OWR\Singleton,
+    OWR\Cache,
+    OWR\Config,
+    OWR\User,
+    OWR\Strings;
 /**
  * This object is used to render page with Dwoo
  * @uses Singleton implements the singleton pattern
@@ -74,7 +74,7 @@ class Utilities extends Singleton
      */
     protected function __construct()
     {
-        $this->_translations = Cache::get('translations_'.User::iGet()->getLang(), 
+        $this->_translations = Cache::get('translations_'.User::iGet()->getLang(),
                                                     Config::iGet()->get('cacheTime')) ?:
                                 array();
     }
@@ -108,7 +108,7 @@ class Utilities extends Singleton
         $LIclass = (string) $LIclass;
 
         $list = '<ul'.(!empty($ULclass) ? ' class="'.$ULclass.'"' : '').'>';
-    
+
         foreach($values as $key => $value)
         {
             if(is_array($value) && !empty($value['contents']))
@@ -150,14 +150,14 @@ class Utilities extends Singleton
                 $list .= '<li'.(!empty($LIclass) ? ' class="'.$LIclass.'"' : '').'><em>'.htmlentities($key, ENT_COMPAT, 'UTF-8', false).'</em> : '.htmlentities($value, ENT_COMPAT, 'UTF-8', false).'</li>';
             }
         }
-    
+
         $list .= '</ul>';
-    
+
         return $list;
     }
 
     /**
-     * Used in templates to cache gettext() response 
+     * Used in templates to cache gettext() response
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public

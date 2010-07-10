@@ -47,8 +47,8 @@ if(!file_exists(HOME_PATH.'cfg.php'))
 // include the config file
 require HOME_PATH.'cfg.php';
 
-use OWR\Exception as Exception,
-    OWR\Logs as Logs;
+use OWR\Exception,
+    OWR\Logs;
 try
 {
     Controller::iGet()->execute(new Request)->renderPage();

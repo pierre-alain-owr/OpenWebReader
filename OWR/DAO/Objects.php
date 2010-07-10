@@ -35,9 +35,9 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, 
+use OWR\DAO,
     OWR\DB\Request as DBRequest,
-    OWR\Exception as Exception;
+    OWR\Exception;
 /**
  * This object represents the table objects
  * @uses DAO extends the base class
@@ -102,7 +102,7 @@ class Objects extends DAO
         }
 
         return (int) parent::$_db->setP('
-    INSERT INTO objects 
+    INSERT INTO objects
         SET id=?, type=?', new DBRequest(array('type'=>$type), array('id' => $this->_fields['id'], 'type' => $this->_fields['type'])), 'exec', true, true);
     }
 }

@@ -69,7 +69,7 @@ class Item
     {
         $this->_item = $stream;
         $this->_version = $version;
-        if(isset($this->_item['title']['contents'])) 
+        if(isset($this->_item['title']['contents']))
             $this->_item['title']['contents'] = (string) strip_tags($this->_item['title']['contents']);
         elseif(!isset($this->_item['description']['contents']))
         {
@@ -102,7 +102,7 @@ class Item
                             break;
                         }
                     }
-                    
+
                     if($ok)
                     {
                         $this->_item['url']['contents'] = html_entity_decode((string) $link['attributes']['href'], ENT_COMPAT, 'UTF-8');

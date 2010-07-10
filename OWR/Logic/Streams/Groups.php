@@ -35,12 +35,12 @@
  * @subpackage Logic
  */
 namespace OWR\Logic\Streams;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
-    OWR\Logic\Response as Response,
-    OWR\Config as Config;
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO,
+    OWR\Logic\Response,
+    OWR\Config;
 /**
  * This class is used to add/edit/delete groups
  * @package OWR
@@ -73,10 +73,10 @@ class Groups extends Logic
             return $this;
         }
 
-        if(!$request->id)
+        if(empty($request->id))
         {
-            $group = $this->_dao->get(array('name' => $request->name), 'id'); 
-            if(!$group)
+            $group = $this->_dao->get(array('name' => $request->name), 'id');
+            if(empty($group))
             {
                 $request->new = true;
                 $group = DAO::getDAO('streams_groups');
@@ -85,7 +85,7 @@ class Groups extends Logic
         else
         {
             $group = $this->_dao->get($request->id, 'id'); // check
-            if(!$group)
+            if(empty($group))
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
@@ -95,7 +95,7 @@ class Groups extends Logic
                 return $this;
             }
         }
-        
+
         $group->name = $request->name;
         $request->id = $group->save();
         unset($group);
@@ -171,7 +171,7 @@ class Groups extends Logic
         }
         catch(Exception $e)
         {
-            $this->_db->rollback(); 
+            $this->_db->rollback();
             throw new Exception($e->getContent(), $e->getCode());
         }
 
@@ -210,7 +210,7 @@ class Groups extends Logic
         }
 
         $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
-        if(!$datas)
+        if(empty($datas))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204
@@ -236,10 +236,10 @@ class Groups extends Logic
      */
     public function checkGroupById(Request $request)
     {
-        if($request->gid > 0)
+        if(!empty($request->gid))
         {
             $group = $this->_dao->get($request->gid, 'id,name');
-            if($group)
+            if(!empty($group))
             {
                 $request->gname = $group->name;
                 $request->setResponse(new Response);
@@ -248,20 +248,20 @@ class Groups extends Logic
         }
 
         $group = $this->_dao->get(array('name' => 'Root'), 'id');
-        if(!$group)
+        if(empty($group))
         {
             $group = DAO::getDAO('streams_groups');
             $group->name = 'Root';
             $group->save();
         }
 
-        $request->gid = (int)$group->id;
+        $request->gid = (int) $group->id;
         $request->gname = $group->name;
 
         unset($group);
 
         $request->setResponse(new Response);
-        
+
         return $this;
     }
 
@@ -285,7 +285,7 @@ class Groups extends Logic
         }
 
         $group = $this->_dao->get(array('id'=>$request->id), 'id, uid');
-        if(!$group)
+        if(empty($group))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',

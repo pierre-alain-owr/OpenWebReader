@@ -246,7 +246,7 @@ class Cron extends Singleton
                     if($args['ttl'] > 60)
                     {
                         $hours = round($args['ttl'] / 60);
-                        
+
                         // at least we update every day at 1am
                         if($hours >= 24)
                         {
@@ -300,9 +300,9 @@ class Cron extends Singleton
                     throw new Exception('Invalid type for cron managing', Exception::E_OWR_WARNING);
                     break;
             }
-            
+
             $cmd = Config::iGet()->get('phpbin').' '.HOME_PATH.'cli.php \'do\'='.escapeshellarg(escapeshellcmd($args['type'])).' >> '.HOME_PATH.'logs/cli.log';
-            
+
             $this->_add($args['type'], $hour, $minute, $monthDay, 
                             $weekDay, $month, $cmd, $comment);
         }
@@ -323,14 +323,14 @@ class Cron extends Singleton
         if(!$this->_hasChanged || empty($this->_cronTab)) return false;
 
         $filename = Cache::getRandomFilename(true);
-        
+
         if(false === file_put_contents($filename, join("\n", $this->_cronTab)))
         {
             throw new Exception('No way to write into cache directory');
         }
 
         exec('crontab '.$filename);
-        
+
         $this->_hasChanged = false;
 
         return @unlink($filename);
@@ -368,7 +368,7 @@ class Cron extends Singleton
                 $escape = false;
                 continue;
             }
-            
+
             $line = (string) $line;
 
             if($isSection === true)
@@ -383,7 +383,7 @@ class Cron extends Singleton
                     continue;
                 }
             }
-            
+
             if($line === self::CRON_START) 
             {
                 $isSection = true;
@@ -397,7 +397,7 @@ class Cron extends Singleton
                     break;
                 }
             }
-            
+
             if($line === self::CRON_STOP)
             {
                 if(!$done) 
@@ -406,15 +406,15 @@ class Cron extends Singleton
                     $newCrontab[] = $minute.' '.$hour.' '.$monthDay.' '.$month.' '.$weekDay.' '.$cmd;
                 }
             }
-            
+
             $newCrontab[] = $line;
         }
-        
+
         if($isSection === false)
         {
             $newCrontab[] = self::CRON_START;
             $newCrontab[] = '# '.$type.' : '.$comment;
-    
+
             $newCrontab[] = $minute.' '.$hour.' '.$monthDay.' '.$month.' '.$weekDay.' '.$cmd;
             $newCrontab[] = self::CRON_STOP;
         }
@@ -442,12 +442,12 @@ class Cron extends Singleton
         $oldCrontab = array();
         $newCrontab = array();
         $isSection = $escape = false;
-        
+
         $type = (string)$type;
         $type = $this->_url .':'. $type;
 
         isset($this->_cronTab) || exec('crontab -l', $this->_cronTab);
-        
+
         foreach($this->_cronTab as $line)
         {
             if($isSection === true)
@@ -464,7 +464,7 @@ class Cron extends Singleton
             {
                 $newCrontab[] = $line;
             }
-            
+
             if ((string)$line === self::CRON_START) { $isSection = true; }
         }
 
@@ -473,7 +473,7 @@ class Cron extends Singleton
             $this->_hasChanged = true;
             $this->_cronTab = $newCrontab;
         }
-        
+
         return $type;
     }
 }

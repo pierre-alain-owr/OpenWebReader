@@ -35,8 +35,8 @@
  * @subpackage Interfaces
  */
 namespace OWR\Interfaces;
-use OWR\DB\Request as Request,
-    OWR\DB\Result as Result;
+use OWR\DB\Request,
+    OWR\DB\Result;
 /**
  * This class is used to declare public functions
  * @package OWR

@@ -1,6 +1,6 @@
 <?php
 /**
- * DAO Object base class 
+ * DAO Object base class
  *
  * PHP 5
  *
@@ -37,7 +37,7 @@ namespace OWR;
 use OWR\DB\Result as DBResult,
     OWR\DB\Request as DBRequest,
     OWR\Interfaces\DAO as iDAO,
-    OWR\View\Utilities as Utilities;
+    OWR\View\Utilities;
 /**
  * This class is used as base class for all DAO objects and defines all usefull functions
  * @abstract
@@ -82,13 +82,13 @@ abstract class DAO implements iDAO
     protected $_idField = '';
 
     /**
-     * @var array associative array of name => field for each relations table 
+     * @var array associative array of name => field for each relations table
      * @access protected
      */
     protected $_relations = array();
 
     /**
-     * @var array associative array of name => field for each user's relations table 
+     * @var array associative array of name => field for each user's relations table
      * @access protected
      */
     protected $_userRelations = array();
@@ -136,7 +136,7 @@ abstract class DAO implements iDAO
      */
     protected function __construct()
     {
-        isset(self::$_db) || (self::$_db  = DB::iGet()); // we assume here that the connexion has already been done, be carefull 
+        isset(self::$_db) || (self::$_db  = DB::iGet()); // we assume here that the connexion has already been done, be carefull
         $this->_fullName = get_called_class();
         $this->_name = strtolower(str_replace('\\', '_', substr($this->_fullName, strlen(__NAMESPACE__.'_DAO_'))));
 
@@ -157,7 +157,7 @@ abstract class DAO implements iDAO
                     $node[$table] = $rel;
                     if(!isset(self::$_tableFields[$table]))
                     {
-                        self::getCachedDAO($table); // will init 
+                        self::getCachedDAO($table); // will init
                     }
                 }
             }
@@ -170,7 +170,7 @@ abstract class DAO implements iDAO
                     $node[$table] = $rel;
                     if(!isset(self::$_tableFields[$table]))
                     {
-                        self::getCachedDAO($table); // will init 
+                        self::getCachedDAO($table); // will init
                     }
                 }
             }
@@ -227,7 +227,7 @@ abstract class DAO implements iDAO
             $wheres[] = $this->_name.'.uid='.User::iGet()->getUid();
         }
 
-        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, $order, $limit), 
+        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, $order, $limit),
                     new DBRequest($request, $fields, true), $fetchType, !empty($wheres));
     }
 
@@ -242,7 +242,7 @@ abstract class DAO implements iDAO
     public function save($ignore = false)
     {
         $requestFields = array();
-        
+
         foreach($this->_fields as $key=>$val)
         {
             (!isset($this->$key) && 'uid' !== $key) || (($fields[] = $key) && ($requestFields[$key] = $val));
@@ -290,12 +290,12 @@ abstract class DAO implements iDAO
     REPLACE INTO ';
         }
 
-        $query .= $this->_name.' 
+        $query .= $this->_name.'
         SET '.join("=?,", array_keys($requestFields)).'=?';
 
         if(!empty($wheres))
         {
-            $query .= ' 
+            $query .= '
         WHERE ';
             $whereFields = array();
             foreach($wheres as $val)
@@ -335,7 +335,7 @@ abstract class DAO implements iDAO
                     $this->uid = $this->uid ?: User::iGet()->getUid();
                     $chkUniQuery .= ' AND uid='.$this->uid;
                 }
-    
+
                 if($this->_idField)
                 {
                     if(isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
@@ -343,7 +343,7 @@ abstract class DAO implements iDAO
                         $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
                     }
                     $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
-                    
+
                     if($exists->next() && $exists->nb > 0)
                     {
                         throw new Exception('Some values are not uniques', 409);
@@ -553,7 +553,7 @@ abstract class DAO implements iDAO
             $wheres[] = $this->_name.'.uid='.User::iGet()->getUid();
         }
 
-        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, null, null), 
+        return $this->_fetch($this->_prepareQuery($query, $wheres, $joins, $groupby, null, null),
                     new DBRequest($request, $fields, true), $fetchType, !empty($wheres));
     }
 
@@ -798,7 +798,7 @@ abstract class DAO implements iDAO
                         $request[$key][] =& $args[$key][$k];
                         $fields[$key][] = $this->_fields[$key];
                     }
-                    
+
                     empty($where) || ($wheres[] = $this->_name.'.'.$key.' IN ('.join(',', $where).')');
                 }
                 else
@@ -1292,25 +1292,25 @@ abstract class DAO implements iDAO
 
         if(!empty($wheres))
         {
-            $query .= ' 
+            $query .= '
         WHERE '.join(' AND ', $wheres);
         }
 
         if(!empty($groupby))
         {
-            $query .= ' 
+            $query .= '
         GROUP BY '.(string) $groupby;
         }
 
         if(!empty($order))
         {
-            $query .= ' 
+            $query .= '
         ORDER BY '.(string) $order;
         }
 
         if(!empty($limit))
         {
-            $query .= ' 
+            $query .= '
         LIMIT '.(string) $limit;
         }
 
@@ -1359,7 +1359,7 @@ abstract class DAO implements iDAO
                     }
                     continue;
                 }
-                
+
                 if(isset($this->_userRelations[$table]))
                 {
                     if(isset(self::$_tableFields[$table.'.'.$field]))

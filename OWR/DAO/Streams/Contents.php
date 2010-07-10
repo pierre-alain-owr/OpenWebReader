@@ -35,7 +35,8 @@
  * @subpackage DAO\streams
  */
 namespace OWR\DAO\streams;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table streams_contents
  * @uses DAO extends the base class
@@ -72,8 +73,8 @@ class Contents extends DAO
     public function __construct()
     {
         $this->_uniqueFields = array('rssid'=>true);
-        $this->_fields = array( 
-            'src'       => array('required' => true, 'type' => \PDO::PARAM_STR), 
+        $this->_fields = array(
+            'src'       => array('required' => true, 'type' => \PDO::PARAM_STR),
             'rssid'     => array('required' => true, 'type' => \PDO::PARAM_INT),
             'contents'  => array('required' => true, 'type' => \PDO::PARAM_STR)
         );

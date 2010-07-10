@@ -35,7 +35,8 @@
  * @subpackage DAO\news\relations
  */
 namespace OWR\DAO\news\relations;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table news_relations_tags
  * @uses DAO extends the base class

@@ -35,20 +35,20 @@
  * @subpackage Logic
  */
 namespace OWR\Logic;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO,
     OWR\Stream\Reader as StreamReader,
     OWR\Stream\Parser as StreamParser,
-    OWR\Logs as Logs,
-    OWR\cURLWrapper as cURLWrapper,
-    OWR\Cron as Cron,
-    OWR\User as User,
+    OWR\Logs,
+    OWR\cURLWrapper,
+    OWR\Cron,
+    OWR\User,
     OWR\OPML\Parser as OPMLParser,
-    OWR\Upload as Upload,
-    OWR\Config as Config,
-    OWR\Threads as Threads;
+    OWR\Upload,
+    OWR\Config,
+    OWR\Threads;
 /**
  * This class is used to add/edit/delete stream and his related tables
  * @package OWR
@@ -101,12 +101,12 @@ class Streams extends Logic
 
         $cron = Cron::iGet();
         $streams = $this->_dao->get(array('hash' => $hash));
-        if($streams)
+        if(!empty($streams))
         { // stream exists
             unset($hash);
             $request->id = (int) $streams->id;
             $request->ttl = $streams->ttl;
-            
+
             $streams_relation = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $streams->id));
             if($streams_relation)
             { // user already have this stream !
@@ -140,9 +140,9 @@ class Streams extends Logic
                     Logs::iGet()->log($response->getError(), $response->getStatus());
                 unset($r);
             }
-            
+
             $news = DAO::getCachedDAO('news')->get(array('rssid' => $streams->id), 'id', 'pubDate DESC, lastupd DESC');
-            if($news)
+            if(!empty($news))
             {
                 $r = clone($request);
                 $r->current = true; // we add a news_relations only for the current user
@@ -200,7 +200,7 @@ class Streams extends Logic
 
             unset($streams_name);
 
-            if(!$request->escape && !$request->escapeNews)
+            if(empty($request->escape) && empty($request->escapeNews))
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'ok',
@@ -242,10 +242,10 @@ class Streams extends Logic
             if(!empty($index))
             {
                 if($hrefs = $this->_extractHREF(array(
-                        'rel'=>array('subscriptions', 'alternate', 'related'), 
+                        'rel'=>array('subscriptions', 'alternate', 'related'),
                         'type'=>array(
-                            'application/rss+xml', 
-                            'application/atom+xml', 
+                            'application/rss+xml',
+                            'application/atom+xml',
                             'application/rdf+xml'
                         )
                     ), $index))
@@ -274,7 +274,7 @@ class Streams extends Logic
                 unset($r, $hrefs, $href);
 
                 if($hrefs = $this->_extractHREF(array(
-                        'rel'=>array('subscriptions', 'alternate', 'related'), 
+                        'rel'=>array('subscriptions', 'alternate', 'related'),
                         'type'=>array('text/x-opml')), $index))
                 { // opml
                     $nb += count($hrefs);
@@ -309,10 +309,10 @@ class Streams extends Logic
                 )));
                 return $this;
             }
-            else 
+            else
             {
                 $request->new = true;
-                if(!$request->escape && !$request->escapeNews)
+                if(empty($request->escape) && empty($request->escapeNews))
                 {
                     $request->setResponse(new Response(array(
                         'do'        => 'redirect',
@@ -346,7 +346,7 @@ class Streams extends Logic
         }
 
         unset($streams);
-    
+
         $streams_contents = DAO::getDAO('streams_contents');
         $streams_contents->src = $stream->get('src');
         $streams_contents->rssid = $request->id;
@@ -405,7 +405,7 @@ class Streams extends Logic
         $this->_db->commit();
         unset($streams_name);
 
-        if(!$request->escapeNews)
+        if(empty($request->escapeNews))
         { // save the news
             $logic = parent::getCachedLogic('news');
             $r = clone($request);
@@ -460,7 +460,7 @@ class Streams extends Logic
             }
         }
 
-        if(!$request->escape && !$request->escapeNews)
+        if(empty($request->escape) && empty($request->escapeNews))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'ok',
@@ -510,7 +510,7 @@ class Streams extends Logic
         }
 
         $datas = $this->_dao->get($args, 'id,streams_relations_name.name,url,ttl,lastupd,favicon,status,gid,streams_groups.name AS gname'.(!isset($request->getContents) || $request->getContents ? ',contents' : ''), $order, $groupby, $limit);
-        if(!$datas)
+        if(empty($datas))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204
@@ -548,6 +548,16 @@ class Streams extends Logic
      */
     public function delete(Request $request)
     {
+        if(empty($request->id))
+        {
+            $request->setResponse(new Response(array(
+                'do'        => 'error',
+                'error'     => 'Missing id',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+
         $type = DAO::getType($request->id);
         if('streams' !== $type)
         {
@@ -586,7 +596,7 @@ class Streams extends Logic
      */
     public function move(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -597,7 +607,7 @@ class Streams extends Logic
         }
 
         $stream = DAO::getCachedDAO('streams_relations')->get(array('rssid' => $request->id), 'rssid');
-        if(!$stream)
+        if(empty($stream))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -629,8 +639,18 @@ class Streams extends Logic
      */
     public function update(Request $request)
     {
+        if(empty($request->id))
+        {
+            $request->setResponse(new Response(array(
+                'do'        => 'error',
+                'error'     => 'Missing id',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+
         $streams = $this->_dao->get($request->id, 'id,url,hash');
-        if(!$streams)
+        if(empty($streams))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -678,10 +698,10 @@ class Streams extends Logic
             )));
             return $this;
         }
-        
+
         $streams->status = 0;
         $streams->ttl = $stream->get('ttl');
-        
+
         $this->_db->beginTransaction();
         try
         {
@@ -694,7 +714,7 @@ class Streams extends Logic
         }
 
         $ttl = $streams->ttl;
-        unset($streams); 
+        unset($streams);
         $streams_contents->src = $stream->get('src');
         $streams_contents->contents = serialize($stream->get('channel'));
         try
@@ -774,21 +794,21 @@ class Streams extends Logic
      */
     public function clear(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             DAO::getCachedDAO('news_relations')->delete();
         }
         else
-        { 
+        {
             $table = DAO::getType($request->id);
-            
+
             switch($table)
             {
-                case 'streams': 
+                case 'streams':
                     DAO::getCachedDAO('news_relations')->delete(array('rssid' => $request->id));
                     break;
 
-                case 'streams_groups': 
+                case 'streams_groups':
                     $query = '
     DELETE nr FROM news_relations nr
         JOIN streams_relations sr ON (nr.rssid=sr.rssid)
@@ -801,7 +821,7 @@ class Streams extends Logic
                     DAO::getCachedDAO('news_relations_tags')->delete(array('tid' => $request->id));
                     break;
 
-                default: 
+                default:
                     $request->setResponse(new Response(array(
                         'do'        => 'error',
                         'error'     => 'Invalid id',
@@ -817,9 +837,9 @@ class Streams extends Logic
             $request->setResponse(new Response(array(
                 'tpl'   => 'news',
                 'datas' => array(
-                    'id' => $request->currentid, 
-                    'offset' => $request->offset, 
-                    'sort' => $request->sort, 
+                    'id' => $request->currentid,
+                    'offset' => $request->offset,
+                    'sort' => $request->sort,
                     'dir' => $request->dir
             ))));
         }
@@ -838,6 +858,16 @@ class Streams extends Logic
      */
     public function rename(Request $request)
     {
+        if(empty($request->id))
+        {
+            $request->setResponse(new Response(array(
+                'do'        => 'error',
+                'error'     => 'Missing id',
+                'status'    => Exception::E_OWR_BAD_REQUEST
+            )));
+            return $this;
+        }
+
         if(empty($request->name))
         {
             $request->setResponse(new Response(array(
@@ -848,8 +878,8 @@ class Streams extends Logic
             return $this;
         }
 
-        $stream = DAO::getCachedDAO('streams_relations_name')->get(array('rssid'=>$request->id), 'rssid, uid');
-        if(!$stream)
+        $stream = DAO::getCachedDAO('streams_relations_name')->get(array('rssid' => $request->id), 'rssid, uid');
+        if(empty($stream))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -877,7 +907,7 @@ class Streams extends Logic
      */
     public function checkAvailability(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             $streams = $this->_db->execute('
     SELECT id,url
@@ -896,7 +926,7 @@ class Streams extends Logic
                     'status'    => 202
                 )));
             }
-            
+
             $request->setResponse(new Response);
             return $this;
         }
@@ -956,7 +986,7 @@ class Streams extends Logic
         if(empty($request->id))
         {
             $streams = $this->_dao->get(array('favicon'=>''), 'id, url');
-            if(!$streams)
+            if(empty($streams))
             {
                 $request->setResponse(new Response);
                 return $this;
@@ -977,7 +1007,7 @@ class Streams extends Logic
 
         $stream = $this->_dao->get(array('favicon'=>'', 'id'=>$request->id), 'id, url');
         $streamContents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$request->id), 'contents');
-        if(!$stream)
+        if(empty($stream))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -994,7 +1024,7 @@ class Streams extends Logic
 
         $url = $reader->get('realurl');
         unset($reader);
-        if($url)
+        if(!empty($url))
         {
             $values = @parse_url($url);
             if(false !== $values && isset($values['scheme']) && isset($values['host']) && 'file' !== $values['scheme'])
@@ -1020,7 +1050,7 @@ class Streams extends Logic
         {
             $base = $values['scheme'].'://'.$values['host'];
             // we check the base of the domain first
-            // some blogs are responding at url like http://blog.com/feeds/(favicon.ico|something) 
+            // some blogs are responding at url like http://blog.com/feeds/(favicon.ico|something)
             // with stream contents burk, we would /require/ imagick to check..
             $favicons[] = $base.'/favicon.ico';
             $indexes[] = $base;
@@ -1045,34 +1075,33 @@ class Streams extends Logic
                 if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
             }
 
-            if($icon)
+            if(empty($icon)) continue;
+
+            if(class_exists('Imagick', false))
             {
-                if(class_exists('Imagick', false))
+                try
                 {
-                    try
+                    $image = new \Imagick();
+                    $image->setFormat('ico');
+                    if(@$image->readImageBlob($icon))
                     {
-                        $image = new \Imagick();
-                        $image->setFormat('ico');
-                        if(@$image->readImageBlob($icon))
-                        {
-                            $image->destroy();
-                            unset($image);
-                            $favicon = $fav;
-                            break;
-                        }
+                        $image->destroy();
+                        unset($image);
+                        $favicon = $fav;
+                        break;
                     }
-                    catch(Exception $e)
-                    { // is it really usefull to log here, surely not
-                        if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
-                    }
-   
-                    unset($image);
-                 }
-                 else
-                 {
-                     $favicon = $fav;
-                     break;
-                 }
+                }
+                catch(Exception $e)
+                { // is it really usefull to log here, surely not
+                    if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
+                }
+
+                unset($image);
+            }
+            else
+            {
+                $favicon = $fav;
+                break;
             }
         }
 
@@ -1089,89 +1118,95 @@ class Streams extends Logic
                 }
                 catch(Exception $e)
                 {
+                    unset($page);
                     // is it really usefull to log here, surely not, only for debug
                     if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
                     continue;
                 }
 
-                if($page && ($hrefs = $this->_extractHREF(array('rel' => array('icon', 'shortcut icon')), $page)))
+                if(empty($page) || !($hrefs = $this->_extractHREF(array('rel' => array('icon', 'shortcut icon')), $page)))
                 {
-                    $favicon = $icon = array();
-                    foreach($hrefs as $href)
+                    unset($page);
+                    continue;
+                }
+
+                unset($page);
+
+                $favicon = $icon = array();
+                foreach($hrefs as $href)
+                {
+                    $url = @parse_url($href);
+                    if(!$url) continue;
+
+                    if((!isset($url['scheme']) || 'file' === $url['scheme']))
                     {
-                        $url = @parse_url($href);
-                        if(!$url) continue;
+                        if(!isset($url['path'])) continue;
 
-                        if((!isset($url['scheme']) || 'file' === $url['scheme']))
+                        if('/' !== mb_substr($index, -1, 1, 'UTF-8'))
+                            $index .= '/';
+
+                        $url = @parse_url($index.$url['path']);
+                        if(!$url || !isset($url['path']) || !isset($url['scheme']) || !isset($url['host'])) continue;
+
+                        // try to resolve relative paths
+                        // can't use realpath() because it only resolves local path
+                        $realpath = array();
+                        $path = explode('/', preg_replace(array('/\/+/', '/\/\.\//'), '/', $url['path']));
+                        foreach($path as $part)
                         {
-                            if(!isset($url['path'])) continue;
-
-                            if('/' !== mb_substr($index, -1, 1, 'UTF-8'))
-                                $index .= '/';
-
-                            $url = @parse_url($index.$url['path']);
-                            if(!$url || !isset($url['path']) || !isset($url['scheme']) || !isset($url['host'])) continue;
-
-                            // try to resolve relative paths
-                            // can't use realpath() because it only resolves local path
-                            $realpath = array();
-                            $path = explode('/', preg_replace(array('/\/+/', '/\/\.\//'), '/', $url['path']));
-                            foreach($path as $part) 
+                            if('..' === $part)
                             {
-                                if('..' === $part)
-                                {
-                                    array_pop($realpath);
-                                } 
-                                elseif('' !== $part) 
-                                {
-                                    $realpath[] = $part;
-                                }
+                                array_pop($realpath);
                             }
-
-                            if(empty($realpath)) continue;
-                            $href = $url['scheme'].'://'.$url['host'].'/'.join('/', $realpath);
+                            elseif('' !== $part)
+                            {
+                                $realpath[] = $part;
+                            }
                         }
 
+                        if(empty($realpath)) continue;
+                        $href = $url['scheme'].'://'.$url['host'].'/'.join('/', $realpath);
+                    }
+
+                    try
+                    {
+                        $icon = cURLWrapper::get($href, array(), false, true);
+                    }
+                    catch(Exception $e)
+                    {
+                        unset($icon);
+                        // is it really usefull to log here, surely not, only for debug
+                        if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
+                        continue;
+                    }
+
+                    if(empty($icon)) continue;
+
+                    if(class_exists('Imagick', false))
+                    {
                         try
                         {
-                            $icon = cURLWrapper::get($href, array(), false, true);
-                        }
-                        catch(Exception $e)
-                        {
-                            // is it really usefull to log here, surely not, only for debug
-                            if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
-                            continue;
-                        }
-
-                        if($icon)
-                        {
-                            if(class_exists('Imagick', false))
+                            $image = new \Imagick();
+                            $image->setFormat('ico');
+                            if(@$image->readImageBlob($icon))
                             {
-                                try 
-                                {
-                                    $image = new \Imagick();
-                                    $image->setFormat('ico');
-                                    if(@$image->readImageBlob($icon))
-                                    {
-                                        $image->destroy();
-                                        unset($image);
-                                        $favicon = $href;
-                                        break 2;
-                                    }
-                                }
-                                catch(Exception $e)
-                                { // is it really usefull to log here, surely not
-                                    if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
-                                }
-                            
+                                $image->destroy();
                                 unset($image);
-                            }
-                            else
-                            {
                                 $favicon = $href;
                                 break 2;
                             }
                         }
+                        catch(Exception $e)
+                        { // is it really usefull to log here, surely not
+                            if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
+                        }
+
+                        unset($image);
+                    }
+                    else
+                    {
+                        $favicon = $href;
+                        break 2;
                     }
                 }
             }
@@ -1199,14 +1234,14 @@ class Streams extends Logic
      */
     public function refresh(Request $request)
     {
-        if(!$request->id)
+        if(empty($request->id))
         {
             $query = "
     SELECT r.id
         FROM streams_relations rel
         JOIN streams r ON (rel.rssid=r.id)
         WHERE rel.uid=".User::iGet()->getUid().' AND (r.lastupd + (r.ttl * 60)) <= UNIX_TIMESTAMP()';
-            
+
             $rss = $this->_db->getAll($query);
             if($rss->count())
             {
@@ -1216,7 +1251,7 @@ class Streams extends Logic
                     $threads->add(array('do'=>'refreshstream', 'id'=>$rss->id));
                 }
             }
-            
+
             unset($rss);
             $request->setResponse(new Response(array(
                 'status'    => 202
@@ -1226,7 +1261,7 @@ class Streams extends Logic
         else
         {
             $table = DAO::getType($request->id);
-            
+
             if('streams' === $table)
             {
                 $this->update($request);
@@ -1237,7 +1272,7 @@ class Streams extends Logic
     SELECT r.id
         FROM streams r
         JOIN streams_relations rel ON (r.id=rel.rssid)
-        WHERE rel.gid='.$request->id.' AND rel.uid='.User::iGet()->getUid().' 
+        WHERE rel.gid='.$request->id.' AND rel.uid='.User::iGet()->getUid().'
         AND (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP()
         GROUP BY r.id';
 
@@ -1276,14 +1311,14 @@ class Streams extends Logic
      */
     public function refreshAll(Request $request)
     { // in cli, we refresh for all users
-        if(!$request->id)
+        if(empty($request->id))
         {
             // status = 0 means stream is alive
             // seems obvious but in the other case it will be a timestamp of down time
             $query = '
     SELECT r.id
         FROM streams r
-        WHERE (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP() AND status=0'; 
+        WHERE (lastupd + (ttl * 60)) <= UNIX_TIMESTAMP() AND status=0';
 
             $streams = $this->_db->getAll($query);
             if($streams->count())
@@ -1376,7 +1411,7 @@ class Streams extends Logic
      */
     public function editOPML(Request $request)
     {
-        if(!$request->escape && empty($_POST) && empty($_FILES['opml']['tmp_name']))
+        if(empty($request->escape) && empty($_POST) && empty($_FILES['opml']['tmp_name']))
         {
             $request->setResponse(new Response(array(
                 'tpl'        => 'upload'
@@ -1384,18 +1419,18 @@ class Streams extends Logic
 
             return $this;
         }
-        
+
         User::iGet()->checkToken();
-        
+
         parent::getCachedLogic('streams_groups')->checkGroupById($request);
         $erase = false;
-        
-        if(!$request->escape && !empty($_FILES['opml']['tmp_name']))
+
+        if(empty($request->escape) && !empty($_FILES['opml']['tmp_name']))
         {
             $upload = new Upload('opml', array(
-                'isArray'       => false, 
+                'isArray'       => false,
                 'mime'          => array('text/x-opml+xml', 'text/xml'),
-                'finfo_mime'    => 'application/xml', 
+                'finfo_mime'    => 'application/xml',
                 'maxFileSize'   => Config::iGet()->get('maxUploadFileSize'),
                 'ext'           => array('opml', 'xml')
             ));
@@ -1461,7 +1496,7 @@ class Streams extends Logic
             $url = isset($stream['xmlUrl']) ? $stream['xmlUrl'] :
                 (isset($stream['htmlUrl']) ? $stream['htmlUrl'] : null);
 
-            if(!$url)
+            if(empty($url))
             {
                 Logs::iGet()->log('Passing stream, missing url', Exception::E_OWR_WARNING);
                 continue;
@@ -1516,6 +1551,7 @@ class Streams extends Logic
                     $currentGroup[$stream['folder']] = $folderId;
                     unset($folderId);
                 }
+
                 $sr->gid = $currentGroup[$stream['folder']];
             }
             else $sr->gid = $gidRoot;
@@ -1570,7 +1606,7 @@ class Streams extends Logic
      */
     protected function _parse($url, $src='')
     {
-        $url = (string)$url;
+        $url = (string) $url;
         isset($this->_streamParser) || $this->_streamParser = new StreamParser();
 
         try
@@ -1581,7 +1617,7 @@ class Streams extends Logic
                 if('' === $csrc || trim($csrc) === trim($src)) return ''; // stream has not changed
 
                 $stream =  (!$this->_streamParser->parse($url, $csrc) ? false : $this->_streamParser->export());
-            } 
+            }
             else $stream = (!$this->_streamParser->parse($url) ? false : $this->_streamParser->export());
         }
         catch(Exception $e)
@@ -1614,45 +1650,46 @@ class Streams extends Logic
     {
         $hrefs = array();
 
-        if(preg_match_all('/<link\b((\s+[a-z]+\s*=\s*(["\'])[^\\3]+?\\3)+)+\s*\/?>/is', $src, $tags))
+        if(!preg_match_all('/<link\b((\s+[a-z]+\s*=\s*(["\'])[^\\3]+?\\3)+)+\s*\/?>/is', $src, $tags))
+            return $hrefs;
+
+        foreach($tags[1] as $tag)
         {
-            foreach($tags[1] as $tag)
+            if(!preg_match_all('/([a-z]+)\s*=\s*(["\'])([^\\2]+?)\\2/i', $tag, $params))
+                continue;
+
+            $rel = $href = $type = null;
+
+            foreach($params[1] as $k => $param)
             {
-                if(preg_match_all('/([a-z]+)\s*=\s*(["\'])([^\\2]+?)\\2/i', $tag, $params))
+                $param = strtolower($param);
+                if('rel' === $param)
+                    $rel = strtolower($params[3][$k]);
+                elseif('href' === $param)
+                    $href = $params[3][$k];
+                elseif(isset($requestedParams['type']) && 'type' === $param)
+                    $type = strtolower($params[3][$k]);
+            }
+
+            unset($params);
+
+            if((isset($requestedParams['type']) && !isset($type)) || !$rel || !$href)
+                continue;
+
+            foreach($requestedParams['rel'] as $k=>$r)
+            {
+                if($rel !== $r) continue;
+
+                if(isset($requestedParams['type']))
                 {
-                    $rel = $href = $type = null;
-                    foreach($params[1] as $k => $param)
+                    foreach($requestedParams['type'] as $t)
                     {
-                        $param = strtolower($param);
-                        if('rel' === $param) $rel = strtolower($params[3][$k]);
-                        elseif('href' === $param) $href = $params[3][$k];
-                        elseif(isset($requestedParams['type']) && 'type' === $param) $type = strtolower($params[3][$k]);
+                        if($t === $type) $hrefs[] = $href;
                     }
-        
-                    $params = array();
-
-                    if(isset($requestedParams['type']) && !isset($type)) continue;
-
-                    if($rel && $href)
-                    {
-                        foreach($requestedParams['rel'] as $k=>$r)
-                        {
-                            if($rel === $r)
-                            {
-                                if(isset($requestedParams['type']))
-                                {
-                                    foreach($requestedParams['type'] as $t)
-                                    {
-                                        if($t === $type) $hrefs[] = $href;
-                                    }
-                                }
-                                else
-                                {
-                                    $hrefs[] = $href;
-                                }
-                            }
-                        }
-                    }
+                }
+                else
+                {
+                    $hrefs[] = $href;
                 }
             }
         }

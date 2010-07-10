@@ -125,10 +125,10 @@ class Threads extends Singleton
         {
             return $this->_exec();
         }
-        
+
         return false;
     }
-    
+
     /**
      * Executes the command
      *
@@ -142,7 +142,7 @@ class Threads extends Singleton
         if(!$cmd) return false;
 
         pclose(popen(escapeshellcmd($cmd).' &', 'r')); // the '&' sets to non-blocking
-        
+
         return true;
     }
 
@@ -156,6 +156,6 @@ class Threads extends Singleton
     protected function _getProcessCount()
     {
         exec(sprintf((string) Config::iGet()->get('grepcmd'), escapeshellcmd($this->_cmd)), $lines);
-        return count($lines);
+        return count($lines) - 1; // -1 because of /bin/sh cron
     }
 }

@@ -35,7 +35,8 @@
  * @subpackage DAO\streams\relations
  */
 namespace OWR\DAO\streams\relations;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table streams_relations_name
  * @uses DAO extends the base class
@@ -73,8 +74,8 @@ class Name extends DAO
     {
         $this->_uniqueFields = array('rssid'=>true, 'name'=>true);
         $this->_fields = array(
-            'rssid' => array('required' => true, 'type' => \PDO::PARAM_INT), 
-            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR), 
+            'rssid' => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR),
             'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(

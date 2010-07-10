@@ -35,13 +35,13 @@
  * @subpackage Logic
  */
 namespace OWR\Logic;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
-    OWR\User as User,
-    OWR\Config as Config,
-    OWR\Logs as Logs;
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO,
+    OWR\User,
+    OWR\Config,
+    OWR\Logs;
 /**
  * This class is used to add/edit/delete news
  * @package OWR
@@ -69,7 +69,7 @@ class News extends Logic
         $pubDate = $request->item->get('pubDate');
 
         $new = $this->_dao->get(array('hash'=>$hash), 'id,pubDate');
-        if($new)
+        if(!empty($new))
         {
             $r = new Request(array('id'=>$new->id, 'streamid'=>$request->streamid));
             $this->insertNewsRelations($r);
@@ -80,7 +80,7 @@ class News extends Logic
             return $this;
         }
         else $new = DAO::getDAO('news');
-        
+
         $new->rssid = $request->streamid;
         $new->link = $link;
         $new->hash = $hash;
@@ -149,7 +149,6 @@ class News extends Logic
             return $this;
         }
 
-
         $type = DAO::getType($request->id);
         if('news' !== $type)
         {
@@ -206,7 +205,7 @@ class News extends Logic
         }
 
         $datas = $this->_dao->get($args, 'id,rssid AS streamid,news.lastupd,pubDate,author,title,link,gid,status,streams_relations_name.name,streams_groups.name AS gname,favicon'.(!isset($request->getContents) || $request->getContents ? ',contents' : ''), $order, $groupby, $limit);
-        if(!$datas)
+        if(empty($datas))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204
@@ -254,7 +253,7 @@ class News extends Logic
         $id = (int) $request->id;
         $streamid = (int) $request->streamid;
 
-        if(!$request->current)
+        if(empty($request->current))
         { // add a relation for all users
             $query = '
     SELECT uid
@@ -322,7 +321,7 @@ class News extends Logic
             $query = '
     UPDATE news_relations
         SET status='.$status.'
-        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
         AND newsid IN ('.join(',', $request->ids).')';
         }
         elseif(0 < $request->id)
@@ -357,7 +356,7 @@ class News extends Logic
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
-        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
         AND rr.gid='.$request->id.' AND lastupd < '.$request->timestamp;
                 }
                 else
@@ -378,7 +377,7 @@ class News extends Logic
         JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
-        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' 
+        WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
         AND nrt.tid='.$request->id.' AND lastupd < '.$request->timestamp;
                 }
                 else

@@ -35,9 +35,9 @@
  * @package OWR
  */
 namespace OWR\CLI;
-use OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\Logs as Logs;
+use OWR\Request,
+    OWR\Exception,
+    OWR\Logs;
 
 define('PATH', dirname(__DIR__).DIRECTORY_SEPARATOR); // define root path
 define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path

@@ -35,8 +35,8 @@
  * @subpackage DB
  */
 namespace OWR\DB;
-use OWR\Object as Object,
-    OWR\Exception as Exception,
+use OWR\Object,
+    OWR\Exception,
     OWR\Interfaces\DB\Result as iResult;
 /**
  * This object represents a result from DB

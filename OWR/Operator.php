@@ -37,12 +37,12 @@
  * @deprecated replaced by addthis, just keep in case
  */
 namespace OWR;
-use OWR\DAO\News as News;
+use OWR\DAO\News;
 /**
  * This object is used to generate an url related for the specified operator
  * @todo use DB instead of hard-coded datas
  * @package OWR
- * @uses OWR\DAO\News 
+ * @uses OWR\DAO\News
  */
 class Operator
 {
@@ -92,7 +92,7 @@ class Operator
      * @access protected
      */
     protected $_operator;
-    
+
     /**
      * Constructor
      * Set the current operator

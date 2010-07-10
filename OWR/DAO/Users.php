@@ -35,7 +35,8 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, OWR\DB\Request as DBRequest;
+use OWR\DAO,
+    OWR\DB\Request as DBRequest;
 /**
  * This object represents the table users
  * @uses DAO extends the base class
@@ -110,9 +111,9 @@ class Users extends DAO
         $this->_idField = 'id';
         $this->_uniqueFields = array('login' => true, 'email' => true, 'openid' => false);
         $this->_fields = array(
-            'id'        => array('required' => true, 'type' => \PDO::PARAM_INT), 
+            'id'        => array('required' => true, 'type' => \PDO::PARAM_INT),
             'login'     => array('required' => true, 'type' => DBRequest::PARAM_LOGIN),
-            'passwd'    => array('required' => false, 'type' => DBRequest::PARAM_PASSWD), 
+            'passwd'    => array('required' => false, 'type' => DBRequest::PARAM_PASSWD),
             'rights'    => array('required' => true, 'type' => DBRequest::PARAM_RIGHTS),
             'lang'      => array('required' => true, 'type' => DBRequest::PARAM_LANG),
             'email'     => array('required' => true, 'type' => DBRequest::PARAM_EMAIL),

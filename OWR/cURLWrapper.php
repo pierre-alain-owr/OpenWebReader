@@ -53,7 +53,7 @@ class cURLWrapper
      * Try to use cURL if enabled to get distant url
      * else uses file_get_contents
      * It will set $headers from the response
-     * 
+     *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @static
      * @access public
@@ -68,10 +68,10 @@ class cURLWrapper
     {
         $headers = array();
         $values = @parse_url($url);
-        if(false === $values || ((!isset($values['scheme']) || 'file' === $values['scheme']) && 
-        (!($url = realpath($url)) || 0 !== mb_strpos($url, Config::iGet()->get('defaultTmpDir'))))) 
+        if(false === $values || ((!isset($values['scheme']) || 'file' === $values['scheme']) &&
+        (!($url = realpath($url)) || 0 !== mb_strpos($url, Config::iGet()->get('defaultTmpDir')))))
             return false;
-    
+
         if(!extension_loaded('curl'))
         {
             $time = microtime(true);
@@ -81,7 +81,7 @@ class cURLWrapper
             if(!$noCache)
             {
                 $cacheFilename = md5($url);
-    
+
                 if($cache = Cache::get('curl'.DIRECTORY_SEPARATOR.$cacheFilename))
                 {
                     !isset($cache['Etag']) || ($heads .= 'If-None-Match: '.$cache['Etag']."\n");
@@ -89,12 +89,12 @@ class cURLWrapper
                 }
             }
 
-            $ret = @file_get_contents($url, null, 
+            $ret = @file_get_contents($url, null,
                         stream_context_create(array('http' => array('header' => $heads)))
                 );
-    
+
             self::$_httpTime += (float)round(microtime(true) - $time, 6);
-    
+
             if(false === $ret)
             {
                 Logs::iGet()->log($url.': file_get_contents failed !', Exception::E_OWR_WARNING);
@@ -108,12 +108,12 @@ class cURLWrapper
                 if(isset($headers['Status']) && false !== strpos($headers['Status'], 304)) return '';
 
                 $cache = array();
-    
+
                 foreach(array('Etag', 'Last-Modified') as $key)
                 {
                     !isset($headers[$key]) || $cache[$key] = $headers[$key];
                 }
-    
+
                 if(!empty($cache))
                 {
                     Cache::write('curl'.DIRECTORY_SEPARATOR.$cacheFilename, $cache);
@@ -129,13 +129,13 @@ class cURLWrapper
                 $url = str_replace($userpwd, '', $url);
                 unset($userpwd);
             }
-        
+
             $ch = curl_init();
             if(!$ch)
             {
                 return false;
             }
-            
+
             $opts += array(
                     CURLOPT_HEADER          => true,
                     CURLOPT_FOLLOWLOCATION  => true,
@@ -150,11 +150,11 @@ class cURLWrapper
                     CURLOPT_SSL_VERIFYHOST  => 2,
                     CURLOPT_TIMEOUT         => 20 // max 20s for timeout, just enough isn't it ?
                     );
-            
+
             if(!$noCache)
             {
                 $cacheFilename = md5($url);
-    
+
                 if($cache = Cache::get('curl'.DIRECTORY_SEPARATOR.$cacheFilename))
                 {
                     !isset($cache['Etag']) || $opts[CURLOPT_HTTPHEADER][] = 'If-None-Match: '.$cache['Etag'];
@@ -163,12 +163,12 @@ class cURLWrapper
             }
 
             if(!curl_setopt_array($ch, $opts)) return false;
-            
+
             $resp = curl_exec($ch);
             $infos = curl_getinfo($ch);
 
             if(isset($infos['total_time'])) self::$_httpTime += (float)$infos['total_time'];
-            
+
             if(false === $resp)
             {
                 Logs::iGet()->log($url.':'.curl_error($ch), Exception::E_OWR_WARNING);
@@ -192,39 +192,39 @@ class cURLWrapper
             if(!$noCache)
             {
                 $cache = array();
-    
+
                 foreach(array('Etag', 'Last-Modified') as $key)
                 {
                     !isset($headers[$key]) || $cache[$key] = $headers[$key];
                 }
-    
+
                 if(!empty($cache))
                 {
                     Cache::write('curl'.DIRECTORY_SEPARATOR.$cacheFilename, $cache);
                 }
             }
         }
-        
+
         if($isXML)
         {
             $ret = trim($ret);
             $ret = Strings::toNormal($ret); // need to do it BEFORE utf8_encode
-            
+
             if(false !== stripos($ret, '<?xml'))
                 $ret = preg_replace("/<\?xml\b([^>]+)encoding=([\"'])(?!utf-8)(.*?)(\\2)([^>]*)\?>/si", "<?xml\\1encoding=\"utf-8\"\\5?>", $ret);
-                
+
             if('UTF-8' !== mb_detect_encoding($ret, 'utf-8,iso-8859-15,iso-8859-1', true))
             {
                 $ret = utf8_encode($ret);
             }
         }
-    
+
         return $ret;
     }
 
     /**
      * Parse response header's and return an associative array
-     * 
+     *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @static
      * @access protected

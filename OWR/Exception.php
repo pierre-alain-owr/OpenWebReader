@@ -36,7 +36,7 @@
  */
 namespace OWR;
 use \Exception as Exceptions,
-    OWR\View\Utilities as Utilities;
+    OWR\View\Utilities;
 /**
  * This object is the exception handler
  * @package OWR
@@ -90,13 +90,13 @@ class Exception extends Exceptions
     /**
      * Constructor
      * Will call Exception::__construct, send header if not already done
-     * 
+     *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
      * @param string $errstr the error message
      * @param int $errcode the error code
      */
-    public function __construct($errstr, $errcode = self::E_OWR_DIE) 
+    public function __construct($errstr, $errcode = self::E_OWR_DIE)
     {
         $errcode = (int) $errcode;
         switch($errcode)
@@ -173,7 +173,7 @@ class Exception extends Exceptions
     {
         $msg = '['.(isset(self::$_type[$exception->getCode()]) ? self::$_type[$exception->getCode()] : 'unknown').'] ';
         $msg .= $exception->getMessage().' in file '.$exception->getFile().' on line '.$exception->getLine();
-        
+
         if(!DEBUG && !User::iGet()->isAdmin())
         {
             Logs::iGet()->log($msg, $exception->getCode());
@@ -241,7 +241,7 @@ class Exception extends Exceptions
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
      */
-    public function __toString() 
+    public function __toString()
     {
         return $this->getContent();
     }

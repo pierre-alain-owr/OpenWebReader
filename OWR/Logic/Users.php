@@ -35,13 +35,13 @@
  * @subpackage Logic
  */
 namespace OWR\Logic;
-use OWR\Logic as Logic,
-    OWR\Request as Request,
-    OWR\Exception as Exception,
-    OWR\DAO as DAO,
-    OWR\User as User,
+use OWR\Logic,
+    OWR\Request,
+    OWR\Exception,
+    OWR\DAO,
+    OWR\User,
     OWR\DB\Request as DBRequest,
-    OWR\Object as Object;
+    OWR\Object;
 /**
  * This class is used to add/edit/delete users and his related tables ()
  * @package OWR
@@ -92,7 +92,7 @@ class Users extends Logic
             )));
             return $this;
         }
-        
+
         if(!User::iGet()->checkToken())
         {
             $request->setResponse(new Response(array(
@@ -102,7 +102,7 @@ class Users extends Logic
             )));
             return $this;
         }
-        
+
         if(empty($request->login) || (!$request->id && empty($request->passwd)) || empty($request->email))
         {
             $request->setResponse(new Response(array(
@@ -127,7 +127,7 @@ class Users extends Logic
             return $this;
         }
 
-        if((!$request->id && (empty($request->passwd) || 
+        if((empty($request->id) && (empty($request->passwd) ||
             empty($request->confirmpasswd) || $request->passwd !== $request->confirmpasswd))
             || (0 < $request->id && !empty($request->passwd) && !empty($request->confirmpasswd)
                 && $request->passwd !== $request->confirmpasswd))
@@ -142,14 +142,14 @@ class Users extends Logic
             return $this;
         }
 
-        if($nb)
+        if(!empty($nb))
         {
             $args = array($request->login);
             $query = '
     SELECT id
         FROM users
         WHERE (login=?';
-                
+
             if(!empty($request->openid))
             {
                 if(false === mb_strpos($request->openid, 'http://', 0, 'UTF-8'))
@@ -160,12 +160,12 @@ class Users extends Logic
                 array_push($args, $request->openid);
             }
             else $query .= ')';
-            
-            if(0 < $request->id)
+
+            if(!empty($request->id))
             {
-                $query .= ' AND id != '.$request->id;
+                $query .= ' AND id != '. (int) $request->id;
             }
-            
+
             $exists = $this->_db->getOneP($query, new DBRequest($args));
             unset($args);
             if($exists->count())
@@ -179,9 +179,9 @@ class Users extends Logic
                 )));
                 return $this;
             }
-            
-            $request->rights = (int)$request->rights;
-            
+
+            $request->rights = (int) $request->rights;
+
             if($request->rights > User::iGet()->getRights() || $request->rights > User::LEVEL_ADMIN)
             {
                 $request->setResponse(new Response(array(
@@ -198,7 +198,7 @@ class Users extends Logic
         { // first registered user = admin
             $request->rights = User::LEVEL_ADMIN;
         }
-        
+
         $request->timezone = User::iGet()->getTimeZones($request->timezone);
         $request->ulang = User::iGet()->getLang($request->ulang);
 
@@ -211,12 +211,12 @@ class Users extends Logic
         if(!empty($request->passwd) && !empty($request->confirmpasswd))
         {
             $args = array(
-                'login'     => $request->login, 
-                'passwd'    => md5($request->login.$request->passwd), 
-                'rights'    => $request->rights, 
-                'lang'      => $request->ulang, 
-                'email'     => $request->email, 
-                'timezone'  => $request->timezone, 
+                'login'     => $request->login,
+                'passwd'    => md5($request->login.$request->passwd),
+                'rights'    => $request->rights,
+                'lang'      => $request->ulang,
+                'email'     => $request->email,
+                'timezone'  => $request->timezone,
                 'id'        => $request->id,
                 'openid'    => $request->openid,
                 'config'    => $cfg
@@ -225,11 +225,11 @@ class Users extends Logic
         else
         {
             $args = array(
-                'login'     => $request->login, 
-                'rights'    => $request->rights, 
-                'lang'      => $request->ulang, 
-                'email'     => $request->email, 
-                'timezone'  => $request->timezone, 
+                'login'     => $request->login,
+                'rights'    => $request->rights,
+                'lang'      => $request->ulang,
+                'email'     => $request->email,
+                'timezone'  => $request->timezone,
                 'id'        => $request->id,
                 'openid'    => $request->openid,
                 'config'    => $cfg
@@ -265,8 +265,8 @@ class Users extends Logic
         try
         {
             $request->id = $user->save($request->new);
-    
-            if(!$nb || (!$request->new && (int)$request->id === (int)User::iGet()->getUid()))
+
+            if(empty($nb) || (!$request->new && (int)$request->id === (int)User::iGet()->getUid()))
             {
                 if(!User::iGet()->auth($user->login, $user->passwd))
                 { // ???
@@ -313,7 +313,7 @@ class Users extends Logic
      */
     public function delete(Request $request)
     {
-        if(!$request)
+        if(empty($request->id))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -391,7 +391,7 @@ class Users extends Logic
         }
 
         $datas = $this->_dao->get($args, 'id,login,rights,lang,email,openid,timezone,config', $order, $groupby, $limit);
-        if(!$datas)
+        if(empty($datas))
         {
             $request->setResponse(new Response(array(
                 'status'    => 204
@@ -470,8 +470,8 @@ class Users extends Logic
 
         $newLang = (string) User::iGet()->setLang($request->newlang);
 
-        $dao = $this->_dao->get(User::iGet()->getUid(), 'id,lang');
-        if(!$dao)
+        $user = $this->_dao->get(User::iGet()->getUid(), 'id,lang');
+        if(empty($user))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -480,8 +480,8 @@ class Users extends Logic
             )));
         }
 
-        $dao->lang = $newLang;
-        $dao->save();
+        $user->lang = $newLang;
+        $user->save();
 
         $request->setResponse(new Response);
 

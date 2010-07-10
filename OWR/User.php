@@ -36,7 +36,7 @@
  */
 namespace OWR;
 use OWR\DB\Request as DBRequest,
-    OWR\View\Utilities as Utilities;
+    OWR\View\Utilities;
 /**
  * This object represents the user running the script
  * @uses Singleton implements the singleton pattern
@@ -328,7 +328,7 @@ class User extends Singleton
                             break;
                         }
                     }
-                    
+
                     if(empty($this->_lang))
                     {
                         $lang = Config::iGet()->get('default_language');
@@ -357,7 +357,7 @@ class User extends Singleton
                 throw new Exception(sprintf(Utilities::iGet()->_('Missing locale ! (%s)'), $this->_lang.'.UTF8'));
             }
         }
-        
+
         putenv('LANG='.$this->_lang);
         bindtextdomain('messages', HOME_PATH.'locale');
         textdomain('messages');
@@ -509,7 +509,7 @@ class User extends Singleton
             WHERE uid=? AND action=?';
 
             $user = DB::iGet()->getRowP($query, new DBRequest(array($uid, $action)));
-            
+
             if(!$user->next() || $user->token !== $login || $user->token_key !== $key)
             {
                 $user = $login = $key = null;
@@ -525,13 +525,13 @@ class User extends Singleton
         elseif(!REST)
         {
             if(!isset($_POST['token']) || !isset($this->_token) || !isset($this->_agent) ||
-                $_POST['token'] !== $this->_token || 
+                $_POST['token'] !== $this->_token ||
                 $this->_agent !== md5($this->_token.(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'X')))
             {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -606,7 +606,7 @@ class User extends Singleton
             $this->reset();
             return false;
         }
-        
+
         $this->_setUser((array)$row);
         $row = $pass = null;
         return true;
@@ -761,18 +761,18 @@ class User extends Singleton
 
         $tokens = array();
 
-        $tokens['tlogin'] = 
+        $tokens['tlogin'] =
                 md5($this->_uid.$action.uniqid(mt_rand(), true)) .
                 md5($this->_uid.$action.uniqid(mt_rand(), true)) .
                 md5($this->_uid.$action.uniqid(mt_rand(), true));
-        
+
         $tokens['tlogin_key'] = substr(md5($tokens['tlogin'].uniqid(mt_rand(), true)), 0, 5);
-        
+
         $query = '
         REPLACE INTO users_tokens
             SET action=?, uid=?, token=?, token_key=?';
         DB::iGet()->setP($query, new DBRequest(array($action, $this->_uid, $tokens['tlogin'], $tokens['tlogin_key'])));
-        
+
         return $tokens;
     }
 }

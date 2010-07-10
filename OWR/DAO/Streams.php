@@ -35,9 +35,9 @@
  * @subpackage DAO
  */
 namespace OWR\DAO;
-use OWR\DAO as DAO, 
+use OWR\DAO,
     OWR\DB\Request as DBRequest,
-    OWR\Config as Config;
+    OWR\Config;
 /**
  * This object represents the table streams
  * @uses DAO extends the base class
@@ -88,9 +88,9 @@ class Streams extends DAO
     {
         $this->_idField = 'id';
         $this->_uniqueFields = array('hash' => true);
-        $this->_fields = array( 
-            'url'       =>  array('required' => true,  'type' => DBRequest::PARAM_URL), 
-            'ttl'       =>  array('required' => true,  'type' => \PDO::PARAM_INT, 'default' => Config::iGet()->get('defaultStreamRefreshTime')), 
+        $this->_fields = array(
+            'url'       =>  array('required' => true,  'type' => DBRequest::PARAM_URL),
+            'ttl'       =>  array('required' => true,  'type' => \PDO::PARAM_INT, 'default' => Config::iGet()->get('defaultStreamRefreshTime')),
             'id'        =>  array('required' => true,  'type' => \PDO::PARAM_INT),
             'lastupd'   =>  array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP),
             'favicon'   =>  array('required' => false, 'type' => \PDO::PARAM_STR),
@@ -98,11 +98,11 @@ class Streams extends DAO
             'status'    =>  array('required' => false, 'type' => DBRequest::PARAM_CURRENT_TIMESTAMP, 'default' => 0)
         );
         $this->_userRelations = array(
-            'streams_relations'         => array('id'                       => 'rssid'),
-            'streams_relations_name'    => array('id'                       => 'rssid')
+            'streams_relations'         => array('id' => 'rssid'),
+            'streams_relations_name'    => array('id' => 'rssid')
         );
         $this->_relations = array(
-            'streams_contents'          => array('id'                       => 'rssid')
+            'streams_contents'          => array('id' => 'rssid')
         );
         parent::__construct();
     }

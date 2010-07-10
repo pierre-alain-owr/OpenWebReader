@@ -35,7 +35,7 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\View\Utilities as Utilities;
+use OWR\View\Utilities;
 /**
  * This object manages checking/moving uploaded files
  * @uses Cache get an unique file name
@@ -151,12 +151,12 @@ class Upload
                 default: throw new Exception('An error occured, try again', Exception::E_OWR_WARNING); break;
             }
         }
-        
+
         if ($file['size'] > $this->_args['maxFileSize'])
         {
             throw new Exception('Filesize is more than limit configuration', Exception::E_OWR_WARNING);
         }
-        
+
         if(!is_uploaded_file($file['tmp_name']))
         {
             throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
@@ -171,7 +171,7 @@ class Upload
                 if($type !== mb_strtolower(mb_substr($file['type'], - mb_strlen($type, 'UTF-8'), mb_strlen($type, 'UTF-8'), 'UTF-8'), 'UTF-8'))
                     ++$err;
             }
-            
+
             if($nb === $err)
             {
                 throw new Exception('Incorrect file type', Exception::E_OWR_WARNING);
@@ -188,11 +188,11 @@ class Upload
         if(class_exists('finfo', false))
         {
             $finfo = new \finfo(FILEINFO_SYMLINK | FILEINFO_MIME);
-            if(!$finfo) 
+            if(!$finfo)
             {
                 throw new Exception('Can not open fileinfo', Exception::E_OWR_WARNING);
             }
-            
+
             if(0 !== mb_strpos($finfo->file($file['tmp_name']), $this->_args['finfo_mime'], 0, 'UTF-8'))
             {
                 throw new Exception('Incorrect file type', Exception::E_OWR_WARNING);
@@ -209,7 +209,7 @@ class Upload
                 if($ext !== mb_strtolower(mb_substr($file['name'], - mb_strlen($ext, 'UTF-8'), mb_strlen($ext, 'UTF-8'), 'UTF-8'), 'UTF-8'))
                     ++$err;
             }
-            
+
             if($nb === $err)
             {
                 throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
@@ -222,9 +222,9 @@ class Upload
                 throw new Exception('Incorrect file name', Exception::E_OWR_WARNING);
             }
         }
-        
+
         $path = Cache::getRandomFilename(true); // uploaded file goes to tmp :-)
-        
+
         if(!move_uploaded_file($file['tmp_name'], $path))
         {
             throw new Exception('Error while moving uploaded file, please try again', Exception::E_OWR_WARNING);
