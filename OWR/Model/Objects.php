@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic for 'objects' object
+ * Model for 'objects' object
  *
  * PHP 5
  *
@@ -32,25 +32,25 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic;
-use OWR\Logic,
+namespace OWR\Model;
+use OWR\Model,
     OWR\Request,
     OWR\Exception,
     OWR\DAO;
 /**
  * This class is used to add/delete objects
  * @package OWR
- * @subpackage Logic
- * @uses OWR\Logic extends the base class
+ * @subpackage Model
+ * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
- * @uses OWR\Request a request sent to the logic
- * @subpackage Logic
+ * @uses OWR\Request a request sent to the model
+ * @subpackage Model
  */
-class Objects extends Logic
+class Objects extends Model
 {
     /**
      * Adds an object entry into the DB
@@ -155,7 +155,7 @@ class Objects extends Logic
         foreach($types as $type)
         {
             $r->id = $type['id'];
-            parent::getCachedLogic($type['type'])->view($r, $args, $order, $groupby, 1);
+            parent::getCachedModel($type['type'])->view($r, $args, $order, $groupby, 1);
             $response = $r->getResponse();
             if('error' !== $response->getNext())
             {

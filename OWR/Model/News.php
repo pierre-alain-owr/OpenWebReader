@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic for 'news' object
+ * Model for 'news' object
  *
  * PHP 5
  *
@@ -32,10 +32,10 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic;
-use OWR\Logic,
+namespace OWR\Model;
+use OWR\Model,
     OWR\Request,
     OWR\Exception,
     OWR\DAO,
@@ -45,15 +45,15 @@ use OWR\Logic,
 /**
  * This class is used to add/edit/delete news
  * @package OWR
- * @subpackage Logic
- * @uses OWR\Logic extends the base class
+ * @subpackage Model
+ * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\Logs the log object
- * @subpackage Logic
+ * @subpackage Model
  */
-class News extends Logic
+class News extends Model
 {
     /**
      * Adds/Edits a stream

@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface for all ResponseLogic
+ * Interface for all ResponseModel
  *
  * PHP 5
  *
@@ -34,7 +34,7 @@
  * @package OWR
  * @subpackage Interfaces
  */
-namespace OWR\Interfaces\Logic;
+namespace OWR\Interfaces\Model;
 /**
  * This class is used to declare public functions
  * @package OWR

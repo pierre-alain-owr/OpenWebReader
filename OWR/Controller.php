@@ -36,7 +36,7 @@
  */
 namespace OWR;
 use OWR\DB\Request as DBRequest,
-    OWR\Logic\Response as LogicResponse,
+    OWR\Model\Response as ModelResponse,
     OWR\View\Utilities;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
@@ -583,13 +583,13 @@ class Controller extends Singleton
     }
 
     /**
-     * Process the response of a Logic call
+     * Process the response of a Model call
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed LogicResponse the response of the
+     * @param mixed ModelResponse the response of the
      */
-    public function processResponse(LogicResponse $response)
+    public function processResponse(ModelResponse $response)
     {
         $status = $response->getStatus();
         if($status)
@@ -622,7 +622,7 @@ class Controller extends Singleton
                 break;
 
             default:
-                throw new Exception('Invalid return from Logic', Exception::E_OWR_DIE);
+                throw new Exception('Invalid return from Model', Exception::E_OWR_DIE);
                 break;
         }
 
@@ -698,7 +698,7 @@ class Controller extends Singleton
         {
             case 'new_contents':
                 $request = new Request(array('id' => $datas['id']));
-                Logic::getCachedLogic('news')->view($request);
+                Model::getCachedModel('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -726,7 +726,7 @@ class Controller extends Singleton
             case 'new_details':
                 $datas['details'] = array();
                 $request = new Request(array('id' => $datas['id']));
-                Logic::getCachedLogic('news')->view($request);
+                Model::getCachedModel('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -782,7 +782,7 @@ class Controller extends Singleton
                 if(is_object($streams))
                     $streams = array($streams);
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams_groups')->view($request, array(), 'name');
+                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 $groups = array();
                 if('error' !== $response->getNext())
@@ -802,7 +802,7 @@ class Controller extends Singleton
                 foreach($streams as $s)
                 {
                     $request->id = $s->rssid;
-                    Logic::getCachedLogic('streams')->view($request);
+                    Model::getCachedModel('streams')->view($request);
                     $response = $request->getResponse();
                     if('error' !== $response->getNext())
                     {
@@ -855,7 +855,7 @@ class Controller extends Singleton
 
             case 'news_tags_contents':
                 $request = new Request(array(), true);
-                Logic::getCachedLogic('news_tags')->view($request, array('newsid' => $datas['id']));
+                Model::getCachedModel('news_tags')->view($request, array('newsid' => $datas['id']));
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -885,7 +885,7 @@ class Controller extends Singleton
 
             case 'menu_part_stream':
                 $request = new Request(array('id' => $datas['id']));
-                Logic::getCachedLogic('streams')->view($request);
+                Model::getCachedModel('streams')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -949,19 +949,19 @@ class Controller extends Singleton
                         break;
                     }
                     $request = new Request(array('ids' => $datas['id'], 'getContents' => $datas['abstract']));
-                    Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
                     $datas['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
                 {
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
                     $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
                 }
                 elseif(-1 === $datas['id'])
                 { // all news
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
                     $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
                     $datas['nbNews'] = $nb ? $nb->nb : 0;
                 }
@@ -988,19 +988,19 @@ class Controller extends Singleton
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     if('streams' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('streams_groups' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('news_tags' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
@@ -1083,7 +1083,7 @@ class Controller extends Singleton
                                                     ));
 
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams_groups')->view($request, array(), 'name');
+                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 $groups = array();
                 $tmpPage = '';
@@ -1164,7 +1164,7 @@ class Controller extends Singleton
 
             case 'menu_tags_contents':
                 $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
-                Logic::getCachedLogic('news_tags')->view($request, array(), 'name');
+                Model::getCachedModel('news_tags')->view($request, array(), 'name');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -1211,7 +1211,7 @@ class Controller extends Singleton
                 unset($datas['dateCreated']);
                 $datas['streams'] = array();
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams')->view($request);
+                Model::getCachedModel('streams')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -1255,7 +1255,7 @@ class Controller extends Singleton
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['timezones'] = $this->_user->getTimeZones();
                 $datas['userrights'] = $this->_user->getRights();
-                Logic::getCachedLogic('users')->view($request);
+                Model::getCachedModel('users')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -1275,7 +1275,7 @@ class Controller extends Singleton
                 $noCacheDatas['token'] = $this->_user->getToken();
                 $datas['users'] = array();
                 $datas['nbusers'] = 0;
-                Logic::getCachedLogic('users')->view($request, array(), 'login');
+                Model::getCachedModel('users')->view($request, array(), 'login');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -1306,7 +1306,7 @@ class Controller extends Singleton
                 if(!empty($datas['id']))
                     $args['rssid'] = $datas['id'];
                 $datas['news'] = $ids = array();
-                Logic::getCachedLogic('news')->view($request, $args);
+                Model::getCachedModel('news')->view($request, $args);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -1420,7 +1420,7 @@ class Controller extends Singleton
      */
 
     /**
-     * Now functions that do not require a logic call
+     * Now functions that do not require a model call
      */
 
     /**
@@ -2065,7 +2065,7 @@ class Controller extends Singleton
     }
 
     /**
-     * Requires a call to a logic from here
+     * Requires a call to a model from here
      */
 
     /**
@@ -2077,7 +2077,7 @@ class Controller extends Singleton
      */
     protected function do_changeLang()
     {
-        Logic::getCachedLogic('users')->changeLang($this->_request);
+        Model::getCachedModel('users')->changeLang($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
@@ -2091,7 +2091,7 @@ class Controller extends Singleton
      */
     protected function do_stats()
     {
-        Logic::getCachedLogic('users')->stat($this->_request);
+        Model::getCachedModel('users')->stat($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
@@ -2272,7 +2272,7 @@ class Controller extends Singleton
      */
     protected function do_move()
     {
-        Logic::getCachedLogic('streams')->move($this->_request);
+        Model::getCachedModel('streams')->move($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
@@ -2289,7 +2289,7 @@ class Controller extends Singleton
     {
         if(!$this->_request->id)
         {
-            Logic::getCachedLogic('users')->deleteRelated($this->_request);
+            Model::getCachedModel('users')->deleteRelated($this->_request);
             if(!$this->processResponse($this->_request->getResponse())) return $this;
         }
         else
@@ -2299,7 +2299,7 @@ class Controller extends Singleton
             switch($type)
             {
                 case 'users':
-                    Logic::getCachedLogic('users')->delete($this->_request);
+                    Model::getCachedModel('users')->delete($this->_request);
                     if(!$this->processResponse($this->_request->getResponse())) return $this;
                     $escape = true;
                     break;
@@ -2308,7 +2308,7 @@ class Controller extends Singleton
                 case 'streams':
                 case 'streams_groups':
                 case 'news_tags':
-                    Logic::getCachedLogic($type)->delete($this->_request);
+                    Model::getCachedModel($type)->delete($this->_request);
                     if(!$this->processResponse($this->_request->getResponse())) return $this;
                     break;
 
@@ -2357,7 +2357,7 @@ class Controller extends Singleton
         $this->_request->escapeNews = $escapeNews;
         $this->_request->escape = isset($url);
 
-        Logic::getCachedLogic('streams')->edit($this->_request);
+        Model::getCachedModel('streams')->edit($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2377,7 +2377,7 @@ class Controller extends Singleton
         $this->_request->new = false;
         $this->_request->escape = isset($name);
 
-        Logic::getCachedLogic('streams_groups')->edit($this->_request);
+        Model::getCachedModel('streams_groups')->edit($this->_request);
         if(!$this->processResponse($this->_request->getResponse())) return $this;
 
         if(!isset($name))
@@ -2408,7 +2408,7 @@ class Controller extends Singleton
         $this->_request->url = $url ?: $this->_request->url;
         $this->_request->escape = isset($url);
 
-        Logic::getCachedLogic('streams')->editOPML($this->_request);
+        Model::getCachedModel('streams')->editOPML($this->_request);
         if(!$this->processResponse($this->_request->getResponse())) return $this;
 
         return $this;
@@ -2497,7 +2497,7 @@ class Controller extends Singleton
      */
     protected function do_refreshStream()
     {
-        Logic::getCachedLogic('streams')->refresh($this->_request);
+        Model::getCachedModel('streams')->refresh($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2512,7 +2512,7 @@ class Controller extends Singleton
      */
     protected function do_upNew()
     {
-        Logic::getCachedLogic('news')->update($this->_request);
+        Model::getCachedModel('news')->update($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2527,7 +2527,7 @@ class Controller extends Singleton
      */
     protected function do_clearStream()
     {
-        Logic::getCachedLogic('streams')->clear($this->_request);
+        Model::getCachedModel('streams')->clear($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2544,7 +2544,7 @@ class Controller extends Singleton
      */
     protected function do_editUser()
     {
-        Logic::getCachedLogic('users')->edit($this->_request);
+        Model::getCachedModel('users')->edit($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2559,7 +2559,7 @@ class Controller extends Singleton
      */
     protected function do_editTag()
     {
-        Logic::getCachedLogic('news_tags')->edit($this->_request);
+        Model::getCachedModel('news_tags')->edit($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2574,7 +2574,7 @@ class Controller extends Singleton
      */
     protected function do_editTagsRelations()
     {
-        Logic::getCachedLogic('news_tags')->editRelations($this->_request);
+        Model::getCachedModel('news_tags')->editRelations($this->_request);
         $this->processResponse($this->_request->getResponse());
 
         return $this;
@@ -2591,7 +2591,7 @@ class Controller extends Singleton
     {
         if(!$this->_request->id)
         {
-            $this->processResponse(new LogicResponse(array(
+            $this->processResponse(new ModelResponse(array(
                 'do'        => 'error',
                 'error'     => 'Invalid id',
                 'status'    => Exception::E_OWR_BAD_REQUEST
@@ -2606,12 +2606,12 @@ class Controller extends Singleton
             case 'streams':
             case 'streams_groups':
             case 'news_tags':
-                Logic::getCachedLogic($type)->rename($this->_request);
+                Model::getCachedModel($type)->rename($this->_request);
                 if(!$this->processResponse($this->_request->getResponse())) return $this;
                 break;
 
             default:
-                $this->processResponse(new LogicResponse(array(
+                $this->processResponse(new ModelResponse(array(
                     'do'        => 'error',
                     'error'     => 'Invalid id',
                     'status'    => Exception::E_OWR_BAD_REQUEST

@@ -1,8 +1,8 @@
 <?php
 /**
- * Class representing a response from every call to a Logic
- * If we a logic returns this object, it means that no blocking errors have been encountered
- * Else the Logic will throw an Exception
+ * Class representing a response from every call to a Model
+ * If we a model returns this object, it means that no blocking errors have been encountered
+ * Else the Model will throw an Exception
  *
  * PHP 5
  *
@@ -34,16 +34,16 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic;
-use OWR\Interfaces\Logic\Response as iResponse,
+namespace OWR\Model;
+use OWR\Interfaces\Model\Response as iResponse,
     OWR\Exception,
     OWR\View\Utilities as ViewUtilities;
 /**
- * This class is an object response of every logic call
+ * This class is an object response of every model call
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
 class Response implements iResponse
 {
@@ -93,7 +93,7 @@ class Response implements iResponse
     protected $_datas = array();
 
     /**
-     * @var boolean true if the logic returns datas and if it contains more than one row
+     * @var boolean true if the model returns datas and if it contains more than one row
      * @access protected
      */
     protected $_multiple = false;
@@ -135,7 +135,7 @@ class Response implements iResponse
                     break;
 
                 default:
-                    throw new Exception('Invalid return from Logic', Exception::E_OWR_DIE);
+                    throw new Exception('Invalid return from Model', Exception::E_OWR_DIE);
                     break;
             }
         }

@@ -35,7 +35,7 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\Logic\Response as LogicResponse;
+use OWR\Model\Response as ModelResponse;
 /**
  * This object is sent to the Controller to be executed
  * @uses String convert M$ bad chars
@@ -51,7 +51,7 @@ class Request
     static protected $_filter;
 
     /**
-    * @var mixed the Logic\Response instance
+    * @var mixed the Model\Response instance
     * @access protected
     */
     protected $_response;
@@ -281,25 +281,25 @@ class Request
     }
 
     /**
-     * Sets the response of a Logic call
+     * Sets the response of a Model call
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $response the Logic\Response instance
+     * @param mixed $response the Model\Response instance
      */
-    public function setResponse(LogicResponse $response)
+    public function setResponse(ModelResponse $response)
     {
         $this->_response = $response;
     }
 
     /**
-     * Returns the response of a Logic call
+     * Returns the response of a Model call
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @return mixed $response the Logic\Response instance
+     * @return mixed $response the Model\Response instance
      */
     public function getResponse()
     {

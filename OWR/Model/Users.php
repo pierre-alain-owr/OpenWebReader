@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic for 'users' object
+ * Model for 'users' object
  *
  * PHP 5
  *
@@ -32,10 +32,10 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic;
-use OWR\Logic,
+namespace OWR\Model;
+use OWR\Model,
     OWR\Request,
     OWR\Exception,
     OWR\DAO,
@@ -45,16 +45,16 @@ use OWR\Logic,
 /**
  * This class is used to add/edit/delete users and his related tables ()
  * @package OWR
- * @uses OWR\Logic extends the base class
+ * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\User the user
  * @uses OWR\DB\Request a request sent to DB
  * @uses OWR\Object transforms an object to an array
- * @subpackage Logic
+ * @subpackage Model
  */
-class Users extends Logic
+class Users extends Model
 {
     /**
      * Adds/Edits a user

@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic for 'news_tags' object
+ * Model for 'streams_groups' object
  *
  * PHP 5
  *
@@ -32,29 +32,29 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic\News;
-use OWR\Logic,
+namespace OWR\Model\Streams;
+use OWR\Model,
     OWR\Request,
     OWR\Exception,
     OWR\DAO,
-    OWR\Logic\Response,
+    OWR\Model\Response,
     OWR\Config;
 /**
- * This class is used to add/edit/delete tags
+ * This class is used to add/edit/delete groups
  * @package OWR
- * @subpackage Logic
- * @uses OWR\Logic extends the base class
+ * @subpackage Model
+ * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
- * @subpackage Logic
+ * @subpackage Model
  */
-class Tags extends Logic
+class Groups extends Model
 {
     /**
-     * Adds/Edits a tag
+     * Adds/Edits a stream
      *
      * @access public
      * @param mixed $request the Request instance
@@ -75,17 +75,17 @@ class Tags extends Logic
 
         if(empty($request->id))
         {
-            $tag = $this->_dao->get(array('name' => $request->name), 'id');
-            if(empty($tag))
+            $group = $this->_dao->get(array('name' => $request->name), 'id');
+            if(empty($group))
             {
                 $request->new = true;
-                $tag = DAO::getDAO('news_tags');
+                $group = DAO::getDAO('streams_groups');
             }
         }
         else
         {
-            $tag = $this->_dao->get($request->id, 'id'); // check
-            if(empty($tag))
+            $group = $this->_dao->get($request->id, 'id'); // check
+            if(empty($group))
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
@@ -96,9 +96,9 @@ class Tags extends Logic
             }
         }
 
-        $tag->name = $request->name;
-        $request->id = $tag->save();
-        unset($tag);
+        $group->name = $request->name;
+        $request->id = $group->save();
+        unset($group);
 
         $request->setResponse(new Response(array(
             'status'    => $request->new ? 201 : 200,
@@ -109,7 +109,7 @@ class Tags extends Logic
     }
 
     /**
-     * Deletes a tag and all contained news
+     * Deletes a group and all contained streams
      *
      * @access public
      * @param int $id the id of the group to delete
@@ -128,7 +128,7 @@ class Tags extends Logic
         }
 
         $type = DAO::getType($request->id);
-        if('news_tags' !== $type)
+        if('streams_groups' !== $type)
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -141,6 +141,32 @@ class Tags extends Logic
         $this->_db->beginTransaction();
         try
         {
+            if($streamids = DAO::getCachedDAO('streams_relations')->get(array('gid' => $request->id), 'rssid'))
+            {
+                $r = clone($request);
+                if(is_array($streamids))
+                {
+                    $model = parent::getCachedModel('streams');
+                    foreach($streamids as $rss)
+                    {
+                        $r->id = $rss->rssid;
+                        $model->delete($r);
+                        $response = $r->getResponse();
+                        if('error' === $response->getNext())
+                            Logs::iGet()->log($response->getError(), $response->getStatus());
+                    }
+                }
+                else
+                {
+                    $r->id = $streamids->rssid;
+                    parent::getCachedModel('streams')->delete($r);
+                    $response = $r->getResponse();
+                    if('error' === $response->getNext())
+                        Logs::iGet()->log($response->getError(), $response->getStatus());
+                    DAO::getCachedDAO('news_relations')->delete(array('rssid' => $streamids->rssid));
+                }
+            }
+            unset($r);
             DAO::getCachedDAO('objects')->delete($request->id);
         }
         catch(Exception $e)
@@ -164,11 +190,11 @@ class Tags extends Logic
      * @param mixed $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
-     * @param string $tagby the groupby clause
+     * @param string $groupby the groupby clause
      * @param string $limit the limit clause
      * @return $this
      */
-    public function view(Request $request, array $args = array(), $order = '', $tagby = '', $limit = '')
+    public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
         $args['FETCH_TYPE'] = 'assoc';
 
@@ -183,7 +209,7 @@ class Tags extends Logic
             $limit = 1;
         }
 
-        $datas = $this->_dao->get($args, 'id,name', $order, $tagby, $limit);
+        $datas = $this->_dao->get($args, 'id,name', $order, $groupby, $limit);
         if(empty($datas))
         {
             $request->setResponse(new Response(array(
@@ -200,7 +226,47 @@ class Tags extends Logic
     }
 
     /**
-     * Renames a tag
+     * Checks if a group exists relative to the id
+     * If no id is passed it will try to get the root group, and create it if it does not exist
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param int &$gid the id to look for, optionnal
+     * @access public
+     * @return mixed the DAO object for table streams_groups for specified id
+     */
+    public function checkGroupById(Request $request)
+    {
+        if(!empty($request->gid))
+        {
+            $group = $this->_dao->get($request->gid, 'id,name');
+            if(!empty($group))
+            {
+                $request->gname = $group->name;
+                $request->setResponse(new Response);
+                return $this;
+            }
+        }
+
+        $group = $this->_dao->get(array('name' => 'Root'), 'id');
+        if(empty($group))
+        {
+            $group = DAO::getDAO('streams_groups');
+            $group->name = 'Root';
+            $group->save();
+        }
+
+        $request->gid = (int) $group->id;
+        $request->gname = $group->name;
+
+        unset($group);
+
+        $request->setResponse(new Response);
+
+        return $this;
+    }
+
+    /**
+     * Renames a group
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
@@ -218,8 +284,8 @@ class Tags extends Logic
             return $this;
         }
 
-        $tag = $this->_dao->get(array('id'=>$request->id), 'id, uid');
-        if(empty($tag))
+        $group = $this->_dao->get(array('id'=>$request->id), 'id, uid');
+        if(empty($group))
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
@@ -229,91 +295,10 @@ class Tags extends Logic
             return $this;
         }
 
-        $tag->name = $request->name;
-        $tag->save();
+        $group->name = $request->name;
+        $group->save();
 
         $request->setResponse(new Response);
-
-        return $this;
-    }
-
-    /**
-     * Edits tags and news relations
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @access public
-     * @param mixed $request the Request instance
-     */
-    public function editRelations(Request $request)
-    {
-        if(empty($request->ids))
-        {
-            $request->setResponse(new Response(array(
-                'do'        => 'error',
-                'error'     => 'Missing ids of news',
-                'status'    => Exception::E_OWR_BAD_REQUEST
-            )));
-            return $this;
-        }
-
-        $daoRelations = DAO::getCachedDAO('news_relations_tags');
-        $tags = array_filter(array_map('trim', explode(',', $request->name)));
-
-        // reset all tags for the id(s)
-        if(is_array($request->ids))
-        {
-            foreach($request->ids as $id)
-            {
-                $daoRelations->delete(array('newsid' => $id));
-            }
-        }
-        else
-        {
-            $daoRelations->delete(array('newsid' => $request->ids));
-        }
-
-        if(empty($tags))
-        { // ok we are done, no tags to add
-            $request->setResponse(new Response);
-
-            return $this;
-        }
-
-        $ids = array();
-        $dao = DAO::getCachedDAO('news_tags');
-
-        foreach($tags as $tag)
-        {
-            $exists = $this->_dao->get(array('name'=>$tag), 'id');
-            if(!$exists)
-            {
-                $dao->name = $tag;
-                $daoRelations->tid = $dao->save();
-                $ids[] = $daoRelations->tid;
-                $dao->id = null;
-            }
-            else $daoRelations->tid = $exists->id;
-
-            if(is_array($request->ids))
-            {
-                foreach($request->ids as $id)
-                {
-                    $daoRelations->newsid = (int) $id;
-                    $daoRelations->save();
-                }
-            }
-            else
-            {
-                $daoRelations->newsid = (int) $request->ids;
-                $daoRelations->save();
-            }
-        }
-
-        $request->setResponse(new Response(empty($ids) ? array() : array(
-            'datas'     => array('ids' => $ids),
-            'status'    => 201,
-            'tpl'       => 'menu_tags_contents'
-        )));
 
         return $this;
     }

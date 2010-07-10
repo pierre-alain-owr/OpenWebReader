@@ -49,9 +49,9 @@ use OWR\Controller as C,
     OWR\View,
     OWR\DAO,
     OWR\XML,
-    OWR\Logic\Response as LogicResponse,
+    OWR\Model\Response as ModelResponse,
     OWR\Cron,
-    OWR\Logic;
+    OWR\Model;
 if(!defined('INC_CONFIG')) die('Please include config file');
 /**
  * This object is the front door of the application
@@ -69,7 +69,7 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses OWR\Log the logs/errors storing object
  * @uses OWR\XML serialize/unserialize XML datas
  * @uses OWR\Cron adds/modify crontab
- * @uses OWR\Logic the main Logic object
+ * @uses OWR\Model the main Model object
  * @package OWR
  * @subpackage Rest
  */
@@ -257,13 +257,13 @@ class Controller extends C
     }
 
     /**
-     * Process the response of a Logic call
+     * Process the response of a Model call
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed LogicResponse the response of the
+     * @param mixed ModelResponse the response of the
      */
-    public function processResponse(LogicResponse $response = null)
+    public function processResponse(ModelResponse $response = null)
     {
         $status = $response->getStatus();
         if($status)
@@ -310,7 +310,7 @@ class Controller extends C
                 break;
 
             default:
-                throw new Exception('Invalid return from Logic', Exception::E_OWR_DIE);
+                throw new Exception('Invalid return from Model', Exception::E_OWR_DIE);
                 break;
         }
 
@@ -444,7 +444,7 @@ class Controller extends C
         {
             case 'new_contents':
                 $request = new Request($datas);
-                Logic::getCachedLogic('news')->view($request);
+                Model::getCachedModel('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -461,7 +461,7 @@ class Controller extends C
             case 'new_details':
                 $page['details'] = array();
                 $request = new Request($datas);
-                Logic::getCachedLogic('news')->view($request);
+                Model::getCachedModel('news')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -516,7 +516,7 @@ class Controller extends C
                 if(is_object($streams))
                     $streams = array($streams);
                 $request = new Request(array('id'=>null));
-                Logic::getCachedLogic('streams_groups')->view($request);
+                Model::getCachedModel('streams_groups')->view($request);
                 $response = $request->getResponse();
                 $groups = array();
                 if('error' !== $response->getNext())
@@ -539,7 +539,7 @@ class Controller extends C
                 foreach($streams as $s)
                 {
                     $request->id = $s->rssid;
-                    Logic::getCachedLogic('streams')->view($request);
+                    Model::getCachedModel('streams')->view($request);
                     $response = $request->getResponse();
                     if('error' !== $response->getNext())
                     {
@@ -564,7 +564,7 @@ class Controller extends C
 
             case 'menu_part_stream':
                 $request = new Request($datas);
-                Logic::getCachedLogic('streams')->view($request);
+                Model::getCachedModel('streams')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -623,13 +623,13 @@ class Controller extends C
                         break;
                     }
                     $request = new Request(array('ids' => $datas['id']));
-                    Logic::getCachedLogic('news')->view($request, array(), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
                     $page['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
                 {
                     $request = new Request(array('id' => null));
-                    Logic::getCachedLogic('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
                     $page['nbNews'] = $this->_request->unreads[0];
                 }
                 else
@@ -655,13 +655,13 @@ class Controller extends C
                     $request = new Request(array('id' => null));
                     if('streams' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
                         $page['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('streams_groups' === $table)
                     {
-                        Logic::getCachedLogic('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('streams_relations.gid' => $datas['id']), 'newsid');
                         $page['nbNews'] = $nb ? $nb->nb : 0;
                     }
@@ -742,7 +742,7 @@ class Controller extends C
                 $page['timezones'] = $this->_user->getTimeZones();
                 $page['userrights'] = $this->_user->getRights();
                 $cacheTime = 0;
-                Logic::getCachedLogic('users')->view($request);
+                Model::getCachedModel('users')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -760,7 +760,7 @@ class Controller extends C
                 $request = new Request($datas);
                 $cacheTime = 0;
                 $datas['surl'] = $this->_cfg->get('surl');
-                Logic::getCachedLogic('users')->view($request, array(), 'login');
+                Model::getCachedModel('users')->view($request, array(), 'login');
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
@@ -862,7 +862,7 @@ class Controller extends C
             $offset = ($request->offset * 10).',10';
         }
 
-        $this->_request->page = Logic::getCachedLogic($type)->view($this->_request, array(), $order, '', $offset);
+        $this->_request->page = Model::getCachedModel($type)->view($this->_request, array(), $order, '', $offset);
         $this->processResponse($this->_request->getResponse());
 
         return $this;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic for 'streams' object
+ * Model for 'streams' object
  *
  * PHP 5
  *
@@ -32,10 +32,10 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
- * @subpackage Logic
+ * @subpackage Model
  */
-namespace OWR\Logic;
-use OWR\Logic,
+namespace OWR\Model;
+use OWR\Model,
     OWR\Request,
     OWR\Exception,
     OWR\DAO,
@@ -52,8 +52,8 @@ use OWR\Logic,
 /**
  * This class is used to add/edit/delete stream and his related tables
  * @package OWR
- * @subpackage Logic
- * @uses OWR\Logic extends the base class
+ * @subpackage Model
+ * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
@@ -61,9 +61,9 @@ use OWR\Logic,
  * @uses OWR\Stream\Parser the stream parser
  * @uses OWR\Logs the logs object
  * @uses OWR\Cron add/modify crontab
- * @subpackage Logic
+ * @subpackage Model
  */
-class Streams extends Logic
+class Streams extends Model
 {
     /**
      * Adds/Edits a stream
@@ -84,7 +84,7 @@ class Streams extends Logic
             return $this;
         }
 
-        parent::getCachedLogic('streams_groups')->checkGroupById($request); // fill gid and gname
+        parent::getCachedModel('streams_groups')->checkGroupById($request); // fill gid and gname
 
         $request->url = html_entity_decode($request->url, ENT_COMPAT, 'UTF-8');
         $hash = md5($request->url);
@@ -149,12 +149,12 @@ class Streams extends Logic
                 $r->streamid = $streams->id;
                 if(is_array($news))
                 {
-                    $logic = parent::getCachedLogic('news');
+                    $model = parent::getCachedModel('news');
 
                     foreach($news as $new)
                     {
                         $r->id = $new->id;
-                        $logic->insertNewsRelations($r);
+                        $model->insertNewsRelations($r);
                         $response = $r->getResponse();
                         if('error' === $response->getNext())
                             Logs::iGet()->log($response->getError(), $response->getStatus());
@@ -164,7 +164,7 @@ class Streams extends Logic
                 else
                 {
                     $r->id = $news->id;
-                    parent::getCachedLogic('news')->insertNewsRelations($r);
+                    parent::getCachedModel('news')->insertNewsRelations($r);
                     $response = $r->getResponse();
                     if('error' === $response->getNext())
                         Logs::iGet()->log($response->getError(), $response->getStatus());
@@ -407,7 +407,7 @@ class Streams extends Logic
 
         if(empty($request->escapeNews))
         { // save the news
-            $logic = parent::getCachedLogic('news');
+            $model = parent::getCachedModel('news');
             $r = clone($request);
             $r->streamid = $request->id;
             $r->item = array();
@@ -415,7 +415,7 @@ class Streams extends Logic
             {
                 try
                 {
-                    $logic->edit($r);
+                    $model->edit($r);
                     $response = $r->getResponse();
                     if('error' === $response->getNext())
                         Logs::iGet()->log($response->getError(), $response->getStatus());
@@ -617,7 +617,7 @@ class Streams extends Logic
             return $this;
         }
 
-        parent::getCachedLogic('streams_groups')->checkGroupById($request);
+        parent::getCachedModel('streams_groups')->checkGroupById($request);
 
         $stream->gid = $request->gid;
         $stream->save();
@@ -731,14 +731,14 @@ class Streams extends Logic
         unset($streams_contents);
 
         $r = clone($request);
-        $logic = parent::getCachedLogic('news');
+        $model = parent::getCachedModel('news');
         $ids = array();
         while($r->item = $stream->get('item'))
         {
             try
             {
                 $r->streamid = $request->id;
-                $logic->edit($r);
+                $model->edit($r);
                 $ids[] = $r->id;
                 $response = $r->getResponse();
                 if('error' === $response->getNext())
@@ -1422,7 +1422,7 @@ class Streams extends Logic
 
         User::iGet()->checkToken();
 
-        parent::getCachedLogic('streams_groups')->checkGroupById($request);
+        parent::getCachedModel('streams_groups')->checkGroupById($request);
         $erase = false;
 
         if(empty($request->escape) && !empty($_FILES['opml']['tmp_name']))
@@ -1476,7 +1476,7 @@ class Streams extends Logic
 
         $r = clone($request);
         $r->gid = 0;
-        parent::getCachedLogic('streams_groups')->checkGroupById($r);
+        parent::getCachedModel('streams_groups')->checkGroupById($r);
         $gidRoot = $r->gid;
         unset($r);
 
@@ -1484,7 +1484,7 @@ class Streams extends Logic
 
         $ids = array();
 
-        $streamsGroupsLogic = parent::getCachedLogic('streams_groups');
+        $streamsGroupsModel = parent::getCachedModel('streams_groups');
         $r = clone($request);
         $sr = clone($request);
         $sr->delay = true;
@@ -1518,7 +1518,7 @@ class Streams extends Logic
                         {
                             $r->id = 0;
                             $r->name = $stream['folder'];
-                            $streamsGroupsLogic->edit($r);
+                            $streamsGroupsModel->edit($r);
                             $response = $r->getResponse();
                             if('error' === $response->getNext())
                             {

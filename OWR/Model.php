@@ -1,6 +1,6 @@
 <?php
 /**
- * Logic Object base class
+ * Model Object base class
  *
  * PHP 5
  *
@@ -34,14 +34,14 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\Interfaces\Logic as iLogic,
+use OWR\Interfaces\Model as iModel,
     OWR\User;
 /**
  * This class is used as base class for all DAO objects and defines all usefull functions
  * Please ensure that all the non-static public functions returns $this
  *
  * @abstract
- * @uses OWR\Interfaces\Logic implements the Logic interface
+ * @uses OWR\Interfaces\Model implements the Model interface
  * @uses OWR\DB the database link
  * @uses OWR\Request a request sent to the database
  * @uses OWR\DB\Result a DB\Result from the database
@@ -49,7 +49,7 @@ use OWR\Interfaces\Logic as iLogic,
  * @uses OWR\User the user
  * @package OWR
  */
-abstract class Logic implements iLogic
+abstract class Model implements iModel
 {
     /**
     * @var string the table name
@@ -76,18 +76,18 @@ abstract class Logic implements iLogic
     protected $_dao;
 
     /**
-    * @var array stored already processed logic names
+    * @var array stored already processed model names
     * @access private
     * @static
     */
-    static private $_logics = array();
+    static private $_models = array();
 
     /**
-    * @var array stored already processed logics objects
+    * @var array stored already processed models objects
     * @access private
     * @static
     */
-    static private $_cachedLogics = array();
+    static private $_cachedModels = array();
 
     /**
      * Constructor, sets the name/fullname of the instance, and set the DB obj
@@ -99,43 +99,43 @@ abstract class Logic implements iLogic
     {
         $this->_db = DB::iGet(); // we assume here that the connexion has already been done, be carefull
         $this->_fullName = get_called_class();
-        $this->_name = str_replace('\\', '_', substr($this->_fullName, strlen(__NAMESPACE__.'_Logic_')));
+        $this->_name = str_replace('\\', '_', substr($this->_fullName, strlen(__NAMESPACE__.'_Model_')));
         $this->_dao = DAO::getDAO($this->_name);
     }
 
     /**
-     * Returns the specified Logic object
+     * Returns the specified Model object
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $logic the name of the Logic
-     * @return mixed the Logic object
+     * @param string $model the name of the Model
+     * @return mixed the Model object
      */
-    static public function getLogic($logic)
+    static public function getModel($model)
     {
-        if(!isset(self::$_logics[$logic]))
+        if(!isset(self::$_models[$model]))
         {
-            $c = __NAMESPACE__.'\Logic\\'.join('\\', array_map('ucfirst', explode('_', (string) $logic)));;
-            self::$_logics[$logic] = $c;
+            $c = __NAMESPACE__.'\Model\\'.join('\\', array_map('ucfirst', explode('_', (string) $model)));;
+            self::$_models[$model] = $c;
         }
-        return new self::$_logics[$logic];
+        return new self::$_models[$model];
     }
 
     /**
-     * Returns the specified Logic object from cache
+     * Returns the specified Model object from cache
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $logic the name of the Logic
-     * @return mixed the Logic object
+     * @param string $model the name of the Model
+     * @return mixed the Model object
      */
-    static public function getCachedLogic($logic)
+    static public function getCachedModel($model)
     {
-        $logic = ucfirst((string) $logic);
-        isset(self::$_cachedLogics[$logic]) || (self::$_cachedLogics[$logic] = self::getLogic($logic));
+        $model = ucfirst((string) $model);
+        isset(self::$_cachedModels[$model]) || (self::$_cachedModels[$model] = self::getModel($model));
 
-        return self::$_cachedLogics[$logic];
+        return self::$_cachedModels[$model];
     }
 }

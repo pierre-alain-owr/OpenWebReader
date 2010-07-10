@@ -53,7 +53,7 @@ use OWR\Controller as MainController,
     OWR\cURLWrapper as cURLWrapper,
     OWR\DAO as DAO,
     OWR\DB as DB,
-    OWR\Logic as Logic,
+    OWR\Model as Model,
     OWR\Threads as Threads,
     OWR\View\Utilities as Utilities;
 if(!defined('INC_CONFIG')) die('Please include config file');
@@ -235,7 +235,7 @@ class Controller extends MainController
      */
     protected function do_checkStreamsAvailability()
     {
-        Logic::getCachedLogic('streams')->checkAvailability($this->_request);
+        Model::getCachedModel('streams')->checkAvailability($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
@@ -252,7 +252,7 @@ class Controller extends MainController
      */
     protected function do_manageFavicons()
     {
-        Logic::getCachedLogic('streams')->manageFavicons($this->_request);
+        Model::getCachedModel('streams')->manageFavicons($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }
@@ -266,7 +266,7 @@ class Controller extends MainController
      */
     protected function do_refreshStream()
     {
-        Logic::getCachedLogic('streams')->refreshAll($this->_request);
+        Model::getCachedModel('streams')->refreshAll($this->_request);
         $this->processResponse($this->_request->getResponse());
         return $this;
     }

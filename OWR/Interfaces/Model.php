@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface for all logics
+ * Interface for all models
  *
  * PHP 5
  *
@@ -41,29 +41,29 @@ use OWR\Request;
  * @package OWR
  * @subpackage Interfaces
  */
-interface Logic
+interface Model
 {
     /**
-     * Returns the specified Logic object
+     * Returns the specified Model object
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $logic the name of the Logic
-     * @return mixed the Logic object
+     * @param string $model the name of the Model
+     * @return mixed the Model object
      */
-    static public function getLogic($logic);
+    static public function getModel($model);
 
     /**
-     * Returns the specified Logic object from cache
+     * Returns the specified Model object from cache
      *
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $logic the name of the Logic
-     * @return mixed the Logic object
+     * @param string $model the name of the Model
+     * @return mixed the Model object
      */
-    static public function getCachedLogic($logic);
+    static public function getCachedModel($model);
 
     /**
      * Adds/Edits an object
