@@ -56,8 +56,18 @@ try
 }
 catch(Exception $e)
 {
-    Logs::iGet()->log($e->getContent(), $e->getCode());
-    Controller::iGet()->renderPage($e->getCode());
+    try
+    {
+        Logs::iGet()->log($e->getContent(), $e->getCode());
+        Controller::iGet()->renderPage($e->getCode());
+    }
+    catch(Exception $e)
+    {
+        if(!headers_sent())
+            header('HTTP/1.1 500 Internal error');
+
+        echo $e->getContent();
+    }
 }
 
 exit;
