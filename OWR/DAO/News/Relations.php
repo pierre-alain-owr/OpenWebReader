@@ -79,19 +79,23 @@ class Relations extends DAO
     public function __construct()
     {
         $this->_fields = array(
-            'newsid'    =>  array('required' => true, 'type' => \PDO::PARAM_INT),
-            'rssid'     =>  array('required' => true, 'type' => \PDO::PARAM_INT),
-            'status'    =>  array('required' => false, 'type' => \PDO::PARAM_INT, 'default' => 1),
-            'uid'       =>  array('required' => true, 'type' => \PDO::PARAM_INT)
+            'newsid'                    => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'rssid'                     => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'status'                    => array('required' => false, 'type' => \PDO::PARAM_INT, 'default' => 1),
+            'uid'                       => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'streams_relations'     => array('rssid'    => 'rssid'),
-            'news_relations_tags'   => array('newsid'   => 'newsid')
+            'streams_relations'         => array('rssid'    => 'rssid'),
+            'news_relations_tags'       => array('newsid'   => 'newsid'),
+            'streams_relations_name'    => array('rssid'    => 'rssid')
         );
         $this->_relations = array(
-            'streams'           => array('rssid'    => 'id'),
-            'news'              => array('newsid'   => 'id')
+            'news'                      => array('newsid'   => 'id'),
+            'news_contents'             => array('newsid'   => 'id'),
+            'streams'                   => array('rssid'    => 'id'),
+            'streams_contents'          => array('rssid'    => 'rssid')
         );
+        $this->_weight = 11;
         parent::__construct();
     }
 }

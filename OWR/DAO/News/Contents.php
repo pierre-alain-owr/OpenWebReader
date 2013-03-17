@@ -72,11 +72,12 @@ class Contents extends DAO
             'contents'          =>  array('required' => true, 'type' => \PDO::PARAM_STR)
         );
         $this->_userRelations = array(
-            'news_relations'    => array('id'   => 'newsid')
+            'news_relations'    => array('id'        => 'newsid')
         );
         $this->_relations = array(
-            'news'              => array('id'   => 'id')
+            'news'              => array('id'        => 'id')
         );
+        $this->_weight = 12;
         parent::__construct();
     }
 }

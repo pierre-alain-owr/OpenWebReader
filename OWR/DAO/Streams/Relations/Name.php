@@ -74,16 +74,20 @@ class Name extends DAO
     {
         $this->_uniqueFields = array('rssid'=>true, 'name'=>true);
         $this->_fields = array(
-            'rssid' => array('required' => true, 'type' => \PDO::PARAM_INT),
-            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR),
-            'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
+            'rssid'                     => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'name'                      => array('required' => true, 'type' => \PDO::PARAM_STR),
+            'uid'                       => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'streams_relations' => array('id'       => 'rssid')
+            'streams_relations'         => array('rssid'    => 'rssid'),
+            'news_relations'            => array('rssid'    => 'rssid')
         );
         $this->_relations = array(
-            'streams'           => array('rssid'    => 'id')
+            'streams'                   => array('rssid'    => 'id'),
+            'streams_contents'          => array('rssid'    => 'rssid'),
+            'news'                      => array('rssid'    => 'rssid')
         );
+        $this->_weight = 7;
         parent::__construct();
     }
 }

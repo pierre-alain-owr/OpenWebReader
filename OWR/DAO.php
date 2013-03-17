@@ -94,6 +94,12 @@ abstract class DAO implements iDAO
     protected $_userRelations = array();
 
     /**
+     * @var int weight of the table in the query, used to optimize joins
+     * @access protected
+     */
+    protected $_weight = 1;
+
+    /**
      * @var array associative array representing the SQL schema
      * @access protected
      */
@@ -648,6 +654,54 @@ abstract class DAO implements iDAO
     }
 
     /**
+     * Returns the weight
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return int the weight for this table
+     */
+    public function getWeight()
+    {
+        return (int) $this->_weight;
+    }
+
+    /**
+     * Returns the relations
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return array the relations for this table
+     */
+    public function getRelations()
+    {
+        return (array) $this->_relations;
+    }
+
+    /**
+     * Returns the relations related to the current user
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return array the relations for the current user for this table
+     */
+    public function getUserRelations()
+    {
+        return (array) $this->_userRelations;
+    }
+
+    /**
+     * Returns all the relations
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return array all the relations for this table
+     */
+    public function getAllRelations()
+    {
+        return (array) array_merge($this->getRelations(), $this->getUserRelations());
+    }
+
+    /**
      * Returns the specified DAO object
      *
      * @access public
@@ -772,17 +826,76 @@ abstract class DAO implements iDAO
     }
 
     /**
+     * Returns the JOIN conditions
+     * This method tries to order the JOIN conditions to get better performance results
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param array $joins the tables to join
+     * @return array the JOIN conditions
+     * @access protected
+     */
+    protected function _optimizeJoins(array $joins)
+    {
+        $tables = array();
+        foreach(array_keys($joins) as $table)
+        {
+            $tables[self::getCachedDAO($table)->getWeight()][] = $table;
+        }
+        krsort($tables);
+
+        $joins = array();
+        $tables = Arrays::multiDimtoNumericalArray($tables);
+
+        $tableName = static::getTableName();
+
+        foreach($tables as $k => $table)
+        {
+            $tableRel = $k === 0 ? $tableName : $tables[$k - 1]; // the table we need to LEFT JOIN
+            $relations = self::getCachedDAO($table)->getAllRelations();
+            foreach($relations as $t => $relation)
+            {
+                if($t !== $tableRel) continue;
+
+                $join = array();
+                foreach($relation as $myfield => $itsfield)
+                {
+                    $join[] = $t.'.'.$itsfield.'='.$table.'.'.$myfield;
+                }
+                $joins[] = ' LEFT JOIN '.$table.' ON ('.join(' AND ', $join).')';
+                continue 2;
+            }
+
+            // can't find relations with previous table, defaulting to INNER JOIN
+            foreach($relations as $t => $relation)
+            {
+                $join = array();
+                foreach($relation as $myfield => $itsfield)
+                {
+                    $join[] = $t.'.'.$itsfield.'='.$table.'.'.$myfield;
+                }
+                $joins[] = ' JOIN '.$table.' ON ('.join(' AND ', $join).')';
+                continue 2;
+            }
+
+            throw new Exception("Can't find a relation table for table ".$table, Exception::E_OWR_DIE);
+        }
+
+        return (array) $joins;
+    }
+
+    /**
      * Prepares the WHERE clauses for a query
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param mixed $args parameters, can be null, a string (if an $_idField has been declared), or an array
-     * @param string $select select fields, by default all
-     * @param string $groupby the groupby clause
-     * @param string $selectAdd additional fields to fetch, optionnal
+     * @param array &$request the fields to SELECT
+     * @param array &$fields the fields definition
+     * @param array &$wheres the WHERE fields
+     * @param array &$joins the JOIN conditions
      * @access protected
      * @todo clean up the code
      */
-    protected function _prepareWhere(array $args, &$request, &$fields, &$wheres, &$joins)
+    protected function _prepareWhere(array $args, array &$request, array &$fields, array &$wheres, array &$joins)
     {
         foreach($args as $key=>$values)
         {
@@ -862,13 +975,7 @@ abstract class DAO implements iDAO
 
                         if(!isset($joins[$table]))
                         {
-                            $joins[$table] = 'JOIN '.$table.' ON (';
-                            $join = array();
-                            foreach($this->_userRelations[$table] as $mine => $its)
-                            {
-                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                            }
-                            $joins[$table] .= join(' AND ', $join).')';
+                            $joins[$table] = true;
                             $wheres[] = $table.'.uid='.User::iGet()->getUid();
                         }
                         continue;
@@ -899,15 +1006,8 @@ abstract class DAO implements iDAO
                         }
 
                         if(!isset($joins[$table]))
-                        {
-                            $joins[$table] = 'JOIN '.$table.' ON (';
-                            $join = array();
-                            foreach($this->_relations[$table] as $mine => $its)
-                            {
-                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                            }
-                            $joins[$table] .= join(' AND ', $join).')';
-                        }
+                            $joins[$table] = true;
+
                         continue;
                     }
                 }
@@ -923,25 +1023,13 @@ abstract class DAO implements iDAO
                             {
                                 if(!isset($joins[$relTable]))
                                 {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_userRelations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $joins[$relTable] = true;
                                     $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
                                 }
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    foreach($rel as $its => $mine)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
-                                    }
-                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
                                     $wheres[] = $table.'.uid='.User::iGet()->getUid();
                                 }
 
@@ -988,42 +1076,16 @@ abstract class DAO implements iDAO
                                 }
 
                                 if(!isset($joins[$relTable]))
-                                {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_relations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
-                                }
+                                    $joins[$relTable] = true;
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    $relations = self::$_tableFields[$relTable];
-                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
+                                    if(!empty(self::$_tableFields[$relTable]['userRelations']) && !empty(self::$_tableFields[$relTable]['userRelations'][$table]))
                                         continue 2;
-                                    }
 
                                     if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
                                         continue 2;
-                                    }
                                 }
                             }
                         }
@@ -1037,25 +1099,13 @@ abstract class DAO implements iDAO
                             {
                                 if(!isset($joins[$relTable]))
                                 {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_userRelations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $joins[$relTable] = true;
                                     $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
                                 }
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    foreach($rel as $its => $mine)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
-                                    }
-                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
                                     $wheres[] = $table.'.uid='.User::iGet()->getUid();
                                 }
 
@@ -1102,42 +1152,16 @@ abstract class DAO implements iDAO
                                 }
 
                                 if(!isset($joins[$relTable]))
-                                {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_relations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
-                                }
+                                    $joins[$relTable] = true;
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    $relations = self::$_tableFields[$relTable];
-                                    if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
+                                    if(!empty(self::$_tableFields[$relTable]['userRelations']) && !empty(self::$_tableFields[$relTable]['userRelations'][$table]))
                                         continue 2;
-                                    }
 
-                                    if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
+                                    if(!empty(self::$_tableFields[$relTable]['relations']) && !empty(self::$_tableFields[$relTable]['relations'][$table]))
                                         continue 2;
-                                    }
                                 }
                             }
                         }
@@ -1174,13 +1198,7 @@ abstract class DAO implements iDAO
 
                             if(!isset($joins[$table]))
                             {
-                                $joins[$table] = 'JOIN '.$table.' ON (';
-                                $join = array();
-                                foreach($relFields as $mine => $its)
-                                {
-                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                                }
-                                $joins[$table] .= join(' AND ', $join).')';
+                                $joins[$table] = true;
                                 $wheres[] = $table.'.uid='.User::iGet()->getUid();
                             }
                             continue 2; // OK found the field, continue to wheres iteration
@@ -1215,15 +1233,8 @@ abstract class DAO implements iDAO
                             }
 
                             if(!isset($joins[$table]))
-                            {
-                                $joins[$table] = 'JOIN '.$table.' ON (';
-                                $join = array();
-                                foreach($relFields as $mine => $its)
-                                {
-                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                                }
-                                $joins[$table] .= join(' AND ', $join).')';
-                            }
+                                $joins[$table] = true;
+
                             continue 2; // OK found the field, continue to wheres iteration
                         }
                     }
@@ -1286,8 +1297,8 @@ abstract class DAO implements iDAO
     {
         if(!empty($joins))
         {
-            $query .='
-        '.join("\n        ", array_unique($joins));
+            $query .= '
+        '.join("\n        ", $this->_optimizeJoins($joins));
         }
 
         if(!empty($wheres))
@@ -1367,13 +1378,7 @@ abstract class DAO implements iDAO
                         $selects[] = $table.'.'.$field.$alias;
                         if(!isset($joins[$table]))
                         {
-                            $joins[$table] = 'JOIN '.$table.' ON (';
-                            $join = array();
-                            foreach($this->_userRelations[$table] as $mine => $its)
-                            {
-                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                            }
-                            $joins[$table] .= join(' AND ', $join).')';
+                            $joins[$table] = true;
                             $wheres[] = $table.'.uid='.User::iGet()->getUid();
                         }
                         continue;
@@ -1386,15 +1391,8 @@ abstract class DAO implements iDAO
                     {
                         $selects[] = $table.'.'.$field.$alias;
                         if(!isset($joins[$table]))
-                        {
-                            $joins[$table] = 'JOIN '.$table.' ON (';
-                            $join = array();
-                            foreach($this->_relations[$table] as $mine => $its)
-                            {
-                                $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                            }
-                            $joins[$table] .= join(' AND ', $join).')';
-                        }
+                            $joins[$table] = true;
+
                         continue;
                     }
                 }
@@ -1411,25 +1409,13 @@ abstract class DAO implements iDAO
                                 $selects[] = $table.'.'.$field.$alias;
                                 if(!isset($joins[$relTable]))
                                 {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_userRelations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $joins[$relTable] = true;
                                     $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
                                 }
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    foreach($rel as $its => $mine)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
-                                    }
-                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
                                     $wheres[] = $table.'.uid='.User::iGet()->getUid();
                                 }
                                 continue 2;
@@ -1439,42 +1425,17 @@ abstract class DAO implements iDAO
                             {
                                 $selects[] = $table.'.'.$field.$alias;
                                 if(!isset($joins[$relTable]))
-                                {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_relations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
-                                }
+                                    $joins[$relTable] = true;
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
+                                    $joins[$table] = true;
                                     $relations = self::$_tableFields[$relTable];
                                     if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
                                         continue 2;
-                                    }
 
                                     if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
                                         continue 2;
-                                    }
                                 }
                             }
                         }
@@ -1489,25 +1450,13 @@ abstract class DAO implements iDAO
                                 $selects[] = $table.'.'.$field.$alias;
                                 if(!isset($joins[$relTable]))
                                 {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_userRelations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$relTable.'.'.$its;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
+                                    $joins[$relTable] = true;
                                     $wheres[] = $relTable.'.uid='.User::iGet()->getUid();
                                 }
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
-                                    foreach($rel as $its => $mine)
-                                    {
-                                        $join[] = $relTable.'.'.$mine.'='.$table.'.'.$its;
-                                    }
-                                    $joins[$table] .= join(' AND ', $join).')';
+                                    $joins[$table] = true;
                                     $wheres[] = $table.'.uid='.User::iGet()->getUid();
                                 }
                                 continue 2;
@@ -1517,42 +1466,17 @@ abstract class DAO implements iDAO
                             {
                                 $selects[] = $table.'.'.$field.$alias;
                                 if(!isset($joins[$relTable]))
-                                {
-                                    $joins[$relTable] = 'JOIN '.$relTable.' ON (';
-                                    $join = array();
-                                    foreach($this->_relations[$relTable] as $mine => $its)
-                                    {
-                                        $join[] = $relTable.'.'.$its.'='.$this->_name.'.'.$mine;
-                                    }
-                                    $joins[$relTable] .= join(' AND ', $join).')';
-                                }
+                                    $joins[$relTable] = true;
 
                                 if(!isset($joins[$table]))
                                 {
-                                    $joins[$table] = 'JOIN '.$table.' ON (';
-                                    $join = array();
+                                    $joins[$table] = true;
                                     $relations = self::$_tableFields[$relTable];
                                     if(!empty($relations['userRelations']) && !empty($relations['userRelations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
                                         continue 2;
-                                    }
 
                                     if(!empty($relations['relations']) && !empty($relations['relations'][$table]))
-                                    {
-                                        $relationTable = $relations['userRelations'][$table];
-                                        foreach($relationTable as $its => $mine)
-                                        {
-                                            $join[] = $table.'.'.$mine.'='.$relTable.'.'.$its;
-                                        }
-                                        $joins[$table] .= join(' AND ', $join).')';
                                         continue 2;
-                                    }
                                 }
                             }
                         }
@@ -1570,13 +1494,7 @@ abstract class DAO implements iDAO
                             $selects[] = $table.'.'.$field.$alias;
                             if(!isset($joins[$table]))
                             {
-                                $joins[$table] = 'JOIN '.$table.' ON (';
-                                $join = array();
-                                foreach($relFields as $mine => $its)
-                                {
-                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                                }
-                                $joins[$table] .= join(' AND ', $join).')';
+                                $joins[$table] = true;
                                 $wheres[] = $table.'.uid='.User::iGet()->getUid();
                             }
                             continue 2; // OK found the field, continue to select iteration
@@ -1592,19 +1510,14 @@ abstract class DAO implements iDAO
                         {
                             $selects[] = $table.'.'.$field.$alias;
                             if(!isset($joins[$table]))
-                            {
-                                $joins[$table] = 'JOIN '.$table.' ON (';
-                                $join = array();
-                                foreach($relFields as $mine => $its)
-                                {
-                                    $join[] = $this->_name.'.'.$mine.'='.$table.'.'.$its;
-                                }
-                                $joins[$table] .= join(' AND ', $join).')';
-                            }
+                                $joins[$table] = true;
+
                             continue 2; // OK found the field, continue to select iteration
                         }
                     }
                 }
+
+
             }
         }
 

@@ -82,6 +82,7 @@ class Tags extends DAO
         $this->_userRelations = array(
             'news_relations_tags' => array('id'   => 'tid')
         );
+        $this->_weight = 4;
         parent::__construct();
     }
 }

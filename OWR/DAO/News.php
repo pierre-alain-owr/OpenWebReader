@@ -115,14 +115,17 @@ class News extends DAO
             'author'    =>  array('required' => false,    'type' => \PDO::PARAM_STR)
         );
         $this->_userRelations = array(
-            'news_relations'        => array('id'       => 'newsid'),
-            'streams_relations'     => array('rssid'    => 'rssid')
+            'news_relations'            => array('id'       => 'newsid'),
+            'streams_relations'         => array('rssid'    => 'rssid'),
+            'streams_relations_name'    => array('rssid'    => 'rssid'),
         );
         $this->_relations = array(
             'news_contents'         => array('id'       => 'id'),
             'news_relations_tags'   => array('id'       => 'newsid'),
-            'streams'               => array('rssid'    => 'id')
+            'streams'               => array('rssid'    => 'id'),
+            'streams_contents'      => array('rssid'    => 'rssid')
         );
+        $this->_weight = 13;
         parent::__construct();
     }
 }

@@ -99,14 +99,23 @@ class Streams extends DAO
         );
         $this->_userRelations = array(
             'streams_relations'         => array('id' => 'rssid'),
-            'streams_relations_name'    => array('id' => 'rssid')
+            'streams_relations_name'    => array('id' => 'rssid'),
+            'news_relations'            => array('id' => 'rssid')
         );
         $this->_relations = array(
-            'streams_contents'          => array('id' => 'rssid')
+            'streams_contents'          => array('id' => 'rssid'),
+            'news'                      => array('id' => 'rssid')
         );
+        $this->_weight = 10;
         parent::__construct();
     }
 
+    /**
+     * Declare a stream as unavailable, ie timeout or unreachable
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     */
     public function declareUnavailable()
     {
         if(empty($this->{$this->_idField}))

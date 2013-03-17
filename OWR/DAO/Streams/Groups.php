@@ -75,13 +75,14 @@ class Groups extends DAO
         $this->_idField = 'id';
         $this->_uniqueFields = array('name' => true);
         $this->_fields = array(
-            'id'    => array('required' => true, 'type' => \PDO::PARAM_INT),
-            'name'  => array('required' => true, 'type' => \PDO::PARAM_STR),
-            'uid'   => array('required' => true, 'type' => \PDO::PARAM_INT)
+            'id'                => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'name'              => array('required' => true, 'type' => \PDO::PARAM_STR),
+            'uid'               => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'streams_relations' => array('id'   => 'gid')
+            'streams_relations' => array('id'       => 'gid')
         );
+        $this->_weight = 6;
         parent::__construct();
     }
 }

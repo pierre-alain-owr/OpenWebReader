@@ -212,7 +212,7 @@ class Object
      * @access public
      * @abstract
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $datas the datas to sanitize 
+     * @param mixed $datas the datas to sanitize
      * @return mixed ?
      */
     public function sanitize(&$datas) {}
@@ -230,6 +230,7 @@ class Object
 
     /**
      * Returns public properties of object passed by parameter as an associative array
+     * or return an array of multidimensional array
      *
      * @access public
      * @static
@@ -248,6 +249,7 @@ class Object
                 else $arr[$k] = $v;
             }
         }
+
         return $arr;
     }
 }

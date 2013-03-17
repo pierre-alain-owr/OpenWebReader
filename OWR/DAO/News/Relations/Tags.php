@@ -73,17 +73,19 @@ class Tags extends DAO
     public function __construct()
     {
         $this->_fields = array(
-            'newsid' => array('required' => true, 'type' => \PDO::PARAM_INT),
-            'tid'    => array('required' => true, 'type' => \PDO::PARAM_INT),
-            'uid'    => array('required' => true, 'type' => \PDO::PARAM_INT)
+            'newsid'                    => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'tid'                       => array('required' => true, 'type' => \PDO::PARAM_INT),
+            'uid'                       => array('required' => true, 'type' => \PDO::PARAM_INT)
         );
         $this->_userRelations = array(
-            'news_relations'    => array('newsid'   => 'newsid'),
-            'news_tags'         => array('tid'      => 'id')
+            'news_relations'            => array('newsid'   => 'newsid'),
+            'news_tags'                 => array('tid'      => 'id')
         );
         $this->_relations = array(
-            'news'              => array('newsid'   => 'id'),
+            'news'                      => array('newsid'   => 'id'),
+            'news_contents'             => array('id'       => 'newsid'),
         );
+        $this->_weight = 5;
         parent::__construct();
     }
 }

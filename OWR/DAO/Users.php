@@ -122,8 +122,15 @@ class Users extends DAO
             'config'    => array('required' => true, 'type' => DBRequest::PARAM_SERIALIZED),
         );
         $this->_relations = array(
-            'users_tokens'  => array('id'   => 'uid')
+            'users_tokens'              => array('id' => 'uid'),
+            'news_relations'            => array('id' => 'uid'),
+            'news_relations_tags'       => array('id' => 'uid'),
+            'news_tags'                 => array('id' => 'uid'),
+            'streams_relations'         => array('id' => 'uid'),
+            'streams_groups'            => array('id' => 'uid'),
+            'streams_relations_name'    => array('id' => 'uid')
         );
+        $this->_weight = 14;
         parent::__construct();
     }
 }
