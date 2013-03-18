@@ -2621,4 +2621,21 @@ class Controller extends Singleton
 
         return $this;
     }
+
+    /**
+     * Renders content of CLI logs file
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getCLILogs()
+    {
+        if(!$this->_user->isAdmin())
+            throw new Exception("You don't have the rights to do that", Exception::E_OWR_UNAUTHORIZED);
+
+        $this->_getPage('logs', array('logs' =>  Logs::iGet()->getCLILogs()));
+
+        return $this;
+    }
 }

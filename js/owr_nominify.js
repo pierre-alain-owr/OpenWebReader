@@ -899,6 +899,7 @@ OWR.prototype = {
                 this.messages['Editing tags'] = "Édition des tags";
                 this.messages['Getting tags'] = "Récupération des tags";
                 this.messages['Generating some statistics'] = "Génération des statistiques";
+                this.messages['Asking logs'] = "Affichage des logs CLI";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -2399,5 +2400,28 @@ OWR.prototype = {
         delete this.token;
         delete this.boardTogglerStatus;
         return true;
+    },
+    getCLILogs: function() {
+    	this.loading(true);
+    	var n = this.setLog('Asking logs');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
+        r.addEvent('failure', function(xhr, n) {
+            this.raiseXHRError(xhr.responseText, n);
+        }.bindWithEvent(this, n));
+        r.addEvent('success', function(json, n){
+            this.loading(false, n);
+            this.parseResponse(json, null, 'body_container');
+            this.currentId = 0;
+            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            s.toTop();
+        }.bindWithEvent(this, n));
+        r.get({'do': 'getclilogs'});
     }
 };

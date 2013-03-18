@@ -123,6 +123,9 @@
                             <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the cache');?>"><?php echo $this->_utilities->_('Clear cache');?></a>
                             <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the cache');?>" class="icon_cache_delete right backgrounded opac"></a>
                         </li>
+                        <li>
+                            <a href="javascript:;" onclick="rP.getCLILogs();" title="<?php echo $this->_utilities->_('CLI logs').'">'.$this->_utilities->_('CLI logs');?></a>
+                        </li>
                     </ul>
                 </li>
 <?php           } ?>

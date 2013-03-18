@@ -125,7 +125,7 @@ class Logs extends Singleton
             {
                 $errstr .= "[Log ".(int)$code."]\n".join("\n", $logs)."\n";
             }
-            
+
             if(!empty($errstr)) error_log($errstr, 0);
         }
         $this->_logs = array();
@@ -141,5 +141,18 @@ class Logs extends Singleton
     public function hasLogs()
     {
         return !empty($this->_logs);
+    }
+
+    /**
+     * Displays CLI log file
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @return string the content of CLI log file
+     * @access public
+     */
+    public function getCLILogs()
+    {
+        $logPath = HOME_PATH . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'cli.log';
+        return is_readable($logPath) ? file_get_contents($logPath) : '';
     }
 }
