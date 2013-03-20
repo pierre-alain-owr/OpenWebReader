@@ -9,8 +9,9 @@
 
 <?php           if($status) {
                     echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded"></a>';
-                }
-?>
+                } else {
+                    echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded" style="display:none"></a>';             
+                }?>
                     </div>
                     <div class="article_description">
 <?php           if(!empty($favicon)) {

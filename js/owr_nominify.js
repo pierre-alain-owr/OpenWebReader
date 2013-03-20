@@ -1019,7 +1019,7 @@ OWR.prototype = {
         var sizeParent = p.getParent().getSize();
         var size = p.getSize();
         // need to resize dynamicly the div
-        imgObj.addEvent('load', function() { 
+        imgObj.addEvent('load', function() {
             obj.set('title', url);
             obj.set('target', '_blank'); // burk
             obj.onclick = function() { this.set('href', url); };
@@ -1061,7 +1061,7 @@ OWR.prototype = {
                             el.setStyles({'background-color': '#666666', 'color':'white'});
                         }
                         element.toggle();
-                    } 
+                    }
                 }).delay(200, this);
             }.bindWithEvent(this, item));
             item.addEvent('dblclick', function(e, el) {
@@ -1154,7 +1154,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1196,7 +1196,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1239,7 +1239,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, val, id){
@@ -1269,7 +1269,7 @@ OWR.prototype = {
         if(!el) {
             el = $('gstream_toggler_'+id);
         }
-        if(search.getStyle('display') == 'inline') { 
+        if(search.getStyle('display') == 'inline') {
             if(this.sortables) { el.status ? this.sortables.addItems(el.getParents()[1]) : this.sortables.removeItems(el.getParents()[1]); }
             search.setStyle('display', 'none');
         } else {
@@ -1316,7 +1316,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, newContents){
@@ -1365,7 +1365,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, gid){
@@ -1389,7 +1389,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, obj){
@@ -1419,7 +1419,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1441,7 +1441,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1475,7 +1475,7 @@ OWR.prototype = {
             this.loading(true);
             var n = this.setLog('Adding a stream');
             var r = new Request.JSON({'url':'./?do=editopml&token='+this.token});
-            r.addEvent('failure', function(xhr, n) { 
+            r.addEvent('failure', function(xhr, n) {
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
             r.addEvent('success', function(json, n){
@@ -1498,7 +1498,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1576,7 +1576,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1613,11 +1613,11 @@ OWR.prototype = {
         if(!id) { return; }
         this.loading(true);
         var rename = $('editurl_'+id);
-        if(rename.getStyle('display') == 'inline') { 
+        if(rename.getStyle('display') == 'inline') {
             rename.setStyle('display', 'none');
-            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); } 
+            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); }
         } else {
-            if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); } 
+            if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); }
             rename.setStyle('display', 'inline');
         }
         this.loading(false);
@@ -1627,11 +1627,11 @@ OWR.prototype = {
         if(!id) { return; }
         this.loading(true);
         var rename = $('rename_'+id);
-        if(rename.getStyle('display') == 'inline') { 
+        if(rename.getStyle('display') == 'inline') {
             rename.setStyle('display', 'none');
-            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); } 
+            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); }
         } else {
-            if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); } 
+            if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); }
             rename.setStyle('display', 'inline');
         }
         this.loading(false);
@@ -1657,7 +1657,7 @@ OWR.prototype = {
                     }
                 }.bindWithEvent(this)
             });
-            r.addEvent('failure', function(xhr, n) { 
+            r.addEvent('failure', function(xhr, n) {
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
             r.addEvent('success', function(json, n){
@@ -1714,7 +1714,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, status){
@@ -1743,15 +1743,15 @@ OWR.prototype = {
                                 var ids = item.get('id').split('_');
                                 if(ids[1] == id || ids[2] == id || ids[3] == id) {
                                     item.removeClass('new_container_read').addClass('new_container_nread');
-                                    $('imgnew_'+id).setStyle('display', 'block');
+                                    $('imgnew_'+ids[1]).setStyle('display', 'block');
                                 }
                             });
                         } else {
                             $$('div.new_container_nread').each(function(item) {
                                 var ids = item.get('id').split('_');
-                                if(ids[1] == id || ids[2] == id || ids[3] == id) { 
+                                if(ids[1] == id || ids[2] == id || ids[3] == id) {
                                     item.removeClass('new_container_nread').addClass('new_container_read');
-                                    $('imgnew_'+id).setStyle('display', 'none');
+                                    $('imgnew_'+ids[1]).setStyle('display', 'none');
                                     ++cleared;
                                 }
                             });
@@ -1782,7 +1782,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, sort, dir, id){
@@ -1827,7 +1827,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1849,7 +1849,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -1857,7 +1857,7 @@ OWR.prototype = {
             if(0 !== id && (id == this.currentId || 0 === this.currentId)) {
                 this.parseResponse(json, null, 'body_container');
                 this.initContents();
-            } else { 
+            } else {
                 if(0 === id) {
                     $('body_container').empty();
                     $('menu_streams').getChildren().each(function(item) {
@@ -1874,7 +1874,7 @@ OWR.prototype = {
                 this.parseResponse(json);
             }
             if(0 !== id) {
-                if($('stream_'+id)) { 
+                if($('stream_'+id)) {
                     $('stream_'+id).destroy();
                     $$('select[id^=move_]').each(function(item){
                         item.getChildren('option').each(function(item){
@@ -1910,7 +1910,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, id){
@@ -1975,7 +1975,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2012,7 +2012,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2033,7 +2033,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2090,12 +2090,12 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
             this.loading(false, n);
-            if(!json.errors) { 
+            if(!json.errors) {
                 window.location.href = './?token='+this.token;
                 return;
             }
@@ -2114,7 +2114,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2137,7 +2137,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2161,7 +2161,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2195,7 +2195,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2219,7 +2219,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
@@ -2243,7 +2243,7 @@ OWR.prototype = {
                     }
                 }.bindWithEvent(this)
             });
-            r.addEvent('failure', function(xhr, n) { 
+            r.addEvent('failure', function(xhr, n) {
                 this.raiseXHRError(xhr.responseText, n);
             }.bindWithEvent(this, n));
             r.addEvent('success', function(json, n, el, id){
@@ -2296,7 +2296,7 @@ OWR.prototype = {
                 }
             }.bindWithEvent(this)
         });
-        r.addEvent('failure', function(xhr, n) { 
+        r.addEvent('failure', function(xhr, n) {
             this.raiseXHRError(xhr.responseText, n);
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n, ids, idc, live, el){
