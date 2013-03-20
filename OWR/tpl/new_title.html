@@ -9,24 +9,24 @@
 
 <?php           if($status) {
                     echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded"></a>';
-                } 
+                }
 ?>
                     </div>
                     <div class="article_description">
 <?php           if(!empty($favicon)) {
                     echo '<img src="'.$favicon.'" alt="" class="favicon left" width="16px" height="16px"/>';
                 } else { ?>
-                    <a href="javascript:;" class="favicon no_favicon backgrounded left"></a> 
+                    <a href="javascript:;" class="favicon no_favicon backgrounded left"></a>
 <?php
                 }
-                echo $this->_utilities->_('Posted').' '.$this->_utilities->_('In').' "'.$name.'"'.('Root' !== $gname ? ' ('.$gname.')' : '').(!empty($author) ? ', '.$this->_utilities->_('By').' "'.$author.'"' : '').', '.$this->_utilities->_('On').' '.$pubDate; 
+                echo $this->_utilities->_('Posted').' '.$this->_utilities->_('In').' "'.$name.'"'.('Root' !== $gname ? ' ('.$gname.')' : '').(!empty($author) ? ', '.$this->_utilities->_('By').' "'.$author.'"' : '').', '.$this->_utilities->_('On').' '.$pubDate;
 ?>
 <?php           if(!empty($abstract)) {?>
                 <div class="new_abstract" id="new_abstract_<?php echo $id;?>">
 <?php               if(!empty($contents['encoded'])) {
-                        echo $this->_utilities->asAbstract($contents['encoded']['contents'], 350);
+                        echo $this->_utilities->asAbstract(is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'], 350);
                     } elseif(!empty($contents['description'])) {
-                        echo $this->_utilities->asAbstract($contents['description']['contents'], 350);
+                        echo $this->_utilities->asAbstract(is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'], 350);
                     } ?>
                 </div>
 <?php           } ?>

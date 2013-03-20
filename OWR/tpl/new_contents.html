@@ -3,7 +3,7 @@
         <a class="stream_details" title="<?php echo $this->_utilities->_('Show/hide details of the new');?>" href="javascript:;" onclick="rP.getNewDetails(<?php echo $id;?>, this);"><?php echo $this->_utilities->_('More');?></a>
         <div class="article_full_details full_rounded" id="new_details_<?php echo $id;?>"></div>
         <div class="spacer"><br/><br/></div>
-<?php   
+<?php
         if(!empty($contents['enclosure']))
         {
             isset($contents['enclosure'][0]) || $contents['enclosure'][0] = array($contents['enclosure']);
@@ -84,7 +84,7 @@
 <?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
                     <br/><br/>
                 </div>
-<?php           
+<?php
                     }
                 }
                 else
@@ -185,9 +185,9 @@
             }
         }
         if(!empty($contents['encoded'])) {
-            echo $contents['encoded']['contents'];
+            echo is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'];
         } elseif(!empty($contents['description'])) {
-            echo $contents['description']['contents'];
+            echo is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'];
         } ?>
 <?php   echo '<p><a href="#new_'.$id.'_'.$streamid.'_'.$gid.'">'.$this->_utilities->_('Back to top of the new').'</a></p>'; ?>
     </div>
