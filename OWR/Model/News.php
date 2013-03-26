@@ -204,7 +204,7 @@ class News extends Model
             $limit = 1;
         }
 
-        $datas = $this->_dao->get($args, 'id,rssid AS streamid,news.lastupd,pubDate,author,title,link,gid,status,streams_relations_name.name,streams_groups.name AS gname,favicon'.(!isset($request->getContents) || $request->getContents ? ',contents' : ''), $order, $groupby, $limit);
+	$datas = $this->_dao->get($args, 'id,rssid AS streamid,news.lastupd,pubDate,author,title,link,gid,status,streams_relations_name.name,streams_groups.name AS gname,favicon', $order, $groupby, $limit);
         if(empty($datas))
         {
             $request->setResponse(new Response(array(
@@ -217,20 +217,26 @@ class News extends Model
         {
             $multiple = true;
             $ids = array();
-
             foreach($datas as $k => $data)
             {
-                if(!isset($request->getContents) || $request->getContents)
-                {
-                    $datas[$k]['contents'] = unserialize($data['contents']);
-                }
+                $ids[] = $data['id'];
             }
             $datas['ids'] = $ids;
+
+            if(!isset($request->getContents) || $request->getContents)
+            {    
+                $contents = DAO::getCachedDAO('news_contents')->get(array('id' => $ids), '*', 'FIELD(id,'. join(',', $ids) .')');
+                foreach($contents as $k => $content)
+                {
+                    $datas[$k]['contents'] = unserialize($content->contents);
+                }
+                unset($contents, $content);
+            }
         }
         else
         {
             if(!isset($request->getContents) || $request->getContents)
-                $datas['contents'] = unserialize($datas['contents']);
+                $datas['contents'] = unserialize(DAO::getCachedDAO('news_contents')->get(array('id' => $datas['id']), 'contents')->contents);
         }
 
         $request->setResponse(new Response(array(
