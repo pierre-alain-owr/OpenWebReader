@@ -463,7 +463,7 @@ abstract class DAO implements iDAO
 
         $uid = false;
 
-        $wheres = $joins = $request = $requestFields = array();
+        $wheres = $joins = $request = $requestFields = $fields = array();
 
         if(is_array($args))
         {
