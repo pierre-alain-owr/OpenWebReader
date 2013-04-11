@@ -1,7 +1,6 @@
 <?php
 /**
- * Renderer class
- * This class uses Dwoo (http://dwoo.org) to render page
+ * Utilities class for the view
  *
  * PHP 5
  *
@@ -40,16 +39,17 @@ use OWR\Singleton,
     OWR\Cache,
     OWR\Config,
     OWR\User,
-    OWR\Strings;
+    OWR\Strings,
+    OWR\Request;
 /**
- * This object is used to render page with Dwoo
+ * This object is an helper for the view
  * @uses Singleton implements the singleton pattern
  * @uses Cache check dwoo cache directories
  * @uses User the current user
  * @uses OWR\Config get the cachetime
  * @uses OWR\Strings multi-byte wordwrap for abstract
  * @package OWR
- * @subpackage Renderer
+ * @subpackage View
  */
 class Utilities extends Singleton
 {
@@ -191,32 +191,6 @@ class Utilities extends Singleton
      */
     public function asAbstract($text, $width)
     {
-        $text = strip_tags((string) $text, '<em><strong><sup><sub><span>');
-        $length = mb_strlen($text, 'UTF-8');
-        $text = preg_split("/(<\/?)([a-z:]+)([^>]*)(\/?>)/", trim(Strings::mb_wordwrap($text, $width, "\n", 1)), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $tags = array();
-        foreach($text as $k => $t)
-        {
-            if('<' === $t)
-            {
-                $tags[] = $text[$k + 1];
-            }
-            elseif('/>' === $t || '</' === $t)
-            {
-                array_pop($tags);
-            }
-        }
-
-        if(!empty($tags))
-        {
-            foreach($tags as $tag)
-            {
-                $text[] = '</'.$tag.'>';
-            }
-        }
-
-        $text = join('', $text);
-
-        return $text.($length > mb_strlen($text, 'UTF-8') ? ' [...]' : '');
+        return Strings::truncate(trim(strip_tags((string) $text), '<em><strong><sup><sub><span>'), $width);
     }
 }
