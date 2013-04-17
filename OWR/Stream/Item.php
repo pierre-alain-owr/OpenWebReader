@@ -168,6 +168,10 @@ class Item
             $this->_item['url']['contents'] = html_entity_decode((string)$this->_item['link']['contents'], ENT_COMPAT, 'UTF-8');
         }
 
+        // in case strtotime returns false
+        if(empty($this->_item['pubDate']['contents']))
+            $this->_item['pubDate']['contents'] = time();
+
         if(empty($this->_item['author']['contents']) && !empty($this->_item['contributor']['contents']))
             $this->_item['author']['contents'] = $this->_item['contributor']['contents'];
     }
