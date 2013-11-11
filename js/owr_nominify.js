@@ -1748,7 +1748,7 @@ OWR.prototype = {
                                 var ids = item.get('id').split('_');
                                 if(ids[1] == id || ids[2] == id || ids[3] == id) {
                                     item.removeClass('new_container_read').addClass('new_container_nread');
-                                    $('imgnew_'+ids[1]).setStyle('display', 'block');
+                                    $('imgnew_'+ids[1]).setStyle('display', 'inline-block');
                                 }
                             });
                         } else {
