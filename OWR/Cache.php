@@ -35,13 +35,18 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\View\Utilities;
 /**
  * This object manages cache files
  * @package OWR
  */
 class Cache
 {
+    /**
+     * @var string name of cache object class
+     * @access private
+     */
+    static private $__instance;
+
     /**
      * Constructor
      *
@@ -50,201 +55,33 @@ class Cache
     private function __construct() {}
 
     /**
-     * Delete every files found in cache directory
+     * Init cache object string
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @access public
+     * @access protected
      * @static
-     * @param string $dir a directory in cache/
-     * @param boolean $maintenance must-we just check for the lastmtime ?
-     * @return int number of deleted files
      */
-    static public function clear($dir = '', $maintenance = false)
+    static protected function _init()
     {
-        $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.(string)$dir;
+        if(isset(self::$__instance)) return true;
 
-        $nb = 0;
-
-        clearstatcache();
-
-        if(!file_exists($dir)) return $nb;
-
-        $cache = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
-
-        if($maintenance)
-        {
-            $now = Config::iGet()->get('begintime');
-            $cacheTime = Config::iGet()->get('cacheTime');
-        }
-
-        foreach($cache as $file)
-        {
-            if(!$cache->isDot() && !$cache->isDir() && $cache->isWritable())
-            {
-                if($maintenance && ($cache->getMTime() + $cacheTime < $now))
-                {
-                    continue;
-                }
-
-                $nb += (int) unlink((string) $file);
-            }
-        }
-
-        return $nb;
+        self::$__instance = 'memcache' === Config::iGet()->get('cacheType') ? 'OWR\Cache\Memcache' : 'OWR\Cache\CFile';
     }
 
     /**
-     * Delete every files found in DB cache directory
+     * Wrapper for cache object methods
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
      * @static
      */
-    static public function clearDB()
+    static public function __callStatic($name, $args)
     {
-        return self::clear('db');
-    }
+        self::_init();
 
-    /**
-     * Delete every files found in HTML cache directories
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @access public
-     * @static
-     */
-    static public function clearHTML()
-    {
-        !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_fr_FR');
-        !file_exists(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US') || @unlink(HOME_PATH.'cache'.DIRECTORY_SEPARATOR.'translations_en_US');
-        return (self::clear('fr_FR') + self::clear('en_US'));
-    }
+        if(!method_exists(self::$__instance, $name))
+            throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), self::$__instance . '::' . $name), Exception::E_OWR_DIE);
 
-    /**
-     * Try to get serialized datas from cache
-     * This function uses file locking
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @static
-     * @param string $filename cache file name
-     * @param int $cacheTime cache life time
-     * @return mixed
-     * @access public
-     */
-    static public function get($filename, $cacheTime=0)
-    {
-        $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
-
-        $cacheTime = (int)$cacheTime;
-
-        if(!file_exists($filename) || ($cacheTime > 0 && (time() > (@filemtime($filename) + $cacheTime))))
-            return false;
-
-        if(!($fh = @fopen($filename, 'rb'))) return false;
-
-        @flock($fh, LOCK_SH);
-        $datas = @stream_get_contents($fh);
-        @fclose($fh);
-
-        if(false === $datas) return false;
-
-        return (@unserialize(base64_decode($datas, true)));
-    }
-
-    /**
-     * Try to write serialized datas into cache
-     * This function uses file locking
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @static
-     * @param string $filename cache file name
-     * @param string $datas datas to store in cache
-     * @return mixed
-     * @access public
-     */
-    static public function write($filename, $datas)
-    {
-        $filename = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$filename;
-
-        $dir = dirname($filename);
-        if(!is_dir($dir))
-        {
-            if(file_exists($dir) && !@unlink($dir)) return false;
-            if(!@mkdir($dir)) return false;
-        }
-
-        $fh = @fopen($filename, 'w+b');
-        if(!$fh) return false;
-
-        @flock($fh, LOCK_EX);
-        $ret = @fwrite($fh, base64_encode(serialize($datas)));
-        @fclose($fh);
-
-        return $ret;
-    }
-
-    /**
-     * Check that the directory is writeable
-     * It will try to create it if it does not exists
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @static
-     * @param string $dir the directory's name
-     * @return mixed
-     * @access public
-     */
-    static public function checkDir($dir)
-    {
-        $dir = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.$dir;
-
-        if(is_dir($dir))
-        {
-            if(!is_writeable($dir))
-            {
-                Logs::iGet()->log(sprintf(Utilities::iGet()->_('The directory "%s" is not writeable'), $dir));
-                return false;
-            }
-        }
-        elseif(file_exists($dir))
-        {
-            if(!@unlink($dir))
-            {
-                Logs::iGet()->log(sprintf(Utilities::iGet()->_('The file "%s" exists, is not a dir and can not be removed'), $dir));
-                return false;
-            }
-
-        }
-        else
-        {
-            if(is_writeable(HOME_PATH.'cache'))
-            {
-                if(!@mkdir($dir))
-                { // hu ?
-                    Logs::iGet()->log(sprintf(Utilities::iGet()->_('Can not create the directory "%s"'), $dir));
-                    return false;
-                }
-            }
-            else
-            {
-                Logs::iGet()->log(Utilities::iGet()->_('The directory "%s" is not writeable', HOME_PATH.'cache'));
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Returns a unique filename
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param boolean $tmp if we must use default tmp dir, default to false
-     * @return string the file name
-     * @access public
-     */
-    static public function getRandomFilename($tmp = false)
-    {
-        $dir = $tmp ? Config::iGet()->get('defaultTmpDir') : PATH.'cache/';
-        return tempnam($dir, 'OWR');
+        return call_user_func_array(array(self::$__instance, $name), $args);
     }
 }

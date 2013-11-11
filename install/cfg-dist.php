@@ -75,6 +75,10 @@ $cfg['surl']                    = 'http'.($cfg['httpsecure'] ? 's' : '').'://'.$
 
 /* templates cache time, default to 24h * 7 */
 $cfg['cacheTime']               = 86400 * 7;
+/* use file or memcache as cache */
+$cfg['cacheType']               = 'file';
+/* memcache hosts, for multiples server add comma-separated values */
+$cfg['memcache']                = '127.0.0.1:11211';
 /* session life time, default to 24h */
 $cfg['sessionLifeTime']         = 86400;
 

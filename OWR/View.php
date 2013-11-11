@@ -100,34 +100,17 @@ class View extends Singleton
 
         if($cacheTime > 0)
         {
-            $cachedTpl = HOME_PATH.'cache'.DIRECTORY_SEPARATOR.User::iGet()->getLang().DIRECTORY_SEPARATOR.md5($tpl.serialize($datas));
-            if(file_exists($cachedTpl) && (@filemtime($cachedTpl) <= (int)(Config::iGet()->get('begintime') + $cacheTime)) &&
-                ($f = @fopen($cachedTpl, 'rb')))
-            {
-                @flock($f, LOCK_SH);
-                $contents = stream_get_contents($f);
-                @flock($f, LOCK_UN);
-                @fclose($f);
-            }
+            $cachedTpl = User::iGet()->getLang().DIRECTORY_SEPARATOR.md5($tpl.serialize($datas));
+            $contents = Cache::get($cachedTpl, $cacheTime);
         }
 
-        if(!isset($contents))
-        {
-            extract($datas, EXTR_SKIP);
-            ob_start();
-            include HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
-            $contents = ob_get_clean();
+        if(!isset($contents) || false === $contents)
+        { // nothing found in cache
+            $contents = $this->_execute($tpl, $datas);
 
             if($cacheTime > 0)
             {
-                $f = @fopen($cachedTpl, 'w+b');
-                if($f)
-                {
-                    @flock($f, LOCK_EX);
-                    @fwrite($f, $contents);
-                    @flock($f, LOCK_UN);
-                    @fclose($f);
-                }
+                Cache::write($cachedTpl, $contents);
             }
         }
 
@@ -145,7 +128,24 @@ class View extends Singleton
     }
 
     /**
-     * Returns the added microtime of all rendering
+     * Executes specified template and returns generated content
+     *
+     * @access public
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @param string $tpl the template name
+     * @param array $datas the datas
+     * @return string the template rendered
+     */
+    protected function _execute($tpl, array $datas)
+    {
+        extract($datas, EXTR_SKIP);
+        ob_start();
+        include HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
+        return ob_get_clean();   
+    }
+
+    /**
+     * Returns the added microtime of all rendering processing
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
