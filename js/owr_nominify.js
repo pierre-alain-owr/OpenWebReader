@@ -1731,7 +1731,7 @@ OWR.prototype = {
             } else {
                 if('object' === typeof id || id === this.currentId) {
                     $$('div.new_container_nread]').removeClass('new_container_nread').addClass('new_container_read');
-                    $$('a[id^=imgnew]').setStyle('display', 'none');
+                    $$('span[id^=imgnew]').setStyle('display', 'none');
                     if('object' === typeof id && (0 === this.currentId || this.sort)) {
                         --this.pageOffset;
                     }
