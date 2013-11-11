@@ -1001,11 +1001,11 @@ OWR.prototype = {
     {
         if(force || this.menuTogglerStatus === 0) {
             $('menu').setStyle('display', 'none');
-            $('contents').getParent().removeClass('span8').addClass('span12');
+            $('contents').getParent().setStyle('margin-left', '0').removeClass('span8').addClass('span12');
             $('menu_toggler').setStyle('background-position', '-18px 0px');
             this.menuTogglerStatus = 1;
         } else {
-            $('contents').getParent().removeClass('span12').addClass('span8');
+            $('contents').getParent().setStyle('margin-left', '').removeClass('span12').addClass('span8');
             $('menu').setStyle('display', 'block');
             $('menu_toggler').setStyle('background-position', '0px 0px');
             this.menuTogglerStatus = 0;
