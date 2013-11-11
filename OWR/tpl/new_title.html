@@ -21,9 +21,9 @@
 <?php           if(!empty($abstract)) {?>
                 <div class="new_abstract" id="new_abstract_<?php echo $id;?>">
 <?php               if(!empty($contents['encoded'])) {
-                        echo $this->_utilities->asAbstract(is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'], 350);
+                        echo $this->_utilities->asAbstract(html_entity_decode(is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'], ENT_COMPAT, 'UTF-8'), 350);
                     } elseif(!empty($contents['description'])) {
-                        echo $this->_utilities->asAbstract(is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'], 350);
+                        echo $this->_utilities->asAbstract(html_entity_decode(is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'], ENT_COMPAT, 'UTF-8'), 350);
                     } ?>
                 </div>
 <?php           } ?>
