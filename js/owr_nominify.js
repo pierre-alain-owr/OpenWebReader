@@ -1250,7 +1250,7 @@ OWR.prototype = {
             this.keywords = val;
             this.currentId = 'search_'+id;
             this.initCurrent();
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
         }.bindWithEvent(this, [n, val, id]));
         if(!id) {
@@ -1799,7 +1799,7 @@ OWR.prototype = {
             if(!this.boardTogglerStatus && $('news_ordering')) {
                 $('news_ordering').setStyle('top', '10px');
             }
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
             this.setTS();
             this.pageOffset = 0;
@@ -1991,7 +1991,7 @@ OWR.prototype = {
             if(!this.boardTogglerStatus && $('news_ordering')) {
                 $('news_ordering').setStyle('top', '10px');
             }
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
             this.pageOffset = offset;
         }.bindWithEvent(this, n));
@@ -2126,7 +2126,7 @@ OWR.prototype = {
             this.loading(false, n);
             this.parseResponse(json, null, 'body_container');
             this.currentId = 0;
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
         }.bindWithEvent(this, n));
         r.get({'do': 'getusers'});
@@ -2149,7 +2149,7 @@ OWR.prototype = {
             this.loading(false, n);
             this.parseResponse(json, null, 'body_container');
             this.currentId = 0;
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
         }.bindWithEvent(this, n));
         r.get({'do': 'stats'});
@@ -2424,7 +2424,7 @@ OWR.prototype = {
             this.loading(false, n);
             this.parseResponse(json, null, 'body_container');
             this.currentId = 0;
-            var s = new Fx.Scroll(document.body, {'wheelStops':true});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
             s.toTop();
         }.bindWithEvent(this, n));
         r.get({'do': 'getclilogs'});
