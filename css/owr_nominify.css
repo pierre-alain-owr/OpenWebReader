@@ -207,7 +207,8 @@ div#logs_container
 ul#logs li
 {
     padding:0 8px 0 8px;
-    line-height:11px;
+    line-height:9px;
+    font-size:8px;
 }
 
 div#contents
