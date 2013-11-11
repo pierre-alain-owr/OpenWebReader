@@ -580,6 +580,7 @@ div.article_description
 {
     font-weight:normal;
     margin:0 6px 0 25px;
+    padding-left:4px;
 }
 
 div.article_content
@@ -804,7 +805,7 @@ ul.menu_container li.menu_part_title
 
 img.favicon, a.favicon, span.favicon
 {
-    margin:-4px 8px 0 -20px;
+    margin:0 8px 0 -24px;
 }
 
 .no_favicon
