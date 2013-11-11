@@ -164,9 +164,9 @@
             }
         }
         if(!empty($contents['encoded'])) {
-            echo is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'];
+            echo html_entity_decode(is_array($contents['encoded']['contents']) ? join('', $contents['encoded']['contents']) : $contents['encoded']['contents'], ENT_COMPAT, 'UTF-8');
         } elseif(!empty($contents['description'])) {
-            echo is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'];
+            echo html_entity_decode(is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'], ENT_COMPAT, 'UTF-8');
         } ?>
 <?php   echo '<a href="#new_'.$id.'_'.$streamid.'_'.$gid.'" class="back-top">'.$this->_utilities->_('Back to top of the new').'</a>'; ?>
     </div>
