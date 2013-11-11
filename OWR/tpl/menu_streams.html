@@ -17,8 +17,10 @@
             <a href="javascript:;" class="move backgrounded opac" onclick="rP.moveStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Move this stream to another category');?>"></a>
             <a href="javascript:;" class="delete backgrounded opac" onclick="rP.deleteStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete this stream');?>"></a>
         </div>
-        <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);"><OWR:NOCACHE NAME='groups_select'/></select>
-        <input type="text" name="name" class="hidden" value="<?php echo htmlspecialchars($name, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
-        <input type="text" name="url" class="hidden" value="<?php echo htmlspecialchars($url, ENT_COMPAT, 'UTF-8', false);?>" id="editurl_<?php echo $id;?>" onchange="rP.inputEditStreamUrl(this);"/>
-        <input type="text" name="search" class="hidden" id="search_<?php echo $id;?>" onchange="rP.searchFormAction(<?php echo $id;?>);"/>
+        <div class="inputs">
+            <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);"><OWR:NOCACHE NAME='groups_select'/></select>
+            <input type="text" name="name" class="hidden" value="<?php echo htmlspecialchars($name, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
+            <input type="text" name="url" class="hidden" value="<?php echo htmlspecialchars($url, ENT_COMPAT, 'UTF-8', false);?>" id="editurl_<?php echo $id;?>" onchange="rP.inputEditStreamUrl(this);"/>
+            <input type="search" name="search" placeholder="<?php echo $this->_utilities->_('Keywords');?>" class="hidden" id="search_<?php echo $id;?>" onchange="rP.searchFormAction(<?php echo $id;?>);"/>
+        </div>
     </li>

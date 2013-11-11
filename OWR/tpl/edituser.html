@@ -25,7 +25,7 @@
             <label for="confirmpasswd"><?php echo $this->_utilities->_('Confirm password');?> (*)&nbsp;:</label>
             <input type="password" name="confirmpasswd" size="25" id="confirmpasswd" value=""/>
             <label for="email"><?php echo $this->_utilities->_('Email');?> (*)&nbsp;:</label>
-            <input type="text" name="email" size="25" id="email" value="<?php if(isset($email)){ echo $email;}?>"/>
+            <input type="email" name="email" size="25" id="email" value="<?php if(isset($email)){ echo $email;}?>"/>
             <label for="rights"><?php echo $this->_utilities->_('User rights');?> (*)&nbsp;:</label>
             <select name="rights" id="rights">
                 <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>

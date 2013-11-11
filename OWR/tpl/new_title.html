@@ -16,7 +16,7 @@
                         <a href="javascript:;" onclick="rP.updateNews(<?php echo $id;?>, true);" class="new_status backgrounded opac" title="<?php echo $this->_utilities->_('Toggle new status');?>"></a>
                         <a href="javascript:;" onclick="rP.editTags(<?php echo $id;?>);" class="new_tag backgrounded opac" title="<?php echo $this->_utilities->_('Edit tags');?>"></a>
                         <a href="javascript:;" onclick="rP.deleteNew(<?php echo $id;?>);" class="delete backgrounded opac" title="<?php echo $this->_utilities->_('Delete new');?>"></a>
-                        <input type="text" class="hidden new_tags" id="edit_tags_<?php echo $id;?>" onchange="rP.inputEditTags(this, <?php echo $id;?>);" value=""/>
+                        <input type="text" placeholder="<?php echo $this->_utilities->_('Edit tags');?>" class="hidden new_tags" id="edit_tags_<?php echo $id;?>" onchange="rP.inputEditTags(this, <?php echo $id;?>);" value=""/>
                     </div>
 <?php           if(!empty($abstract)) {?>
                 <div class="new_abstract" id="new_abstract_<?php echo $id;?>">
