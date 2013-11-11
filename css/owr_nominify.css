@@ -227,7 +227,6 @@ a#menu_toggler
     cursor:pointer;
     border:1px solid #BBBBBB;
     margin:0 0 0 15px;
-    padding:.7em;
     position:fixed;
     z-index:1;
     top:65px;
@@ -242,7 +241,6 @@ a#board_toggler
     cursor:pointer;
     border:1px solid #BBBBBB;
     margin:0 0 0 40px;
-    padding:.7em;
     position:fixed;
     z-index:1;
     top:65px;
