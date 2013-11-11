@@ -1618,7 +1618,7 @@ OWR.prototype = {
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); }
         } else {
             if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); }
-            rename.setStyle('display', 'inline');
+            rename.setStyles({'display': 'inline', 'visibility':'visible'});
         }
         this.loading(false);
     },
@@ -1642,6 +1642,11 @@ OWR.prototype = {
         this.loading(true);
         var move = $('move_'+id);
         move.setStyles(move.getStyle('display') == 'inline' ? {'display': 'none'} : {display:'inline','visibility':'visible'});
+        if(move.getStyle('display') == 'inline') {
+            if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.removeItems(move.getParents('li[id^=stream_]')[0]); }
+        } else {
+            if(this.sortables) { this.sortables.addItems(move.getParents('li[id^=stream_]')[0]); }
+        }
         this.loading(false);
     },
     getUnread: function(arr)
