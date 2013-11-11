@@ -1,27 +1,23 @@
                 <div class="article_title full_rounded shadow new_container_<?php if($status){ echo 'n';}?>read" id="new_<?php echo $id.'_'.$streamid.'_'.$gid;?>" title="<?php echo $this->_utilities->_('Show the new');?>">
                     <div class="new_title">
-                        <span class="verysmall"><?php echo $title;?></span>
-                        <a href="javascript:;" onclick="rP.deleteNew(<?php echo $id;?>);" class="delete right backgrounded opac" title="<?php echo $this->_utilities->_('Delete new');?>"></a>
-                        <input type="text" class="hidden right new_tags" id="edit_tags_<?php echo $id;?>" onchange="rP.inputEditTags(this, <?php echo $id;?>);" value=""/>
-                        <a href="javascript:;" onclick="rP.editTags(<?php echo $id;?>);" class="new_tag right backgrounded opac" title="<?php echo $this->_utilities->_('Edit tags');?>"></a>
-                        <a href="javascript:;" onclick="rP.updateNews(<?php echo $id;?>, true);" class="new_status right backgrounded opac" title="<?php echo $this->_utilities->_('Toggle new status');?>"></a>
-                        <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');" class="link_go right backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
-
-<?php           if($status) {
-                    echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded"></a>';
-                } else {
-                    echo '<a href="javascript:;" id="imgnew_'.$id.'" class="new right backgrounded" style="display:none"></a>';             
-                }?>
+                        <span id="imgnew_<?php echo $id;?>" class="new backgrounded<?php if(empty($status)) echo ' hidden';?>"></span><?php echo $title;?>
                     </div>
                     <div class="article_description">
 <?php           if(!empty($favicon)) {
-                    echo '<img src="'.$favicon.'" alt="" class="favicon left" width="16px" height="16px"/>';
-                } else { ?>
-                    <a href="javascript:;" class="favicon no_favicon backgrounded left"></a>
-<?php
+                    echo '<img src="'.$favicon.'" alt="" class="favicon" width="16px" height="16px"/>';
+                } else { 
+                    echo '<span class="favicon no_favicon backgrounded"></span>';
                 }
                 echo $this->_utilities->_('Posted').' '.$this->_utilities->_('In').' "'.$name.'"'.('Root' !== $gname ? ' ('.$gname.')' : '').(!empty($author) ? ', '.$this->_utilities->_('By').' "'.$author.'"' : '').', '.$this->_utilities->_('On').' '.$pubDate;
 ?>
+                    </div>
+                    <div class="article_actions"> 
+                        <a href="<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>" onclick="window.open('<?php echo htmlentities($link, ENT_COMPAT, 'UTF-8');?>');" class="link_go backgrounded opac" title="<?php echo htmlentities($title, ENT_COMPAT, 'UTF-8').' ('.$this->_utilities->_('See online').')';?>"></a>
+                        <a href="javascript:;" onclick="rP.updateNews(<?php echo $id;?>, true);" class="new_status backgrounded opac" title="<?php echo $this->_utilities->_('Toggle new status');?>"></a>
+                        <a href="javascript:;" onclick="rP.editTags(<?php echo $id;?>);" class="new_tag backgrounded opac" title="<?php echo $this->_utilities->_('Edit tags');?>"></a>
+                        <a href="javascript:;" onclick="rP.deleteNew(<?php echo $id;?>);" class="delete backgrounded opac" title="<?php echo $this->_utilities->_('Delete new');?>"></a>
+                        <input type="text" class="hidden new_tags" id="edit_tags_<?php echo $id;?>" onchange="rP.inputEditTags(this, <?php echo $id;?>);" value=""/>
+                    </div>
 <?php           if(!empty($abstract)) {?>
                 <div class="new_abstract" id="new_abstract_<?php echo $id;?>">
 <?php               if(!empty($contents['encoded'])) {
@@ -31,7 +27,5 @@
                     } ?>
                 </div>
 <?php           } ?>
-                    </div>
                 </div>
                 <div class="article_contents full_rounded hidden" id="new__<?php echo $id.'_'.$streamid.'_'.$gid;?>"></div>
-                <div class="news_spacer"></div>

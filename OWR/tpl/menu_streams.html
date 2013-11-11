@@ -1,34 +1,24 @@
     <li id="stream_<?php echo $id;?>" class="stream_<?php echo $id;?>">
         <div class="groupname">
-            <a href="javascript:;" class="current_stream left backgrounded hidden" onclick="rP.showStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Show the news for this stream');?>" id="current_<?php echo $id;?>"></a>
 <?php       if($status > 0) {
-                echo '<div class="icon_unavailable_feed left backgrounded" title="'.$this->_utilities->_('Set unavailable on').' '.$unavailable.'"></div>';
+                echo '<div class="icon_unavailable_feed backgrounded" title="'.$this->_utilities->_('Set unavailable on').' '.$unavailable.'"></div>';
             } ?>
-            <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $id;?>);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php echo $name;?> (<span id="unread_<?php echo $id;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
-<?php       if(!empty($favicon)) {
-                echo '<img src="'.$favicon.'" class="favicon_stream right" width="16px" height="16px" alt="" title="'.$this->_utilities->_('Favicon of').' '.$name.'" />';
-            } else { ?>
-                <a href="javascript:;" class="favicon_stream no_favicon backgrounded right" title="Favicon"></a> 
-<?php
-            } ?>
+            <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $id;?>);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php if(!empty($favicon)) echo '<img src="'.$favicon.'" class="favicon_stream" width="16px" height="16px" alt="" title="'.$this->_utilities->_('Favicon of').' '.$name.'" />'; else echo '<span class="favicon_stream no_favicon backgrounded" title="Favicon"></span>';?> <span class="current_stream backgrounded hidden" id="current_<?php echo $id;?>"></span> <?php echo $name;?> (<span id="unread_<?php echo $id;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
         </div>
-        <div class="spacer"></div>
-        <div id="sprites_<?php echo $id;?>" class="sprites_actions left">
-            <a href="javascript:;" class="stream_toggler left backgrounded opac" id="stream_toggler_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Expand this stream');?>" onclick="rP.streamsToggle(<?php echo $id;?>, this);"></a>
-            <a href="javascript:;" class="refresh_category left backgrounded opac" onclick="rP.getMenuPartStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Refresh menu');?>"></a>
-            <a href="javascript:;" class="read left backgrounded opac" onclick="rP.updateNews(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Mark all the news of this stream as read');?>"></a>
-            <a href="javascript:;" class="refresh left backgrounded opac" onclick="rP.refreshStream(<?php echo $id;?>, 1);" title="<?php echo $this->_utilities->_('Force refresh of this stream');?>"></a>
-            <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete all the news of this stream');?>"></a>
-            <a href="javascript:;" class="search backgrounded left opac" title="<?php echo $this->_utilities->_('Search');?>" onclick="rP.searchStream(<?php echo $id;?>);"></a>
-            <a href="javascript:;" class="rename left backgrounded opac" onclick="rP.renameStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Rename this stream');?>"></a>
-            <a href="javascript:;" class="editurl left backgrounded opac" onclick="rP.editStreamUrl(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Edit the url of this stream');?>"></a>
-            <a href="javascript:;" class="move left backgrounded opac" onclick="rP.moveStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Move this stream to another category');?>"></a>
-            <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete this stream');?>"></a>
+        <div id="sprites_<?php echo $id;?>" class="sprites_actions">
+            <a href="javascript:;" class="stream_toggler backgrounded opac" id="stream_toggler_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Expand this stream');?>" onclick="rP.streamsToggle(<?php echo $id;?>, this);"></a>
+            <a href="javascript:;" class="refresh_category backgrounded opac" onclick="rP.getMenuPartStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Refresh menu');?>"></a>
+            <a href="javascript:;" class="read backgrounded opac" onclick="rP.updateNews(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Mark all the news of this stream as read');?>"></a>
+            <a href="javascript:;" class="refresh backgrounded opac" onclick="rP.refreshStream(<?php echo $id;?>, 1);" title="<?php echo $this->_utilities->_('Force refresh of this stream');?>"></a>
+            <a href="javascript:;" class="clean backgrounded opac" onclick="rP.clearStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete all the news of this stream');?>"></a>
+            <a href="javascript:;" class="search backgrounded opac" title="<?php echo $this->_utilities->_('Search');?>" onclick="rP.searchStream(<?php echo $id;?>);"></a>
+            <a href="javascript:;" class="rename backgrounded opac" onclick="rP.renameStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Rename this stream');?>"></a>
+            <a href="javascript:;" class="editurl backgrounded opac" onclick="rP.editStreamUrl(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Edit the url of this stream');?>"></a>
+            <a href="javascript:;" class="move backgrounded opac" onclick="rP.moveStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Move this stream to another category');?>"></a>
+            <a href="javascript:;" class="delete backgrounded opac" onclick="rP.deleteStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Delete this stream');?>"></a>
         </div>
-        <div class="spacer"></div>
         <select name="name" class="hidden" id="move_<?php echo $id;?>" onchange="rP.selectMove(this);"><OWR:NOCACHE NAME='groups_select'/></select>
-        <input type="text" name="name" class="hidden left" value="<?php echo htmlspecialchars($name, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
-        <input type="text" name="url" class="hidden left" value="<?php echo htmlspecialchars($url, ENT_COMPAT, 'UTF-8', false);?>" id="editurl_<?php echo $id;?>" onchange="rP.inputEditStreamUrl(this);"/>
-        <input type="text" name="search" class="hidden left" id="search_<?php echo $id;?>" onchange="rP.searchFormAction(<?php echo $id;?>);"/>
-        <div class="spacer"></div>
+        <input type="text" name="name" class="hidden" value="<?php echo htmlspecialchars($name, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $id;?>" onchange="rP.inputRename(this);"/>
+        <input type="text" name="url" class="hidden" value="<?php echo htmlspecialchars($url, ENT_COMPAT, 'UTF-8', false);?>" id="editurl_<?php echo $id;?>" onchange="rP.inputEditStreamUrl(this);"/>
+        <input type="text" name="search" class="hidden" id="search_<?php echo $id;?>" onchange="rP.searchFormAction(<?php echo $id;?>);"/>
     </li>

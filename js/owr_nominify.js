@@ -933,7 +933,7 @@ OWR.prototype = {
                     var id = el.get('id');
                     if(!el.status) {
                         el.status = 1;
-                        $('contents_'+id).setStyle('display','block').slide('in');
+                        $('contents_'+id).setStyles({'display':'block','visibility':'visible'}).slide('in');
                     } else {
                         el.status = !el.status;
                         $('contents_'+id).slide();
@@ -1001,11 +1001,11 @@ OWR.prototype = {
     {
         if(force || this.menuTogglerStatus === 0) {
             $('menu').setStyle('display', 'none');
-            $('contents').setStyle('width', '100%');
+            $('contents').getParent().removeClass('span8').addClass('span12');
             $('menu_toggler').setStyle('background-position', '-18px 0px');
             this.menuTogglerStatus = 1;
         } else {
-            $('contents').setStyle('width', '75%');
+            $('contents').getParent().removeClass('span12').addClass('span8');
             $('menu').setStyle('display', 'block');
             $('menu_toggler').setStyle('background-position', '0px 0px');
             this.menuTogglerStatus = 0;
@@ -1058,7 +1058,7 @@ OWR.prototype = {
                             el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
                         } else {
                             if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).addClass('hidden'); }
-                            el.setStyles({'background-color': '#666666', 'color':'white'});
+                            el.setStyles({'background-color': '#888888', 'color':'white'});
                         }
                         element.toggle();
                     }
@@ -1269,12 +1269,12 @@ OWR.prototype = {
         if(!el) {
             el = $('gstream_toggler_'+id);
         }
-        if(search.getStyle('display') == 'inline') {
+        if(search.getStyle('display') == 'block') {
             if(this.sortables) { el.status ? this.sortables.addItems(el.getParents()[1]) : this.sortables.removeItems(el.getParents()[1]); }
             search.setStyle('display', 'none');
         } else {
             if(this.sortables) { this.sortables.removeItems(el.getParents()[1]); }
-            search.setStyle('display', 'inline');
+            search.setStyles({'display': 'block', visibility:'visible'});
         }
         this.loading(false);
     },
@@ -1513,15 +1513,15 @@ OWR.prototype = {
         this.loading(true);
         if(typeof(this.currentId) === 'string' && -1 !== this.currentId.indexOf("search_")) {
             var id = this.currentId.split('_')[1].toInt();
-            $$('a[id^=current_]').setStyle('display', 'none');
+            $$('span[id^=current_]').setStyle('display', 'none');
             if(!id) {
-                $('current_search').setStyle('display', 'block');
+                $('current_search').setStyle('display', 'inline-block').removeClass('hidden');
             } else {
-                $('current_'+id).setStyle('display', 'block');
+                $('current_'+id).setStyle('display', 'inline-block').removeClass('hidden');
             }
         } else {
-            $$('a[id^=current_]').setStyle('display', 'none');
-            $('current_'+this.currentId).setStyle('display', 'block');
+            $$('span[id^=current_]').setStyle('display', 'none');
+            $('current_'+this.currentId).setStyle('display', 'inline-block').removeClass('hidden');
         }
         this.loading(false);
     },
@@ -1627,12 +1627,12 @@ OWR.prototype = {
         if(!id) { return; }
         this.loading(true);
         var rename = $('rename_'+id);
-        if(rename.getStyle('display') == 'inline') {
+        if(rename.getStyle('display') == 'block') {
             rename.setStyle('display', 'none');
             if(this.sortables && !$('stream_toggler_'+id).status) { this.sortables.addItems(rename.getParents('li[id^=stream_]')[0]); }
         } else {
             if(this.sortables) { this.sortables.removeItems(rename.getParents('li[id^=stream_]')[0]); }
-            rename.setStyle('display', 'inline');
+            rename.setStyles({'display': 'block','visibility':'visible'});
         }
         this.loading(false);
     },
@@ -1641,7 +1641,7 @@ OWR.prototype = {
         if(!id) { return; }
         this.loading(true);
         var move = $('move_'+id);
-        move.setStyle('display', move.getStyle('display') == 'inline' ? 'none' : 'inline');
+        move.setStyles(move.getStyle('display') == 'inline' ? {'display': 'none'} : {display:'inline','visibility':'visible'});
         this.loading(false);
     },
     getUnread: function(arr)
@@ -2250,8 +2250,8 @@ OWR.prototype = {
                 this.loading(false, n);
                 this.parseResponse(json, null, 'new_details_'+id);
                 $('new_details_'+id).toggle();
-                addthis.button('#addthis_'+id, {'ui_cobrand': 'OWR', 'data_use_cookies':false, 'data_use_flash':false});
                 el.status = 1;
+                addthis.button('#addthis_'+id, {'ui_cobrand': 'OWR', 'data_use_cookies':false, 'data_use_flash':false});
             }.bindWithEvent(this, [n, obj, id]));
             r.get({'do': 'getnewdetails', 'id': id});
         } else {
@@ -2303,8 +2303,8 @@ OWR.prototype = {
             this.loading(false, n);
             var contents = this.parseResponse(json);
             if(contents) {
-                idc.set('html', contents).toggle();
-                el.removeClass('new_container_nread').addClass('new_container_read').setStyles({'background-color': '#666666', 'color': 'white'});
+                idc.set('html', contents).setStyle('visibility', 'visible').toggle();
+                el.removeClass('new_container_nread').addClass('new_container_read').setStyles({'background-color': '#888888', 'color': 'white'});
             }
             var img = $('imgnew_'+ids[1]);
             if(img) {img.setStyle('display', 'none');}
@@ -2339,16 +2339,16 @@ OWR.prototype = {
                     if(contents) {
                         tags.set('value', contents);
                     }
-                    tags.removeClass('hidden');
+                    tags.removeClass('hidden').setStyle('display', 'block');
                     tags.focus();
                     tags.status = 1;
                 }.bindWithEvent(this, [n,tags]));
                 r.get({'do': 'gettags', 'id': id});
             } else {
-                tags.removeClass('hidden');
+                tags.setStyle('display', 'block');
             }
         } else {
-            tags.addClass('hidden');
+            tags.setStyle('display', 'none');
         }
     },
     inputEditTags: function(obj, id) {

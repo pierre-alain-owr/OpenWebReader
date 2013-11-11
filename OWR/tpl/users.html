@@ -1,7 +1,5 @@
 <div class="users">
-    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
-    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
-    <div class="spacer"></div>
+    <a class="icon_add_user backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
     <table id="users" class="users">
         <caption><?php echo $this->_utilities->_('Users list');?> <span class="small">(<?php echo $nbusers;?>)</span></caption>
         <thead>
@@ -17,9 +15,9 @@
             <tr id="user_<?php echo $user['id'];?>">
                 <td class="full_rounded">
 <?php           if((int)$user['rights'] === OWR\User::LEVEL_USER) {
-                    echo '<div class="left backgrounded icon_rights_user" title="'.$this->_utilities->_('User').'"></div>';
+                    echo '<span class="backgrounded pull-left icon_rights_user" title="'.$this->_utilities->_('User').'"></span>';
                 }elseif((int)$user['rights'] === OWR\User::LEVEL_ADMIN) {
-                    echo '<div class="left backgrounded icon_rights_administrator" title="'.$this->_utilities->_('Administrator').'"></div>';
+                    echo '<span class="backgrounded pull-left icon_rights_administrator" title="'.$this->_utilities->_('Administrator').'"></span>';
                 }
                 echo $user['login']; ?>
                 </td>
@@ -30,14 +28,12 @@
                     <?php echo $user['openid'];?>
                 </td>
                 <td class="actions full_rounded">
-                    <a class="icon_user_delete right backgrounded opac" href="javascript:;" onclick="rP.deleteUser(<?php echo $user['id'];?>);" title="<?php echo $this->_utilities->_('Delete');?>"></a>
-                    <a class="icon_user_edit right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id='.$user['id'].'&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit');?>"></a>
+                    <a class="icon_user_delete backgrounded opac" href="javascript:;" onclick="rP.deleteUser(<?php echo $user['id'];?>);" title="<?php echo $this->_utilities->_('Delete');?>"></a>
+                    <a class="icon_user_edit backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id='.$user['id'].'&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit');?>"></a>
                 </td>
             </tr>
 <?php   } ?>
         </tbody>
     </table>
-    <div class="spacer"></div>
-    <a class="icon_add_user right backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
-    <a class="icon_add_user left backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+    <a class="icon_add_user backgrounded opac" href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"></a>
 </div>

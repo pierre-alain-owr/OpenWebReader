@@ -1,11 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $xmlLang;?>">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo $ulang;?>" xml:lang="<?php echo $xmlLang;?>">
     <head>
+        <meta charset="utf-8"/>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
         <link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php" type="text/css" media="screen" />
         <link rel="icon" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png" />
         <link rel="shortcut icon" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png" />
         <title>OpenWebReader - <?php echo $this->_utilities->_('Restricted access');?></title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     </head>
     <body>
         <div id="loginbox" class="full_rounded shadow">
@@ -19,17 +21,13 @@
                     <legend><?php echo $this->_utilities->_('Authentication');?></legend>
 <?php   if(isset($error)){ echo '<p class="error">'.$error.'</p>';} ?>
                     <label for="login"><?php echo $this->_utilities->_('Login');?> :</label>
-                    <br />
                     <input type="text" name="login" maxlength="55" size="31" id="login" />
-                    <br />
                     <label for="passwd"><?php echo $this->_utilities->_('Password');?> :</label>
-                    <br />
                     <input type="password" name="passwd" size="31" id="passwd" />
-                    <br />
 <?php   if(isset($openIDerror)){ echo '<p class="error">'.$openIDerror.'</p>';} ?>
                     <label for="identifier">OpenID :</label>
-                    <input class="openid" type="texte" size="31" name="identifier"/>
-                    <input type="submit" name="submit"/>
+                    <input class="openid" type="text" size="31" name="identifier"/>
+                    <button type="submit" class="btn btn-block" name="submit"><?php echo $this->_utilities->_('Submit');?></button>
                 </fieldset>
             </form>
         </div>

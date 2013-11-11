@@ -4,94 +4,85 @@
                 <li class="noborder">
                     <ul class="menu_actions" id="menu_actions">
                         <li>
-                            <div id="addrss" class="menu_actions_toggler" title="<?php echo $this->_utilities->_('Add a rss feed');?>"><?php echo $this->_utilities->_('Add RSS');?><div class="icon_rss backgrounded right"></div></div>
+                            <div id="addrss" class="menu_actions_toggler" title="<?php echo $this->_utilities->_('Add a rss feed');?>"><span class="icon_rss backgrounded"></span> <?php echo $this->_utilities->_('Add RSS');?></div>
                             <div class="menu_actions_contents" id="contents_addrss">
                                 <form method="post" id="editstream" action="./">
                                     <fieldset>
                                         <input type="hidden" name="do" value="editstream"/>
                                         <label for="name_editstream"><?php echo $this->_utilities->_('Name');?> :</label>
-                                        <br />
-                                        <input type="text" id="name_editstream" name="name" maxlength="55" size="20" value=""/><br />
-                                        <label for="url_editstream"><?php echo $this->_utilities->_('Url');?> (*) :</label><br />
-                                        <input type="text" name="url" size="20" id="url_editstream" value=""/><br />
-                                        <label for="move_category"><?php echo $this->_utilities->_('Category');?> :</label><br />
+                                        <input type="text" id="name_editstream" name="name" maxlength="55" size="20" value=""/>
+                                        <label for="url_editstream"><?php echo $this->_utilities->_('Url');?> (*) :</label>
+                                        <input type="text" name="url" size="20" id="url_editstream" value=""/>
+                                        <label for="move_category"><?php echo $this->_utilities->_('Category');?> :</label>
                                         <select name="gid" id="move_category"><OWR:NOCACHE NAME='groups_select'/></select>
-                                        <br />
-                                        <input type="submit" name="submit_rss" onclick="return rP.editStreamFormAction();"/>
+                                        <button type="submit" name="submit_rss" class="btn btn-block" onclick="return rP.editStreamFormAction();"><?php echo $this->_utilities->_('Submit');?></button>
                                     </fieldset>
                                 </form>
                             </div>
                         </li>
                         <li>
-                            <div class="menu_actions_toggler" id="addopml" title="<?php echo $this->_utilities->_('Add rss feed(s) via an opml file');?>"><?php echo $this->_utilities->_('Add OPML');?><div class="icon_opml right backgrounded"></div></div>
+                            <div class="menu_actions_toggler" id="addopml" title="<?php echo $this->_utilities->_('Add rss feed(s) via an opml file');?>"><span class="icon_opml backgrounded"></span> <?php echo $this->_utilities->_('Add OPML');?></div>
                             <div class="menu_actions_contents" id="contents_addopml">
                             <form method="post" id="editopml" enctype="multipart/form-data" action="./">
                                 <fieldset>
                                     <label for="url"><?php echo $this->_utilities->_('Url');?> :</label>
-                                    <br/>
                                     <input type="text" name="url" size="20" id="url" value=""/>
-                                    <br />
                                     <label for="opml"><?php echo $this->_utilities->_('File');?> :</label>
-                                    <br/>
                                     <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $maxuploadfilesize;?>"/>
                                     <input type="file" name="opml" size="8" id="opml"/>
-                                    <br />
                                     <label for="move_opml"><?php echo $this->_utilities->_('Category');?> :</label>
-                                    <br/>
                                     <select name="gid" id="move_opml"><OWR:NOCACHE NAME='groups_select'/></select>
-                                    <br />
-                                    <input type="submit" name="submit_rss" onclick="return rP.editOPML();"/>
+                                    <button type="submit" name="submit_rss" class="btn btn-block" onclick="return rP.editOPML();"><?php echo $this->_utilities->_('Submit');?></button>
                                 </fieldset>
                             </form>
                             </div>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('getopml', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Export your feed(s) list to OMPL file');?>"><?php echo $this->_utilities->_('Export to OMPL');?></a>&nbsp;
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('getopml', 'dl=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Download your feed(s) in OPML format');?>"><span style="text-decoration:underline;"><?php echo $this->_utilities->_('Download OMPL');?></span></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('getopml', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Export your feed(s) list to OMPL file');?>" class="icon_opml right opac backgrounded"></a>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('getopml', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Export your feed(s) list to OMPL file');?>"><span class="icon_opml backgrounded"></span> <?php echo $this->_utilities->_('Export to OMPL');?></a>
                         </li>
                         <li>
-                            <div id="addcategory" class="menu_actions_toggler" title="<?php echo $this->_utilities->_('Add a custom category');?>"><?php echo $this->_utilities->_('Add Category');?><div class="icon_add_category right backgrounded" title="<?php echo $this->_utilities->_('Add a custom category');?>"></div></div>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('getopml', 'dl=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Download your feed(s) in OPML format');?>"><span class="icon_opml backgrounded"></span> <?php echo $this->_utilities->_('Download OMPL');?></a>
+                        </li>
+                        <li>
+                            <div id="addcategory" class="menu_actions_toggler" title="<?php echo $this->_utilities->_('Add a custom category');?>"><span class="icon_add_category backgrounded"></span> <?php echo $this->_utilities->_('Add Category');?></div>
                             <div class="menu_actions_contents" id="contents_addcategory">
                                 <form method="post" id="editstreamgroup" action="./">
                                     <fieldset>
                                         <input type="hidden" name="do" value="editstreamgroup"/>
-                                        <label for="name_editstreamgroup"><?php echo $this->_utilities->_('Name');?> (*) :</label><br />
-                                        <input type="text" id="name_editstreamgroup" name="name" maxlength="55" size="20" value=""/><br/>
-                                        <input type="submit" name="submit_editstreamgroup" onclick="return rP.editStreamGroupsFormAction();"/>
+                                        <label for="name_editstreamgroup"><?php echo $this->_utilities->_('Name');?> (*) :</label>
+                                        <input type="text" id="name_editstreamgroup" name="name" maxlength="55" size="20" value=""/>
+                                        <button type="submit" name="submit_editstreamgroup" class="btn btn-block" onclick="return rP.editStreamGroupsFormAction();"><?php echo $this->_utilities->_('Submit');?></button>
                                     </fieldset>
                                 </form>
                             </div>
                         </li>
                         <li>
                             <div id="do_search" class="menu_actions_toggler" title="<?php echo $this->_utilities->_('Search in all news');?>">
-                                <a id="current_search" href="javascript:;" class="current backgrounded hidden left"></a><?php echo $this->_utilities->_('Search');?>
-                                <div class="icon_search backgrounded right" title="<?php echo $this->_utilities->_('Search in all news');?>"></div>
+                                <a id="current_search" href="javascript:;"><span class="current backgrounded hidden"></span> <span class="icon_search backgrounded"></span> <?php echo $this->_utilities->_('Search');?></a>
                             </div>
                             <div class="menu_actions_contents" id="contents_do_search">
-                                <form method="post" id="search_0" action="./">
+                                <form method="post" id="search_0" action="./" class="form-search">
                                     <fieldset>
                                         <input type="hidden" name="do" value="search"/>
-                                        <label for="keywords"><?php echo $this->_utilities->_('Keywords');?> (*) :</label><br />
-                                        <input type="text" name="keywords" size="20" id="keywords" value=""/><br />
-                                        <input type="submit" name="submit_search" value="<?php echo $this->_utilities->_('Find !');?>" onclick="return rP.searchFormAction();"/>
+                                        <label for="keywords"><?php echo $this->_utilities->_('Keywords');?> (*) :</label>
+                                        <input type="text" name="keywords" size="20" id="keywords" placeholder="<?php echo $this->_utilities->_('Keywords');?>"/>
+                                        <button type="submit" name="submit_search" class="btn btn-block" onclick="return rP.searchFormAction();"><?php echo $this->_utilities->_('Find !');?></button>
                                     </fieldset>
                                 </form>
                             </div>
-                        </li>
+                        </li><!--
                         <li>
                             <a href="javascript:;" onclick="rP.getRssToken();" title="<?php echo $this->_utilities->_('Get the RSS gateway url');?>"><?php echo $this->_utilities->_('Rss gateway');?></a>
                             <a href="javascript:;" onclick="rP.getRssToken();" title="<?php echo $this->_utilities->_('Get the RSS gateway url');?>" class="icon_link_rss right backgrounded opac"></a>
                         </li>
                         <li>
                             <a href="javascript:;" onclick="rP.getRestAuthToken();" title="<?php echo $this->_utilities->_('Get REST auth tokens');?>"><?php echo $this->_utilities->_('REST auth tokens');?></a>
+                        </li>-->
+                        <li>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id=<OWR:NOCACHE NAME=\'uid\'/>&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit your informations').'"><span class="icon_edit_user backgrounded"></span> '.$this->_utilities->_('Edit your informations');?></a>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id=<OWR:NOCACHE NAME=\'uid\'/>&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit your informations').'">'.$this->_utilities->_('Edit your informations');?></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'id=<OWR:NOCACHE NAME=\'uid\'/>&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Edit your informations');?>" class="icon_edit_user right backgrounded opac"></a>
-                        </li>
-                        <li>
-                            <a href="javascript:;" onclick="rP.getStats();" title="<?php echo $this->_utilities->_('Display some statistics');?>"><?php echo $this->_utilities->_('Show statistics');?></a>
+                            <a href="javascript:;" onclick="rP.getStats();" title="<?php echo $this->_utilities->_('Display some statistics');?>"><span class="icon_stats backgrounded"></span> <?php echo $this->_utilities->_('Show statistics');?></a>
                         </li>
                     </ul>
                 </li>
@@ -100,34 +91,29 @@
                 <li class="noborder">
                     <ul class="menu_actions" id="menu_administration">
                         <li>
-                            <a href="javascript:;" onclick="rP.askMaintenance();" title="<?php echo $this->_utilities->_('Do maintenance of the database (may take a while..)').'">'.$this->_utilities->_('Maintenance');?></a>
-                            <a href="javascript:;" onclick="rP.askMaintenance();" class="icon_maintenance right backgrounded opac" title="<?php echo $this->_utilities->_('Do maintenance of the database (may take a while..)');?>"></a>
+                            <a href="javascript:;" onclick="rP.askMaintenance();" title="<?php echo $this->_utilities->_('Do maintenance of the database (may take a while..)').'"><span class="icon_maintenance backgrounded"></span> '.$this->_utilities->_('Maintenance');?></a>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"><?php echo $this->_utilities->_('Create a user');?></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" class="icon_add_user right backgrounded opac" title="<?php echo $this->_utilities->_('Create user');?>"></a>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('edituser', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Create user');?>"><span class="icon_add_user backgrounded"></span> <?php echo $this->_utilities->_('Create a user');?></a>
                         </li>
                         <li>
-                            <a href="javascript:;" onclick="rP.getUsersList();" title="<?php echo $this->_utilities->_('Users list');?>"><?php echo $this->_utilities->_('Users list');?></a>
-                            <a href="javascript:;" class="icon_list_user right backgrounded opac" onclick="rP.getUsersList();" title="<?php echo $this->_utilities->_('Users list');?>"></a>
+                            <a href="javascript:;" onclick="rP.getUsersList();" title="<?php echo $this->_utilities->_('Users list');?>"><span class="icon_list_user backgrounded"></span> <?php echo $this->_utilities->_('Users list');?></a>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearhtmlcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the HTML cache');?>"><?php echo $this->_utilities->_('Clear HTML cache');?></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearhtmlcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the HTML cache');?>" class="icon_cache_delete right backgrounded opac"></a>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearhtmlcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the HTML cache');?>"><span class="icon_cache_delete backgrounded"></span> <?php echo $this->_utilities->_('Clear HTML cache');?></a>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'cleardbcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the DB cache');?>"><?php echo $this->_utilities->_('Clear DB cache');?></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'cleardbcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the DB cache');?>" class="icon_cache_delete right backgrounded opac"></a>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'cleardbcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the DB cache');?>"><span class="icon_cache_delete backgrounded"></span> <?php echo $this->_utilities->_('Clear DB cache');?></a>
                         </li>
                         <li>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the cache');?>"><?php echo $this->_utilities->_('Clear cache');?></a>
-                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the cache');?>" class="icon_cache_delete right backgrounded opac"></a>
+                            <a href="<?php echo OWR\Config::iGet()->makeURI('', 'clearcache=1&amp;token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Clear the cache');?>"><span class="icon_cache_delete backgrounded"></span> <?php echo $this->_utilities->_('Clear cache');?></a>
                         </li>
                         <li>
-                            <a href="javascript:;" onclick="rP.getCLILogs();" title="<?php echo $this->_utilities->_('CLI logs').'">'.$this->_utilities->_('CLI logs');?></a>
+                            <a href="javascript:;" onclick="rP.getCLILogs();" title="<?php echo $this->_utilities->_('CLI logs').'"><span class="icon_logs backgrounded"></span> '.$this->_utilities->_('CLI logs');?></a>
                         </li>
                     </ul>
                 </li>
 <?php           } ?>
             </ul>
         </div>
+    </div>

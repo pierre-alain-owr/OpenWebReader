@@ -1066,6 +1066,7 @@ class Controller extends Singleton
                 $page .= $this->_view->get('header', array(
                                                         'surl'      => $surl,
                                                         'xmlLang'   => $this->_user->getXMLLang(),
+                                                        'ulang'     => substr($ulang, 0, 2)
                                                     ),
                                                     $cacheTime,
                                                     array(
@@ -1120,9 +1121,6 @@ class Controller extends Singleton
                     $empty = true;
                 }
                 unset($response, $request);
-                $page .= $this->_view->get('contents_header', array(), $cacheTime);
-                $page .= $this->_getPage('news', $datas, true);
-                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
                 $page .= $this->_view->get('menu_header', array(), $cacheTime,
                                             array(
                                                 'unread' => $this->_request->unreads[0],
@@ -1150,6 +1148,9 @@ class Controller extends Singleton
                                                                         $cacheTime
                                                         )));
                 unset($groups);
+                $page .= $this->_view->get('contents_header', array(), $cacheTime);
+                $page .= $this->_getPage('news', $datas, true);
+                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
                 $page .= $this->_view->get('footer', array(
                                                         'lang'=>$ulang,
                                                         'surl'=>$surl
@@ -1255,6 +1256,8 @@ class Controller extends Singleton
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['timezones'] = $this->_user->getTimeZones();
                 $datas['userrights'] = $this->_user->getRights();
+                $datas['ulang'] = substr($this->_user->getLang(), 0, 2);
+                $datas['xmlLang'] = $this->_user->getXMLLang();
                 Model::getCachedModel('users')->view($request);
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
@@ -1351,6 +1354,7 @@ class Controller extends Singleton
             case 'login':
                 $datas['surl'] = $this->_cfg->get('surl');
                 $datas['xmlLang'] = $this->_user->getXMLLang();
+                $datas['ulang'] = substr($this->_user->getLang(), 0, 2);
                 $noCacheDatas['token'] = $this->_user->getToken();
                 $noCacheDatas['back'] = $this->_request->back;
                 break;

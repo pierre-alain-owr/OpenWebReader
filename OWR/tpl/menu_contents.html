@@ -1,21 +1,17 @@
                         <li id="stream_<?php echo $groupid;?>" class="groups">
                             <div class="groupname">
-                                <a href="javascript:;" class="backgrounded current left hidden" onclick="rP.showStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Show the news for this category');?>" id="current_<?php echo $groupid;?>"></a>
-                                <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
-                                <div class="icon_category right backgrounded"></div>
+                                <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor inline-block" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this category');?>"><span class="icon_category backgrounded"></span> <span class="hidden backgrounded current" id="current_<?php echo $groupid;?>"></span> <?php if('Root' === $gname){ echo $this->_utilities->_('No category (root)');}else{ echo $gname;}?> (<span id="unread_<?php echo $groupid;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
                             </div>
-                            <div class="spacer"></div>
-                            <div id="sprites_<?php echo $groupid;?>" class="sprites_actions left">
-                                <a href="javascript:;" id="gstream_toggler_<?php echo $groupid;?>" class="gstream_toggler left backgrounded opac" title="<?php echo $this->_utilities->_('Toggle category');?>" onclick="rP.gstreamsToggle(<?php echo $groupid;?>, this);"></a>
-                                <a href="javascript:;" class="refresh_category left backgrounded opac" onclick="rP.getMenuPartGroup(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Refresh menu');?>"></a>
-                                <a href="javascript:;" class="read left backgrounded opac" onclick="rP.updateNews(<?php echo $groupid;?>);" id="update_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Mark all the news of this category as read');?>"></a>
-                                <a href="javascript:;" class="refresh left backgrounded opac" onclick="rP.refreshStream(<?php echo $groupid;?>);" id="refresh_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Refresh all the streams of this category');?>"></a>
-                                <a href="javascript:;" class="search backgrounded left opac" title="<?php echo $this->_utilities->_('Search');?>" onclick="rP.searchStream(<?php echo $groupid;?>);"></a>
-                                <input type="text" name="search" class="hidden left" id="search_<?php echo $groupid;?>" onchange="rP.searchFormAction(<?php echo $groupid;?>);"/>
-                                <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearStream(<?php echo $groupid;?>);" id="clear_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Delete all the news of this category');?>"></a>
-                                <a href="javascript:;" class="rename left backgrounded opac" onclick="rP.renameStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Rename this category');?>"></a>
-                                <input type="text" name="name" class="hidden left" value="<?php echo htmlspecialchars($gname, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $groupid;?>" onchange="rP.inputRename(this);"/>
-                                <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Delete this category and all sub-streams');?>" id="delete_<?php echo $groupid;?>"></a>
+                            <div id="sprites_<?php echo $groupid;?>" class="sprites_actions">
+                                <a href="javascript:;" id="gstream_toggler_<?php echo $groupid;?>" class="gstream_toggler backgrounded opac" title="<?php echo $this->_utilities->_('Toggle category');?>" onclick="rP.gstreamsToggle(<?php echo $groupid;?>, this);"></a>
+                                <a href="javascript:;" class="refresh_category backgrounded opac" onclick="rP.getMenuPartGroup(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Refresh menu');?>"></a>
+                                <a href="javascript:;" class="read backgrounded opac" onclick="rP.updateNews(<?php echo $groupid;?>);" id="update_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Mark all the news of this category as read');?>"></a>
+                                <a href="javascript:;" class="refresh backgrounded opac" onclick="rP.refreshStream(<?php echo $groupid;?>);" id="refresh_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Refresh all the streams of this category');?>"></a>
+                                <a href="javascript:;" class="search backgrounded opac" title="<?php echo $this->_utilities->_('Search');?>" onclick="rP.searchStream(<?php echo $groupid;?>);"></a>
+                                <a href="javascript:;" class="clean backgrounded opac" onclick="rP.clearStream(<?php echo $groupid;?>);" id="clear_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Delete all the news of this category');?>"></a>
+                                <a href="javascript:;" class="rename backgrounded opac" onclick="rP.renameStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Rename this category');?>"></a>
+                                <a href="javascript:;" class="delete backgrounded opac" onclick="rP.deleteStream(<?php echo $groupid;?>);" title="<?php echo $this->_utilities->_('Delete this category and all sub-streams');?>" id="delete_<?php echo $groupid;?>"></a>
+                                <input type="text" name="search" class="hidden inline-block" id="search_<?php echo $groupid;?>" onchange="rP.searchFormAction(<?php echo $groupid;?>);"/>
+                                <input type="text" name="name" class="hidden" value="<?php echo htmlspecialchars($gname, ENT_COMPAT, 'UTF-8', false);?>" id="rename_<?php echo $groupid;?>" onchange="rP.inputRename(this);"/>
                             </div>
-                            <div class="spacer"></div>
                         </li>

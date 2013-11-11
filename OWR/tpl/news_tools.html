@@ -11,21 +11,21 @@
 <div id="news_ordering" class="shadow full_rounded opac verysmall">
     <?php echo $this->_utilities->_('Order by');?> :
     <a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('title');?>" onclick="rP.showStream(rP.currentId, 'title', '<?php echo (($sort === 'news.title') ? $nextdir : 'asc');?>');"><?php echo (($sort === 'news.title') ? '<strong>'.$this->_utilities->_('title').'</strong>' : $this->_utilities->_('title'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('pubDate');?>" onclick="rP.showStream(rP.currentId, 'pubDate', '<?php echo (($sort === 'news.pubDate') ? $nextdir : 'desc');?>');"><?php echo ((!$sort || $sort === 'news.pubDate') ? '<strong>'.$this->_utilities->_('pubDate').'</strong>' : $this->_utilities->_('pubDate'));?></a>&nbsp;-&nbsp;<a class="underlined" href="javascript:;" title="<?php echo $this->_utilities->_('Order by').' '.$this->_utilities->_('status');?>" onclick="rP.showStream(rP.currentId, 'status', '<?php echo (($sort === 'news_relations.status') ? $nextdir : 'desc');?>');"><?php echo (($sort === 'news_relations.status') ? '<strong>'.$this->_utilities->_('status').'</strong>' : $this->_utilities->_('status'));?></a><?php echo '&nbsp;/&nbsp;'.(!$sort || !$dir || $nextdir === 'asc' ? '↓' : '↑');?>
+    <a href="javascript:;" class="read_page backgrounded opac" onclick="rP.updateNews('page');" title="<?php echo $this->_utilities->_('Mark all the news of this page as read');?>"></a>
 <?php   if($nbNews > $nbNewsByPage) {
             $nbPages = ceil($nbNews/$nbNewsByPage);
             $next_offset = $offset + 1;
             if($next_offset < $nbPages) {
                 $next_next_offset = $next_offset + 1;
-?>
-    <a class="pager right pager_markright backgrounded opac" href="javascript:;" onclick="rP.moveToPage('next', 1);" title="<?php echo $this->_utilities->_('Mark all the news of this page as read').' '.$this->_utilities->_('And').' '.$this->_utilities->_('Move to page').' '.$next_next_offset.'/'.$nbPages; ?>">
-    </a><a class="pager right pager_right backgrounded opac" href="javascript:;" onclick="rP.moveToPage('next');" title="<?php echo $this->_utilities->_('Move to page').' '.$next_next_offset.'/'.$nbPages; ?>">
-    </a>
-<?php       }
             if($offset > 0) {
                 $prev_offset = $offset - 1;
 ?>
-    <a class="pager right pager_left backgrounded opac" href="javascript:;" onclick="rP.moveToPage('prev');" title="<?php echo $this->_utilities->_('Move to page').' '.$offset.'/'.$nbPages; ?>"></a><a class="pager right pager_markleft backgrounded opac" href="javascript:;" onclick="rP.moveToPage('prev', 1);" title="<?php echo $this->_utilities->_('Mark all the news of this page as read').' '.$this->_utilities->_('And').' '.$this->_utilities->_('Move to page').' '.$offset.'/'.$nbPages; ?>"></a>
+    <a class="pager pager_markleft backgrounded opac" href="javascript:;" onclick="rP.moveToPage('prev', 1);" title="<?php echo $this->_utilities->_('Mark all the news of this page as read').' '.$this->_utilities->_('And').' '.$this->_utilities->_('Move to page').' '.$offset.'/'.$nbPages; ?>"></a>
+    <a class="pager pager_left backgrounded opac" href="javascript:;" onclick="rP.moveToPage('prev');" title="<?php echo $this->_utilities->_('Move to page').' '.$offset.'/'.$nbPages; ?>"></a>
+<?php       } ?>
+    <a class="pager pager_right backgrounded opac" href="javascript:;" onclick="rP.moveToPage('next');" title="<?php echo $this->_utilities->_('Move to page').' '.$next_next_offset.'/'.$nbPages; ?>"></a>
+    <a class="pager pager_markright backgrounded opac" href="javascript:;" onclick="rP.moveToPage('next', 1);" title="<?php echo $this->_utilities->_('Mark all the news of this page as read').' '.$this->_utilities->_('And').' '.$this->_utilities->_('Move to page').' '.$next_next_offset.'/'.$nbPages; ?>">
+    </a>
 <?php       }
         } ?>
-    <a href="javascript:;" class="read_page right backgrounded opac" onclick="rP.updateNews('page');" title="<?php echo $this->_utilities->_('Mark all the news of this page as read');?>"></a>
 </div>

@@ -2,7 +2,6 @@
     <div class="article_content">
         <a class="stream_details" title="<?php echo $this->_utilities->_('Show/hide details of the new');?>" href="javascript:;" onclick="rP.getNewDetails(<?php echo $id;?>, this);"><?php echo $this->_utilities->_('More');?></a>
         <div class="article_full_details full_rounded" id="new_details_<?php echo $id;?>"></div>
-        <div class="spacer"><br/><br/></div>
 <?php
         if(!empty($contents['enclosure']))
         {
@@ -27,9 +26,7 @@
                         <param name="movie" value="dewtube.swf?movie=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>" />
                         <p>Sorry, your browser does not support Flash.</p>
                     </object>
-                    <div class="spacer"></div>
 <?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                    <br/><br/>
                 </div>
 <?php               }
                     else
@@ -38,16 +35,13 @@
                     <video id="<?php echo $id;?>" src="<?php echo $enclosure['attributes']['url'];?>" controls>
                         <p>Sorry, your browser does not support the &lt;video&gt; element</p>
                     </video>
-                    <div class="spacer"></div>
                     <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
-                    <div class="spacer"></div>
 <?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                    <br/><br/>
                 </div>
 <?php               }
                 }
@@ -61,9 +55,7 @@
                             <param name="wmode" value="transparent" />
                             <param name="movie" value="dewplayer.swf?mp3=test.mp3&amp;showtime=1" />
                         </object>
-                        <div class="spacer"></div>
 <?php                   echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                        <br/><br/>
                     </div>
 <?php               }
                     else
@@ -73,16 +65,13 @@
                     <audio id="<?php echo $id;?>" src="<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>" controls>
                         <p>Sorry, your browser does not support the &lt;audio&gt; element.</p>
                     </audio>
-                    <div class="spacer"></div>
                     <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
                     <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
-                    <div class="spacer"></div>
 <?php               echo '<a href="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                    <br/><br/>
                 </div>
 <?php
                     }
@@ -115,9 +104,7 @@
                                 <param name="movie" value="dewtube.swf?movie=<?php echo htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8');?>" />
                                 <p>Sorry, your browser does not support Flash.</p>
                             </object>
-                            <div class="spacer"></div>
 <?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                            <br/><br/>
                         </div>
 <?php                   }
                         else
@@ -128,16 +115,13 @@
 <?php                           echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';?>
                                 </p>
                             </video>
-                            <div class="spacer"></div>
                             <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
-                            <div class="spacer"></div>
 <?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                            <br/><br/>
                         </div>
 <?php                   }
                     }
@@ -151,9 +135,7 @@
                                 <param name="wmode" value="transparent" />
                                 <param name="movie" value="dewplayer.swf?mp3=<?php echo htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8');?>&amp;showtime=1" />
                             </object>
-                            <div class="spacer"></div>
 <?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                            <br/><br/>
                         </div>
 <?php                   }
                         else
@@ -164,16 +146,13 @@
 <?php                           echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>';?>
                                 </p>
                             </audio>
-                            <div class="spacer"></div>
                             <button onclick="document.getElementById('<?php echo $id;?>').play();">Play</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').pause();">Pause</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').volume += 0.25;">Volume Up</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').volume -= 0.25;">Volume Down</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').muted = true;">Mute</button>
                             <button onclick="document.getElementById('<?php echo $id;?>').muted = false;">Unmute</button>
-                            <div class="spacer"></div>
 <?php                       echo '<a href="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'">'.$this->_utilities->_('Enclosure').'</a>'; ?>
-                            <br/><br/>
                         </div>
 <?php                   }
                     }
@@ -189,6 +168,6 @@
         } elseif(!empty($contents['description'])) {
             echo is_array($contents['description']['contents']) ? join('', $contents['description']['contents']) : $contents['description']['contents'];
         } ?>
-<?php   echo '<p><a href="#new_'.$id.'_'.$streamid.'_'.$gid.'">'.$this->_utilities->_('Back to top of the new').'</a></p>'; ?>
+<?php   echo '<a href="#new_'.$id.'_'.$streamid.'_'.$gid.'" class="back-top">'.$this->_utilities->_('Back to top of the new').'</a>'; ?>
     </div>
 <?php } ?>

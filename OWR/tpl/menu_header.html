@@ -1,3 +1,6 @@
+<div id="container" class="container-fluid">
+    <div class="row-fluid">
+    <div class="span4">
         <div id="menu">
             <ul id="menu_container" class="menu_container">
                 <li class="menu_part_title opac" id="menu_title_streams"><?php echo $this->_utilities->_('Streams');?></li>
@@ -5,18 +8,14 @@
                     <ul class="menu_streams" id="menu_streams">
                         <li id="stream_0" class="groups">
                             <div class="groupname">
-                                <a href="javascript:;" class="current left backgrounded" onclick="rP.showStream(0);" title="<?php echo $this->_utilities->_('Show all unread news');?>" id="current_0"></a>
-                                <a href="javascript:;"<OWR:NOCACHE NAME='bold'/> id="showStream_0" onclick="rP.showStream(0);" title="<?php echo $this->_utilities->_('Show all unread news');?>"><?php echo $this->_utilities->_('Not read');?> (<span id="unread_0"><OWR:NOCACHE NAME='unread'/></span>)</a>
-                                <br class="spacer"/>
-                                <a href="javascript:;" class="current left backgrounded hidden" onclick="rP.showStream(-1);" title="<?php echo $this->_utilities->_('Show all news');?>" id="current_-1"></a>
-                                <a href="javascript:;" id="showStream_-1" onclick="rP.showStream(-1);" title="<?php echo $this->_utilities->_('Show all news');?>"><?php echo $this->_utilities->_('All news');?></a>
+                                <a href="javascript:;"<OWR:NOCACHE NAME='bold'/> id="showStream_0" onclick="rP.showStream(0);" title="<?php echo $this->_utilities->_('Show all unread news');?>"><span id="current_0" class="current backgrounded"></span> <?php echo $this->_utilities->_('Not read');?> (<span id="unread_0"><OWR:NOCACHE NAME='unread'/></span>)</a>
+                                <br/>
+                                <a href="javascript:;" id="showStream_-1" onclick="rP.showStream(-1);" title="<?php echo $this->_utilities->_('Show all news');?>"><span class="current backgrounded hidden" id="current_-1"></span> <?php echo $this->_utilities->_('All news');?></a>
                             </div>
-                            <div class="spacer"></div>
-                            <div id="sprites_0" class="sprites_actions left">
-                                <a href="javascript:;" class="read left backgrounded opac" onclick="rP.updateNews(0);" id="update_0" title="<?php echo $this->_utilities->_('Mark all the news as read');?>"></a>
-                                <a href="javascript:;" class="refresh left backgrounded opac" onclick="rP.refreshStream(0);" id="refresh_0" title="<?php echo $this->_utilities->_('Force refresh of all streams');?>"></a>
-                                <a href="javascript:;" class="clear left backgrounded opac" onclick="rP.clearStream(0);" id="clear_0" title="<?php echo $this->_utilities->_('Delete all news of all the streams');?>"></a>
-                                <a href="javascript:;" class="delete left backgrounded opac" onclick="rP.deleteStream(0);" title="<?php echo $this->_utilities->_('Delete everything, categories included');?>"></a>
+                            <div id="sprites_0" class="sprites_actions">
+                                <a href="javascript:;" class="read backgrounded opac" onclick="rP.updateNews(0);" id="update_0" title="<?php echo $this->_utilities->_('Mark all the news as read');?>"></a>
+                                <a href="javascript:;" class="refresh backgrounded opac" onclick="rP.refreshStream(0);" id="refresh_0" title="<?php echo $this->_utilities->_('Force refresh of all streams');?>"></a>
+                                <a href="javascript:;" class="clean backgrounded opac" onclick="rP.clearStream(0);" id="clear_0" title="<?php echo $this->_utilities->_('Delete all news of all the streams');?>"></a>
+                                <a href="javascript:;" class="delete backgrounded opac" onclick="rP.deleteStream(0);" title="<?php echo $this->_utilities->_('Delete everything, categories included');?>"></a>
                             </div>
-                            <div class="spacer"></div>
                         </li>
