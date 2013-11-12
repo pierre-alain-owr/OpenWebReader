@@ -11,7 +11,7 @@ body
     margin:0;
     font-family:sans-serif;
     font-size:12px;
-    line-height:1.3em;
+    line-height:1.5em;
     color:#000;
 }
 
@@ -429,11 +429,6 @@ div.news_spacer
     margin:16px;
 }
 
-div.new_container_nread
-{
-    font-weight:bold;
-}
-
 div.new_abstract
 {
     font-weight:normal;
@@ -445,6 +440,11 @@ div.new_abstract
 div.new_container_read
 {
     font-weight:normal;
+}
+
+div.new_container_nread
+{
+    font-weight:bold;
 }
 
 h5.article_link
@@ -471,7 +471,7 @@ div#sprites_0
 .new
 {
     background-position:-285px 0px;
-    margin:0 8px 0 -24px;
+    margin:0 8px 0 0;
 }
 
 .link_go
@@ -579,8 +579,9 @@ div#board a.clean
 div.article_description
 {
     font-weight:normal;
-    margin:0 6px 0 25px;
+    margin:-3px 6px 0 25px;
     padding-left:4px;
+    font-size:80%;
 }
 
 div.article_content
@@ -805,7 +806,7 @@ ul.menu_container li.menu_part_title
 
 img.favicon, a.favicon, span.favicon
 {
-    margin:0 8px 0 -24px;
+    margin:-20px 8px 0 -24px;
 }
 
 .no_favicon
