@@ -985,7 +985,7 @@ class Streams extends Model
     {
         if(empty($request->id))
         {
-            $streams = $this->_dao->get(array('favicon'=>''), 'id, url');
+            $streams = $this->_dao->get(array(), 'id, url');
             if(empty($streams))
             {
                 $request->setResponse(new Response);
@@ -1005,7 +1005,8 @@ class Streams extends Model
             return $this;
         }
 
-        $stream = $this->_dao->get(array('favicon'=>'', 'id'=>$request->id), 'id, url');
+        $stream = $this->_dao->get(array('id'=>$request->id), 'id, url, favicon');
+        $currentFavicon = $stream->favicon;
         $streamContents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$request->id), 'contents');
         if(empty($stream))
         {
@@ -1021,6 +1022,9 @@ class Streams extends Model
         $reader = new StreamReader(array('channel'=>unserialize($streamContents->contents)));
         unset($streamContents);
         $favicons = $indexes = array();
+
+        if(!empty($stream->favicon))
+            $favicons[] = $stream->favicon;
 
         $url = $reader->get('realurl');
         unset($reader);
@@ -1062,12 +1066,13 @@ class Streams extends Model
         }
 
         $favicons = array_unique($favicons);
-
+        
         foreach($favicons as $fav)
         {
             try
             {
-                $icon = cURLWrapper::get($fav, array(), false, true);
+                $headers = array();
+                $icon = cURLWrapper::get($fav, array(), false, true, $headers);
             }
             catch(Exception $e)
             {
@@ -1075,8 +1080,8 @@ class Streams extends Model
                 if(DEBUG) Logs::iGet()->log($e->getContent(), $e->getCode());
             }
 
-            if(empty($icon)) continue;
-
+            if(empty($icon) || false == strpos($headers['Content-Type'], 'image')) continue;
+            
             if(class_exists('Imagick', false))
             {
                 try
@@ -1100,11 +1105,18 @@ class Streams extends Model
             }
             else
             {
-                $favicon = $fav;
-                break;
+                if(@imagecreatefromstring($icon))
+                {
+                    $favicon = $fav;
+                    break;
+                }
+                elseif('ico' === pathinfo($fav, PATHINFO_EXTENSION))
+                {
+                    $favicon = $fav;
+                }
             }
         }
-
+        
         unset($favicons, $icon);
 
         if(empty($favicon))
@@ -1132,7 +1144,7 @@ class Streams extends Model
 
                 unset($page);
 
-                $favicon = $icon = array();
+                $icon = array();
                 foreach($hrefs as $href)
                 {
                     $url = @parse_url($href);
@@ -1170,7 +1182,8 @@ class Streams extends Model
 
                     try
                     {
-                        $icon = cURLWrapper::get($href, array(), false, true);
+                        $headers = array();
+                        $icon = cURLWrapper::get($href, array(), false, true, $headers);
                     }
                     catch(Exception $e)
                     {
@@ -1180,7 +1193,7 @@ class Streams extends Model
                         continue;
                     }
 
-                    if(empty($icon)) continue;
+                    if(empty($icon) || false === strpos($headers['Content-Type'], 'image')) continue;
 
                     if(class_exists('Imagick', false))
                     {
@@ -1205,15 +1218,23 @@ class Streams extends Model
                     }
                     else
                     {
-                        $favicon = $href;
-                        break 2;
+                        if(@imagecreatefromstring($icon))
+                        {
+                            $favicon = $href;
+                            break 2;
+                        }
+                        elseif('ico' === pathinfo($href, PATHINFO_EXTENSION))
+                        { // TODO : to be enhanced
+                            $favicon = $href;
+                            break 2;
+                        }
                     }
                 }
             }
             unset($indexes, $index, $page);
         }
-
-        if(!empty($favicon))
+        
+        if((string) $currentFavicon !== (string) $favicon)
         {
             $stream->favicon = (string) $favicon;
             $stream->url = null;
