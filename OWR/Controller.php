@@ -55,6 +55,7 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses OWR\DB\Request a request sent to database
  * @uses Logs the logs/errors storing object
  * @uses OWR\View\Utilities translate errors
+ * @uses Themes the theme manager
  * @package OWR
  */
 class Controller extends Singleton
