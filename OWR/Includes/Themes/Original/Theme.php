@@ -180,13 +180,13 @@ JS;
         $this->_view->addBlock('board', 'header', $this->_view->get('board', $datas, null, $noCacheDatas));
 
         $this->_view->addBlock('menu_header', 'contents', $this->_view->get('menu_header', $datas, null, array_merge($noCacheDatas, array('bold' => $noCacheDatas['unread_0'] > 0 ? ' class="bold" ' : ''))));
-        $this->_view->addBlock('categories', 'contents', self::categories(array $datas, array $noCacheDatas));
+        $this->_view->addBlock('categories', 'contents', self::categories($datas, $noCacheDatas));
         $this->_view->addBlock('menu_tags', 'contents', $this->_view->get('menu_tags', $datas, null, $noCacheDatas));
-        $this->_view->addBlock('tags', 'contents', self::tags(array $datas, array $noCacheDatas));
+        $this->_view->addBlock('tags', 'contents', self::tags($datas, $noCacheDatas));
         $this->_view->addBlock('menu_footer', 'contents', $this->_view->get('menu_footer', $datas, null, $noCacheDatas));
 
         $this->_view->addBlock('contents_header', 'contents', $this->_view->get('contents_header', $datas, null, $noCacheDatas));
-        $this->_view->addBlock('posts', 'contents', self::posts(array $datas, array $noCacheDatas));
+        $this->_view->addBlock('posts', 'contents', self::posts($datas, $noCacheDatas));
         $this->_view->addBlock('contents_footer', 'contents', $this->_view->get('contents_footer', $datas, null, $noCacheDatas));
         
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
