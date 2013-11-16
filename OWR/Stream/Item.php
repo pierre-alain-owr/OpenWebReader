@@ -141,7 +141,7 @@ class Item
                 $author = '';
                 if(isset($this->_item['author']['name']) && isset($this->_item['author']['name']['contents']))
                 {
-                    $author .= $this->_item['author']['name']['contents'];
+                    $author .= is_array($this->_item['author']['name']['contents']) ? join(', ', $this->_item['author']['name']['contents']) : $this->_item['author']['name']['contents'];
                 }
 
                 if(isset($this->_item['author']['email']) && isset($this->_item['author']['email']))
@@ -164,7 +164,7 @@ class Item
         }
         else
         { // rss
-            $this->_item['pubDate']['contents'] = !empty($this->_item['pubDate']['contents']) ? strtotime((string) $this->_item['pubDate']['contents']) : time();
+            $this->_item['pubDate']['contents'] = !empty($this->_item['pubDate']['contents']) ? strtotime((string) is_array($this->_item['pubDate']['contents']) ? current($this->_item['pubDate']['contents']) : $this->_item['pubDate']['contents']) : time();
             $this->_item['url']['contents'] = html_entity_decode((string)$this->_item['link']['contents'], ENT_COMPAT, 'UTF-8');
         }
 
