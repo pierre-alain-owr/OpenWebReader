@@ -214,4 +214,30 @@ abstract class Themes implements iThemes
 
         return call_user_func_array(array($call, $name), array_merge(array('datas' => $datas, 'noCacheDatas' => $noCacheDatas), $args));
     }
+
+    /**
+     * Returns parent theme instance if exists
+     *
+     * @access public
+     * @return mixed self::$_parent instance or false if empty
+     */
+    final static public function getParentTheme()
+    {
+        if(!isset(self::$_parent)) return false;
+        
+        $theme = 'OWR\Includes\Themes\\' . ucfirst((string) self::$_parent) . '\Theme';
+
+        return new $theme;
+    }
+
+    /**
+     * Returns parent theme name
+     *
+     * @access public
+     * @return string self::$_parent
+     */
+    final public function getParent()
+    {
+        return self::$_parent;
+    }
 }

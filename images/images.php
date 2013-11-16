@@ -10,9 +10,18 @@ define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
 require HOME_PATH . 'cfg.php';
 
-$file = Themes::iGet()->getPath() . 'images' . DIRECTORY_SEPARATOR . basename($_GET['f']);
+$theme = Themes::iGet();
+$filename = basename($_GET['f']);
 
-if(!file_exists($file))
+do
+{
+    $file = $theme->getPath() . 'images' . DIRECTORY_SEPARATOR . $filename;
+    if(file_exists($file))
+        break;
+}
+while($theme = Themes::getParentTheme());
+
+if(empty($theme))
     die;
 
 switch(strtolower(pathinfo($file, PATHINFO_EXTENSION)))

@@ -10,11 +10,19 @@ define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
 require HOME_PATH . 'cfg.php';
 
-$file = Themes::iGet()->getPath() . 'css' . DIRECTORY_SEPARATOR . basename($_GET['f']);
+$theme = Themes::iGet();
+$filename = basename($_GET['f']);
 
-if(!file_exists($file))
+do
+{
+    $file = $theme->getPath() . 'css' . DIRECTORY_SEPARATOR . $filename;
+    if(file_exists($file))
+        break;
+}
+while($theme = Themes::getParentTheme());
+
+if(empty($theme))
     die;
-
 
 header('Content-type: text/css; charset=utf-8');
 header('Cache-Control: Public, must-revalidate');
