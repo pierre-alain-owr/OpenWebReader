@@ -34,7 +34,8 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\View\Utilities;
+use OWR\View\Utilities,
+    OWR\View\Block;
 /**
  * This object is used to render page
  * @uses Singleton implements the singleton pattern
@@ -69,6 +70,8 @@ class View extends Singleton
      */
     protected $_statusCode = 200;
 
+    protected $_blocks = array();
+
     /**
      * Constructor
      * Checks cache directories and set OWR\View\Utilities instance
@@ -93,14 +96,14 @@ class View extends Singleton
      * @param array $noCacheDatas the datas that are not cached but replaced on-the-fly
      * @return string the template rendered
      */
-    public function get($tpl, array $datas = array(), $cacheTime = 0, array $noCacheDatas = array())
+    public function get($tpl, array $datas = array(), $cacheTime = null, array $noCacheDatas = array())
     {
         $t = microtime(true);
-        $cacheTime = (int) $cacheTime;
+        $cacheTime = (int) (isset($cacheTime) ? $cacheTime : Config::iGet()->get('cacheTime'));
 
         if($cacheTime > 0)
         {
-            $cachedTpl = User::iGet()->getLang().DIRECTORY_SEPARATOR.md5($tpl.serialize($datas));
+            $cachedTpl = User::iGet()->getLang() . DIRECTORY_SEPARATOR . md5($tpl . serialize($datas));
             $contents = Cache::get($cachedTpl, $cacheTime);
         }
 
@@ -138,10 +141,10 @@ class View extends Singleton
      */
     protected function _execute($tpl, array $datas)
     {
-        extract($datas, EXTR_SKIP);
+        extract((array) $datas, EXTR_SKIP);
         ob_start();
-        include HOME_PATH.'tpl'.DIRECTORY_SEPARATOR.$tpl.'.html';
-        return ob_get_clean();   
+        include Themes::iGet()->getPath($tpl) . $tpl . '.html';
+        return ob_get_clean();
     }
 
     /**
@@ -259,14 +262,14 @@ class View extends Singleton
                     break;
             }
 
-            if(!CLI) header('HTTP/1.1 '.$this->_statusCode.' '.$statusCode);
+            if(!CLI) header('HTTP/1.1 ' . $this->_statusCode . ' ' . $statusCode);
         }
 
         if(!CLI)
         {
             foreach($this->_headers as $name=>$value)
             {
-                header($name.': '.$value);
+                header($name . ': ' . $value);
             }
         }
 
@@ -325,5 +328,39 @@ class View extends Singleton
                 flush();
                 break;
         }
+    }
+
+    public function addBlock($name, $layout, $content, $type = 'html')
+    {
+        $this->_blocks[$layout][$name] = new Block($content, $type);
+    }
+
+    public function getBlocks($layout)
+    {
+        return isset($this->_blocks[$layout]) ? join('', $this->_blocks[$layout]) : null;
+    }
+
+    public function getBlock($name, $layout)
+    {
+        return isset($this->_blocks[$layout][$name]) ? $this->_blocks[$layout][$name] : null;
+    }
+
+    public function renderBlocks($layout)
+    {
+        $blocks = $this->getBlocks($layout);
+        if(!empty($blocks))
+            echo $blocks;
+    }
+
+    public function renderBlock($name, $layout)
+    {
+        $block = $this->getBlock($name, $layout);
+        if(!empty($block))
+            echo $block;
+    }
+
+    public function _($name)
+    {
+        return $this->_utilities->_($name);
     }
 }

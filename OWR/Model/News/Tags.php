@@ -312,7 +312,7 @@ class Tags extends Model
         $request->setResponse(new Response(empty($ids) ? array() : array(
             'datas'     => array('ids' => $ids),
             'status'    => 201,
-            'tpl'       => 'menu_tags_contents'
+            'tpl'       => 'tag'
         )));
 
         return $this;

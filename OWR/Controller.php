@@ -78,12 +78,6 @@ class Controller extends Singleton
     protected $_db;
 
     /**
-     * @var mixed the View instance
-     * @access protected
-     */
-    protected $_view;
-
-    /**
      * @var mixed the Session instance
      * @access protected
      */
@@ -245,7 +239,7 @@ class Controller extends Singleton
                     // we prompt the user to log-in to confirm he is really who he pretends to be
                         if($this->_request->do === 'opensearch' || $this->_request->do === 'add')
                             $this->_request->back = basename(trim(Filter::iGet()->purify($_SERVER['REQUEST_URI'])));
-                        $this->_getPage('login', array('error' => Utilities::iGet()->_('You lost your token ! Confirm back your identity')));
+                        $this->_buildPage('login', array('error' => Utilities::iGet()->_('You lost your token ! Confirm back your identity')));
                         return $this;
                     }
                 }
@@ -325,11 +319,9 @@ class Controller extends Singleton
             while($error = @ob_get_clean());
         }
 
-        isset($this->_view) || $this->_view = View::iGet();
-
         if(isset($_SERVER['HTTP_ACCEPT']) && (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
-            $this->_view->addHeaders(array('Content-Type' => 'application/json; charset=utf-8'));
+            View::iGet()->addHeaders(array('Content-Type' => 'application/json; charset=utf-8'));
             $page = array('contents' => '');
 
             if(!isset($this->_request->unreads))
@@ -376,14 +368,14 @@ class Controller extends Singleton
             if(empty($page['errors']) && isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
             {
                 $etag = '"owr-'.md5(serialize($page)).'"';
-                $this->_view->addHeaders(array(
+                View::iGet()->addHeaders(array(
                     'Cache-Control' => 'Public, must-revalidate',
                     "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
                     'Etag' => $etag
                 ), true);
                 if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
                 {
-                    $this->_view->setStatusCode(304, true);
+                    View::iGet()->setStatusCode(304, true);
                     flush();
                     return true;
                 }
@@ -398,7 +390,7 @@ class Controller extends Singleton
         }
         else
         {
-            $this->_view->addHeaders(array('Content-type' => 'text/html; charset=utf-8'));
+            View::iGet()->addHeaders(array('Content-type' => 'text/html; charset=utf-8'));
             if(Logs::iGet()->hasLogs())
             {
                 if(DEBUG || $this->_user->isAdmin())
@@ -451,14 +443,14 @@ class Controller extends Singleton
                         if(isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
                         {
                             $etag = '"owr-'.md5($this->_request->page).'"';
-                            $this->_view->addHeaders(array(
+                            View::iGet()->addHeaders(array(
                                 'Cache-Control' => 'Public, must-revalidate',
                                 "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
                                 'Etag' => $etag
                             ), true);
                             if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
                             {
-                                $this->_view->setStatusCode(304, true);
+                                View::iGet()->setStatusCode(304, true);
                                 flush();
                                 return $this;
                             }
@@ -475,14 +467,14 @@ class Controller extends Singleton
                 if(isset($_SERVER['REQUEST_METHOD']) && 'GET' === $_SERVER['REQUEST_METHOD'])
                 {
                     $etag = '"owr-'.md5($this->_request->page).'"';
-                    $this->_view->addHeaders(array(
+                    View::iGet()->addHeaders(array(
                         'Cache-Control' => 'Public, must-revalidate',
                         "Expires" => gmdate("D, d M Y H:i:s", $this->_request->begintime + $this->_cfg->get('cacheTime'))." GMT",
                         'Etag' => $etag
                     ), true);
                     if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
                     {
-                        $this->_view->setStatusCode(304, true);
+                        View::iGet()->setStatusCode(304, true);
                         flush();
                         return $this;
                     }
@@ -495,9 +487,9 @@ class Controller extends Singleton
             $page =& $this->_request->page;
         }
 
-        $this->_view->setStatusCode($statusCode, true);
+        View::iGet()->setStatusCode($statusCode, true);
 
-        $this->_view->render($page);
+        View::iGet()->render($page);
 
         $this->_request->page = null;
 
@@ -560,8 +552,7 @@ class Controller extends Singleton
         if(isset($_SERVER['HTTP_ACCEPT']) && (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
             $page = json_encode(array('location' => $surl));
-            isset($this->_view) || $this->_view = View::iGet();
-            $this->_view->render($page);
+            View::iGet()->render($page);
         }
         elseif(!$this->_isFrame && !headers_sent())
         {
@@ -576,8 +567,7 @@ class Controller extends Singleton
             $page .= '<noscript>';
             $page .= '<meta http-equiv="refresh" content="0;url='.$surl.'" />';
             $page .= '</noscript>';
-            isset($this->_view) || $this->_view = View::iGet();
-            $this->_view->render($page);
+            View::iGet()->render($page);
         }
         exit;
     }
@@ -606,7 +596,7 @@ class Controller extends Singleton
                 $tpl = $response->getTpl();
                 if($tpl)
                 {
-                    $this->_getPage($tpl, $response->getDatas());
+                    $this->_buildPage($tpl, $response->getDatas());
                 }
                 else Logs::iGet()->log($response->getError(), $response->getStatus());
                 $ret = false;
@@ -617,7 +607,7 @@ class Controller extends Singleton
                 $tpl = $response->getTpl();
                 if($tpl)
                 {
-                    $this->_getPage($tpl, $response->getDatas());
+                    $this->_buildPage($tpl, $response->getDatas());
                 }
                 break;
 
@@ -676,7 +666,7 @@ class Controller extends Singleton
     }
 
     /**
-     * Gets a template to display
+     * Adds a template to the page to display
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $tpl the name of the tpl, without the extension
@@ -685,697 +675,20 @@ class Controller extends Singleton
      * @return mixed the template if $return=true, else true
      * @access protected
      */
-    protected function _getPage($tpl, array $datas = array(), $return = false)
+    protected function _buildPage($tpl, array $datas = array(), $return = false)
     {
-        isset($this->_view) || $this->_view = View::iGet();
-
-        $cacheTime = $this->_cfg->get('cacheTime');
         $noCacheDatas = array();
-        $empty = false;
-        $page = '';
-
-        switch($tpl)
-        {
-            case 'new_contents':
-                $request = new Request(array('id' => $datas['id']));
-                Model::getCachedModel('news')->view($request);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $datas = $response->getDatas();
-                    if($this->_user->getConfig('blockimg'))
-                    {
-                        array_walk_recursive($datas, function(&$data) {
-                            $data = preg_replace('/<img\b([^>]*)(src\s*=\s*([\'"])?(.*?)\\3\s*)[^>]*\/?>/ise',
-                                "'<a href=\"javascript:;\" title=\"Blocked image, click to see it ! " .
-                                "('.addcslashes(\"\\4\", '\"').')\" class=\"img_blocked backgrounded\" " .
-                                "onclick=\"rP.loadImage(this, \''.addcslashes(\"\\4\", '\'').'\');\">" .
-                                "<img alt=\"&nbsp;&nbsp;&nbsp;&nbsp;\"/></a>'", $data);
-                        });
-                    }
-                    $page .= $this->_view->get('new_contents', $datas, $cacheTime);
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-            break;
-
-            case 'new_details':
-                $datas['details'] = array();
-                $request = new Request(array('id' => $datas['id']));
-                Model::getCachedModel('news')->view($request);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $data = $response->getDatas();
-                    $datas['url'] = htmlspecialchars($data['link'], ENT_COMPAT, 'UTF-8');
-                    $datas['title'] = htmlspecialchars($data['title'], ENT_COMPAT, 'UTF-8');
-                    foreach($data['contents'] as $k => $content)
-                    {
-                        switch($k)
-                        {
-                            case 'description':
-                            case 'content':
-                            case 'encoded':
-                            case 'url':
-                            case 'title':
-                                break;
-
-                            default:
-                                $datas['details'][$k] = $content;
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-            break;
-
-            case 'menu_part_category':
-                $datas['gname'] = $datas['name'];
-                $datas['groupid'] = $datas['gid'];
-
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-
-                $noCacheDatas['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
-                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
-                $tpl = 'menu_contents';
-                break;
-
-            case 'menu_part_group':
-                $streams = DAO::getDAO('streams_relations')->get(array('gid' => $datas['id']), 'rssid');
-                if(!$streams)
-                {
-                    $empty = true;
-                    break;
-                }
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-                if(is_object($streams))
-                    $streams = array($streams);
-                $request = new Request(array('id'=>null));
-                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
-                $response = $request->getResponse();
-                $groups = array();
-                if('error' !== $response->getNext())
-                {
-                    $groups = $response->getDatas();
-                    if(!$response->isMultiple()) $groups = array($groups);
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                    break;
-                }
-                unset($response, $g);
-                $request->getContents = false;
-                $streamsToDisplay = array();
-                foreach($streams as $s)
-                {
-                    $request->id = $s->rssid;
-                    Model::getCachedModel('streams')->view($request);
-                    $response = $request->getResponse();
-                    if('error' !== $response->getNext())
-                    {
-                        $stream = $response->getDatas();
-                        if(empty($stream))
-                        {
-                            $empty = true;
-                            break;
-                        }
-                        $stream['groups'] = $groups;
-                        if($stream['status'] > 0)
-                        {
-                            $stream['unavailable'] = $this->_getDate($stream['status']);
-                        }
-
-                        if(!isset($groups_select[$stream['gid']]))
-                            $groups_select[$stream['gid']] = $this->_view->get('menu_selects', array(
-                                                                        'gid' => $stream['gid'],
-                                                                        'groups' => $groups),
-                                                                        $cacheTime
-                                                        );
-                        $streamsToDisplay[$stream['name']] = $stream;
-                        $streamsToDisplay[$stream['name']]['unread'] = isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0;
-                    }
-                    else
-                    {
-                        Logs::iGet()->log($response->getError(), $response->getStatus());
-                        $empty = true;
-                        break;
-                    }
-                    unset($response);
-                }
-                unset($streams);
-
-                ksort($streamsToDisplay);
-
-                foreach($streamsToDisplay as $stream)
-                {
-                    $unread = $stream['unread'];
-                    unset($stream['unread']);
-                    $page .= $this->_view->get('menu_streams', $stream, $cacheTime, array(
-                            'unread'    => $unread,
-                            'bold'      => $unread > 0 ? 'bold ' : '',
-                            'groups_select'     => $groups_select[$stream['gid']]
-                            ));
-                }
-
-                unset($streamsToDisplay, $request);
-                break;
-
-            case 'news_tags_contents':
-                $request = new Request(array(), true);
-                Model::getCachedModel('news_tags')->view($request, array('newsid' => $datas['id']));
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $tags = $response->getDatas();
-                    if(empty($tags))
-                    {
-                        $empty = true;
-                        break;
-                    }
-
-                    if($response->isMultiple())
-                    {
-                        $page = array();
-                        foreach($tags as $tag)
-                            $page[] = $tag['name'];
-                        $page = join(',', $page);
-                    }
-                    else $page .= $tags['name'];
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-                break;
-
-            case 'menu_part_stream':
-                $request = new Request(array('id' => $datas['id']));
-                Model::getCachedModel('streams')->view($request);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $datas['stream'] = $response->getDatas();
-                    unset($datas['stream']['title']);
-                    $datas['stream']['contents']['nextRefresh'] = $this->_getDate($datas['stream']['lastupd'] + $datas['stream']['ttl']);
-                    $datas['stream']['contents']['id'] = $datas['stream']['id'];
-                    $datas['stream']['contents']['url'] = $datas['stream']['url'];
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-                break;
-
-            case 'news':
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-
-                $datas['abstract'] = $this->_user->getConfig('abstract');
-                $ids = null;
-                $uid = $this->_user->getUid();
-
-                if(!empty($datas['sort']))
-                {
-                    $order = $datas['sort'].' '.$datas['dir'];
-                    if('news.pubDate' !== $datas['sort'])
-                        $order .= ',news.pubDate DESC';
-                }
-                else
-                {
-                    $order = 'news.pubDate DESC';
-                }
-
-                $offset = 0;
-                $nbNewsByPage = (int) $this->_user->getConfig('nbnews');
-
-                if(isset($datas['offset']))
-                {
-                    $datas['offset'] = (int)$datas['offset'];
-
-                    if($datas['offset'] > 0)
-                    {
-                        $offset = (int)($datas['offset'] * $nbNewsByPage);
-                    }
-                }
-                else
-                {
-                    $datas['offset'] = 0;
-                }
-
-                $offset = $offset.','.$nbNewsByPage;
-
-                if(isset($datas['id']) && is_array($datas['id']))
-                {
-                    if(empty($datas['id']))
-                    {
-                        $empty = true;
-                        break;
-                    }
-                    $request = new Request(array('ids' => $datas['id'], 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
-                    $datas['nbNews'] = count($datas['id']);
-                }
-                elseif(empty($datas['id']))
-                {
-                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
-                    $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
-                }
-                elseif(-1 === $datas['id'])
-                { // all news
-                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
-                    $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
-                    $datas['nbNews'] = $nb ? $nb->nb : 0;
-                }
-                else
-                {
-                    try
-                    {
-                        $table = DAO::getType($datas['id']);
-                    }
-                    catch(Exception $e)
-                    {
-                        switch($e->getCode())
-                        {
-                            case Exception::E_OWR_NOTICE:
-                            case Exception::E_OWR_WARNING:
-                                Logs::iGet()->log($e->getContent(), $e->getCode());
-                                $empty = true;
-                                break 2;
-                            default: throw new Exception($e->getContent(), $e->getCode());
-                                break;
-                        }
-                    }
-
-                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    if('streams' === $table)
-                    {
-                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
-                        $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
-                    }
-                    elseif('streams_groups' === $table)
-                    {
-                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
-                        $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
-                    }
-                    elseif('news_tags' === $table)
-                    {
-                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
-                        $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
-                    }
-                    else
-                    {
-                        Logs::iGet()->log(Utilities::iGet()->_('Invalid id'));
-                        $empty = true;
-                        break;
-                    }
-                }
-
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $news = $response->getDatas();
-                    if(empty($news))
-                    {
-                        $empty = true;
-                        break;
-                    }
-
-                    if(!$response->isMultiple()) $news = array($news);
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                    break;
-                }
-                unset($response, $request, $result);
-
-                $pager = array('nbNews'         => (int) $datas['nbNews'],
-                                'offset'        => $datas['offset'],
-                                'sort'          => !empty($datas['sort']) ? $datas['sort'] : null,
-                                'dir'           => !empty($datas['dir']) ? $datas['dir'] : null,
-                                'nbNewsByPage'  => $nbNewsByPage);
-
-                if(empty($datas['search']))
-                {
-                    $page .= $this->_view->get('news_tools', $pager, $cacheTime);
-                }
-
-                unset($news['ids']);
-
-                foreach($news as $k => $new)
-                {
-                    if(isset($datas['searchResults'][$new['id']]))
-                        $new['search_result'] = (float) $datas['searchResults'][$new['id']];
-                    $new['pubDate'] = $this->_getDate($new['pubDate']);
-                    $new['abstract'] = $datas['abstract'];
-                    $page .= $this->_view->get('new_title', $new, $cacheTime);
-                }
-                unset($news);
-            break;
-
-            case 'index':
-                if(empty($this->_request->unreads))
-                    $this->do_getunread(true);
-                $token = $this->_user->getToken();
-                $surl = $this->_cfg->get('surl');
-                $ulang = $this->_user->getLang();
-                $uid = $this->_user->getUid();
-                $page .= $this->_view->get('header', array(
-                                                        'surl'      => $surl,
-                                                        'xmlLang'   => $this->_user->getXMLLang(),
-                                                        'ulang'     => substr($ulang, 0, 2)
-                                                    ),
-                                                    $cacheTime,
-                                                    array(
-                                                        'token' => $token
-                                                    ));
-
-                $page .= $this->_view->get('board', array(
-                                                        'lang' => $ulang,
-                                                        'surl' => $surl,
-                                                    ),
-                                                    $cacheTime,
-                                                    array(
-                                                        'userlogin' => htmlentities($this->_user->getLogin(), ENT_COMPAT, 'UTF-8'),
-                                                        'token'     => $token
-                                                    ));
-
-                $request = new Request(array('id'=>null));
-                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
-                $response = $request->getResponse();
-                $groups = array();
-                $tmpPage = '';
-                if('error' !== $response->getNext())
-                {
-                    $groups = $response->getDatas();
-                    if(!empty($groups))
-                    {
-                        if($response->isMultiple())
-                        {
-                            foreach($groups as $group)
-                            {
-                                $group['groupid'] = $group['id'];
-                                $group['gname'] = $group['name'];
-                                $noCacheDatas['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
-                                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
-                                $tmpPage .= $this->_view->get('menu_contents', $group, $cacheTime, $noCacheDatas);
-                            }
-                        }
-                        else
-                        {
-                            $groups['groupid'] = $groups['id'];
-                            $groups['gname'] = $groups['name'];
-                            $noCacheDatas['unread'] = isset($this->_request->unreads[$groups['id']]) ? $this->_request->unreads[$groups['id']] : 0;
-                            $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
-                            $tmpPage .= $this->_view->get('menu_contents', $groups, $cacheTime, $noCacheDatas);
-                            $groups = array($groups);
-                        }
-                    }
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-                $page .= $this->_view->get('menu_header', array(), $cacheTime,
-                                            array(
-                                                'unread' => $this->_request->unreads[0],
-                                                'bold' => $this->_request->unreads[0] > 0 ? ' class="bold"' : ''
-                                            ));
-                $page .= $tmpPage;
-                unset($tmpPage);
-                $page .= $this->_view->get('menu_tags', array(), $cacheTime);
-
-                $page .= $this->_getPage('menu_tags_contents', $datas, true);
-
-                $page .= $this->_view->get('menu_footer', array(
-                                                            'groups'            => $groups,
-                                                            'userrights'        => $this->_user->getRights(),
-                                                            'surl'              => $surl,
-                                                            'maxuploadfilesize' => $this->_cfg->get('maxUploadFileSize')
-                                                        ),
-                                                        $cacheTime,
-                                                        array(
-                                                            'token'             => $token,
-                                                            'uid'               => $uid,
-                                                            'groups_select'     => $this->_view->get('menu_selects', array(
-                                                                        'gid' => 0,
-                                                                        'groups' => $groups),
-                                                                        $cacheTime
-                                                        )));
-                unset($groups);
-                $page .= $this->_view->get('contents_header', array(), $cacheTime);
-                $page .= $this->_getPage('news', $datas, true);
-                $page .= $this->_view->get('contents_footer', array(), $cacheTime);
-                $page .= $this->_view->get('footer', array(
-                                                        'lang'=>$ulang,
-                                                        'surl'=>$surl
-                                                        ),
-                                                        $cacheTime,
-                                                    array(
-                                                        'token'=>$token,
-                                                        'ttl'=>$this->_cfg->get('defaultMinStreamRefreshTime')*60*1000,
-                                                        'opensearch'=>(isset($datas['opensearch']) ? $datas['opensearch'] : 0)
-                                                    ));
-                break;
-
-            case 'menu_tags_contents':
-                $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
-                Model::getCachedModel('news_tags')->view($request, array(), 'name');
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $tags = $response->getDatas();
-                    if(!empty($tags))
-                    {
-                        if($response->isMultiple())
-                        {
-                            foreach($tags as $tag)
-                            {
-                                $tag['groupid'] = $tag['id'];
-                                $tag['gname'] = $tag['name'];
-                                $noCacheDatas['unread'] = isset($this->_request->unreads[$tag['id']]) ? $this->_request->unreads[$tag['id']] : 0;
-                                $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
-                                $page .= $this->_view->get('menu_tags_contents', $tag, $cacheTime, $noCacheDatas);
-                            }
-                        }
-                        else
-                        {
-                            $tags['groupid'] = $tags['id'];
-                            $tags['gname'] = $tags['name'];
-                            $noCacheDatas['unread'] = isset($this->_request->unreads[$tags['id']]) ? $this->_request->unreads[$tags['id']] : 0;
-                            $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
-                            $page .= $this->_view->get('menu_tags_contents', $tags, $cacheTime, $noCacheDatas);
-                        }
-                    }
-                    else $empty = true;
-                    unset($tags);
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                break;
-
-            case 'getopensearch':
-                $datas['surl'] = $this->_cfg->get('surl');
-                break;
-
-            case 'opml':
-                $datas['userlogin'] = $this->_user->getLogin();
-                $noCacheDatas['dateCreated'] = $datas['dateCreated'];
-                unset($datas['dateCreated']);
-                $datas['streams'] = array();
-                $request = new Request(array('id'=>null));
-                Model::getCachedModel('streams')->view($request);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $streams = $response->getDatas();
-                    if(empty($streams)) break;
-
-                    if($response->isMultiple())
-                    {
-                        foreach($streams as $stream)
-                        {
-                            if(!isset($datas['groups'][$stream['gid']]))
-                                $datas['groups'][$stream['gid']] = $stream['gname'];
-                            $datas['streams'][$stream['gid']][] = $stream;
-                        }
-                    }
-                    else
-                    {
-                        $datas['groups'][$streams['gid']] = $streams['gname'];
-                        $datas['streams'][$streams['gid']][] = $streams;
-                    }
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request, $streams);
-                break;
-
-            case 'edituser':
-                $noCacheDatas['token'] = $this->_user->getToken();
-                if(empty($datas['id']))
-                { // surely editing a new user
-                    $datas['surl'] = $this->_cfg->get('surl');
-                    $datas['timezones'] = $this->_user->getTimeZones();
-                    $datas['userrights'] = $this->_user->getRights();
-                    break;
-                }
-
-                $request = new Request(array('id' => $datas['id']));
-                $datas['surl'] = $this->_cfg->get('surl');
-                $datas['timezones'] = $this->_user->getTimeZones();
-                $datas['userrights'] = $this->_user->getRights();
-                $datas['ulang'] = substr($this->_user->getLang(), 0, 2);
-                $datas['xmlLang'] = $this->_user->getXMLLang();
-                Model::getCachedModel('users')->view($request);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $datas += $response->getDatas();
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-                break;
-
-            case 'users':
-                $request = new Request($datas);
-                $datas['surl'] = $this->_cfg->get('surl');
-                $noCacheDatas['token'] = $this->_user->getToken();
-                $datas['users'] = array();
-                $datas['nbusers'] = 0;
-                Model::getCachedModel('users')->view($request, array(), 'login');
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    if(!$response->isMultiple())
-                    {
-                        $datas['users'][] = $response->getDatas();
-                        $datas['nbusers'] = 1;
-                    }
-                    else
-                    {
-                        $datas['users'] = $response->getDatas();
-                        $datas['nbusers'] = count($datas['users']);
-                    }
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-                break;
-
-            case 'rss':
-                $request = new Request(array('id'=>null));
-                $datas['surl'] = $this->_cfg->get('surl');
-                $datas['userlogin'] = $this->_user->getLogin();
-                $args = array('status' => 1);
-                if(!empty($datas['id']))
-                    $args['rssid'] = $datas['id'];
-                $datas['news'] = $ids = array();
-                Model::getCachedModel('news')->view($request, $args);
-                $response = $request->getResponse();
-                if('error' !== $response->getNext())
-                {
-                    $data = $response->getDatas();
-                    if(empty($data)) break;
-
-                    if($response->isMultiple())
-                    {
-                        $datas['news'] = $data;
-                        unset($data);
-                        foreach($datas['news'] as $k=>$new)
-                        {
-                            $ids[] = $new['id'];
-                            $datas['news'][$k]['pubDate'] = date(DATE_RSS, $new['pubDate']);
-                        }
-                    }
-                    else
-                    {
-                        $ids[] = $data['id'];
-                        $data['pubDate'] = date(DATE_RSS, $data['pubDate']);
-                        $datas['news'][] = $data;
-                    }
-
-                }
-                else
-                {
-                    Logs::iGet()->log($response->getError(), $response->getStatus());
-                    $empty = true;
-                }
-                unset($response, $request);
-
-                if(!empty($ids))
-                {
-                    $query = '
-    UPDATE news_relations
-        SET status=0
-        WHERE uid='.$this->_user->getUid().' AND newsid IN ('.join(',', $ids).')';
-                    $this->_db->set($query);
-                }
-                break;
-
-            case 'login':
-                $datas['surl'] = $this->_cfg->get('surl');
-                $datas['xmlLang'] = $this->_user->getXMLLang();
-                $datas['ulang'] = substr($this->_user->getLang(), 0, 2);
-                $noCacheDatas['token'] = $this->_user->getToken();
-                $noCacheDatas['back'] = $this->_request->back;
-                break;
-
-            default:
-                break;
-        }
-
+        
+        $this->getPageDatas($tpl, $datas, $noCacheDatas);
+        
+        $page = Themes::iGet()->$tpl($datas, $noCacheDatas);
+        
         if(!empty($page))
         {
             if($return)
                 return $page;
             else
-                $this->_request->page .= $page;
-        }
-        elseif(!$empty)
-        {
-            if($return)
-                return $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
-            else
-                $this->_request->page .= $this->_view->get($tpl, $datas, $cacheTime, $noCacheDatas);
+                $this->addToPage($page);
         }
     }
 
@@ -1460,9 +773,8 @@ class Controller extends Singleton
      */
     protected function do_getRSS()
     {
-        isset($this->_view) || $this->_view = View::iGet();
-        $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
-        $this->_getPage('rss', array('id'=>$this->_request->id));
+        View::iGet()->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
+        $this->_buildPage('rss', array('id'=>$this->_request->id));
         return $this;
     }
 
@@ -1487,7 +799,7 @@ class Controller extends Singleton
      */
     protected function do_getNewDetails()
     {
-        $this->_getPage('new_details', array('id' => $this->_request->id));
+        $this->_buildPage('post_details', array('id' => $this->_request->id));
         return $this;
     }
 
@@ -1500,7 +812,7 @@ class Controller extends Singleton
      */
     protected function do_getMenuPartGroup()
     {
-        $this->_getPage('menu_part_group', array('id'=>$this->_request->id));
+        $this->_buildPage('streams', array('id'=>$this->_request->id));
         return $this;
     }
 
@@ -1512,7 +824,7 @@ class Controller extends Singleton
      */
     protected function do_getMenuPartStream()
     {
-        $this->_getPage('menu_part_stream', array('id'=>$this->_request->id));
+        $this->_buildPage('stream', array('id'=>$this->_request->id));
         return $this;
     }
 
@@ -1538,7 +850,7 @@ class Controller extends Singleton
             $this->do_upNew();
         }
 
-        $this->_getPage('news', array(
+        $this->_buildPage('posts', array(
                             'id'        => $this->_request->id,
                             'offset'    => $this->_request->offset,
                             'sort'      => $this->_request->sort,
@@ -1647,7 +959,7 @@ class Controller extends Singleton
      */
     protected function do_index()
     {
-        $this->_getPage('index');
+        $this->_buildPage('index');
         return $this;
     }
 
@@ -1663,7 +975,7 @@ class Controller extends Singleton
         if(!$this->_user->isAdmin())
             throw new Exception("You don't have the rights to do that", Exception::E_OWR_UNAUTHORIZED);
 
-        $this->_getPage('users');
+        $this->_buildPage('users');
         return $this;
     }
 
@@ -1676,9 +988,8 @@ class Controller extends Singleton
      */
     protected function do_getOpenSearch()
     {
-        isset($this->_view) || $this->_view = View::iGet();
-        $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
-        $this->_getPage('getopensearch');
+        View::iGet()->addHeaders(array('Content-Type' => 'text/xml; charset=utf-8'));
+        $this->_buildPage('opensearch');
         return $this;
     }
 
@@ -1719,7 +1030,7 @@ class Controller extends Singleton
             }
         }
 
-        $this->_getPage('new_contents', array('id'=>$this->_request->id, 'offset'=>$this->_request->offset));
+        $this->_buildPage('post_content', array('id'=>$this->_request->id, 'offset'=>$this->_request->offset));
         return $this;
     }
 
@@ -1732,11 +1043,10 @@ class Controller extends Singleton
      */
     protected function do_getOPML()
     {
-        isset($this->_view) || $this->_view = View::iGet();
         if(!empty($this->_request->dl))
         {
-            $opml = $this->_getPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")), true);
-            $this->_view->addHeaders(array(
+            $opml = $this->_buildPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")), true);
+            View::iGet()->addHeaders(array(
                 "Pragma" => "public",
                 "Expires" => "0",
                 "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
@@ -1749,8 +1059,8 @@ class Controller extends Singleton
         }
         else
         {
-            $this->_view->addHeaders(array('Content-Type' => 'text/xml; charset=UTF-8'));
-            $this->_getPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")));
+            View::iGet()->addHeaders(array('Content-Type' => 'text/xml; charset=UTF-8'));
+            $this->_buildPage('opml', array('dateCreated'=>date("D, d M Y H:i:s T")));
         }
         return $this;
     }
@@ -1890,7 +1200,7 @@ class Controller extends Singleton
             $datas = array();
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
-            $this->_getPage('index');
+            $this->_buildPage('index');
             return $this;
         }
 
@@ -1954,14 +1264,14 @@ class Controller extends Singleton
             unset($results);
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
-            $this->_getPage('index', $datas);
+            $this->_buildPage('index', $datas);
         }
         else
         {
             Logs::iGet()->log(Utilities::iGet()->_('No results found. Try again by simplifying the request'), 204);
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
-            $this->_getPage('index', $datas);
+            $this->_buildPage('index', $datas);
         }
         return $this;
     }
@@ -2043,7 +1353,7 @@ class Controller extends Singleton
             $datas['offset'] = $this->_request->offset;
             $datas['sort'] = $this->_request->sort ?: '';
             $datas['dir'] = $this->_request->dir ?: '';
-            $this->_getPage('news', $datas);
+            $this->_buildPage('posts', $datas);
         }
         else
         {
@@ -2064,7 +1374,7 @@ class Controller extends Singleton
         if(empty($this->_request->id))
             throw new Exception('Missing id', Exception::E_OWR_BAD_REQUEST);
 
-        $this->_getPage('news_tags_contents', array('id' => $this->_request->id));
+        $this->_buildPage('post_tags', array('id' => $this->_request->id));
         return $this;
     }
 
@@ -2116,7 +1426,7 @@ class Controller extends Singleton
         if(!$exists)
         {
             $this->_user->reset();
-            $this->_getPage('edituser', array('id'=>0));
+            $this->_buildPage('user', array('id'=>0));
             return $this;
         }
         unset($exists);
@@ -2127,7 +1437,7 @@ class Controller extends Singleton
             if(isset($this->_request->timeout)) $datas['error'] = Utilities::iGet()->_('Session timeout');
             if(isset($this->_request->back)) $datas['back'] = $this->_request->back;
             $this->_user->reset();
-            $this->_getPage('login', $datas);
+            $this->_buildPage('login', $datas);
             return $this;
         }
 
@@ -2138,7 +1448,7 @@ class Controller extends Singleton
             if(!$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, $this->_request->do))
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
+                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
         }
@@ -2151,7 +1461,7 @@ class Controller extends Singleton
             $this->_request->token !== $token)
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
+                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
             $this->_user->openIdAuth($openid);
@@ -2187,20 +1497,20 @@ class Controller extends Singleton
             if(!$this->_user->checkToken())
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
+                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
 
             if(empty($this->_request->login) || empty($this->_request->passwd))
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error'=> Utilities::iGet()->_('Please fill all the fields.')));
+                $this->_buildPage('login', array('error'=> Utilities::iGet()->_('Please fill all the fields.')));
                 return $this;
             }
             elseif(mb_strlen($this->_request->login, 'UTF-8') > 55)
             {
                 $this->_user->reset();
-                $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
+                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
                 return $this;
             }
 
@@ -2214,7 +1524,7 @@ class Controller extends Singleton
         if(!$uid)
         {
             $this->_user->reset();
-            $this->_getPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
+            $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid login or password. Please try again.')));
             return $this;
         }
 
@@ -2324,7 +1634,7 @@ class Controller extends Singleton
 
         if(!isset($escape) && (!$this->_request->currentid || $this->_request->id === $this->_request->currentid))
         {
-            $this->_getPage('news', array('id' => 0, 'sort' => $this->_request->sort ?: '', 'dir' => $this->_request->dir ?: ''));
+            $this->_buildPage('posts', array('id' => 0, 'sort' => $this->_request->sort ?: '', 'dir' => $this->_request->dir ?: ''));
         }
 
         return $this;
@@ -2388,7 +1698,7 @@ class Controller extends Singleton
         {
             $contents = array('id' => $this->_request->id);
             if($this->_request->new)
-                $contents['menu'] = $this->_getPage('menu_part_category', array('gid'=>$this->_request->id, 'name'=>$this->_request->name), true);
+                $contents['menu'] = $this->_buildPage('category', array('gid'=>$this->_request->id, 'name'=>$this->_request->name), true);
             $this->_request->page = array();
             $this->addToPage($contents);
         }
@@ -2638,7 +1948,436 @@ class Controller extends Singleton
         if(!$this->_user->isAdmin())
             throw new Exception("You don't have the rights to do that", Exception::E_OWR_UNAUTHORIZED);
 
-        $this->_getPage('logs', array('logs' =>  Logs::iGet()->getCLILogs()));
+        $this->_buildPage('logs', array('logs' =>  Logs::iGet()->getCLILogs()));
+
+        return $this;
+    }
+
+    /**
+     * Retrieves datas for displaying template
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param string $tpl template name
+     * @param array &$datas retrieved datas
+     * @param array &$noCacheDatas retrieved not cached datas
+     * @return $this
+     */
+    public function getPageDatas($tpl, array &$datas = array(), array &$noCacheDatas = array())
+    {
+        switch($tpl)
+        {
+            case 'post_content':
+                $request = new Request(array('id' => $datas['id']));
+                Model::getCachedModel('news')->view($request);
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+                
+                $datas = array_merge($datas, $response->getDatas());
+            break;
+
+            case 'post_details':
+                $datas['details'] = array();
+                $request = new Request(array('id' => $datas['id']));
+                Model::getCachedModel('news')->view($request);
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+                
+                $data = $response->getDatas();
+                $datas['url'] = htmlspecialchars($data['link'], ENT_COMPAT, 'UTF-8');
+                $datas['title'] = htmlspecialchars($data['title'], ENT_COMPAT, 'UTF-8');
+                foreach($data['contents'] as $k => $content)
+                {
+                    switch($k)
+                    {
+                        case 'description':
+                        case 'content':
+                        case 'encoded':
+                        case 'url':
+                        case 'title':
+                            break;
+
+                        default:
+                            $datas['details'][$k] = $content;
+                            break;
+                    }
+                }
+            break;
+
+            case 'category':
+                $datas['gname'] = $datas['name'];
+                $datas['groupid'] = $datas['gid'];
+
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+
+                $noCacheDatas['unread'] = isset($this->_request->unreads[$datas['gid']]) ? $this->_request->unreads[$datas['gid']] : 0;
+                break;
+
+            case 'streams':
+                $streams = DAO::getDAO('streams_relations')->get(array('gid' => $datas['id']), 'rssid');
+                if(!$streams)
+                    break;
+
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                if(is_object($streams))
+                    $streams = array($streams);
+
+                $request = new Request(array('id'=>null));
+                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['groups'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+
+                $request->getContents = false;
+                foreach($streams as $s)
+                {
+                    $request->id = $s->rssid;
+                    Model::getCachedModel('streams')->view($request);
+                    $response = $request->getResponse();
+                    if('error' === $response->getNext())
+                    {
+                        Logs::iGet()->log($response->getError(), $response->getStatus());
+                        continue;
+                    }
+                    
+                    $stream = $response->getDatas();
+                    if(empty($stream))
+                        break;
+
+                    $stream['groups'] = $datas['groups'];
+                    if($stream['status'] > 0)
+                    {
+                        $stream['unavailable'] = $this->_getDate($stream['status']);
+                    }
+                    $stream['unread'] = isset($this->_request->unreads[$stream['id']]) ? $this->_request->unreads[$stream['id']] : 0;
+                    
+                    $datas['streams'][] = $stream;
+                }
+                break;
+
+            case 'post_tags':
+                $request = new Request(array(), true);
+                Model::getCachedModel('news_tags')->view($request, array('newsid' => $datas['id']));
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['tags'] = $response->getDatas();
+                break;
+
+            case 'stream':
+                $request = new Request(array('id' => $datas['id']));
+                Model::getCachedModel('streams')->view($request);
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+                
+                $datas['stream'] = $response->getDatas();
+                break;
+
+            case 'posts':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+
+                $datas['abstract'] = (bool) $this->_user->getConfig('abstract');
+                    
+                if(!empty($datas['sort']))
+                {
+                    $order = $datas['sort'].' '.$datas['dir'];
+                    if('news.pubDate' !== $datas['sort'])
+                        $order .= ',news.pubDate DESC';
+                }
+                else
+                {
+                    $order = 'news.pubDate DESC';
+                }
+
+                $offset = 0;
+                $nbNewsByPage = (int) $this->_user->getConfig('nbnews');
+
+                if(isset($datas['offset']))
+                {
+                    $datas['offset'] = (int)$datas['offset'];
+
+                    if($datas['offset'] > 0)
+                    {
+                        $offset = (int)($datas['offset'] * $nbNewsByPage);
+                    }
+                }
+                else
+                {
+                    $datas['offset'] = 0;
+                }
+
+                $offset = $offset.','.$nbNewsByPage;
+
+                if(isset($datas['id']) && is_array($datas['id']))
+                {
+                    if(empty($datas['id']))
+                        break;
+                    $request = new Request(array('ids' => $datas['id'], 'getContents' => $datas['abstract']));
+                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
+                    $datas['nbNews'] = count($datas['id']);
+                }
+                elseif(empty($datas['id']))
+                {
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
+                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
+                    $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
+                }
+                elseif(-1 === $datas['id'])
+                { // all news
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
+                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
+                    $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
+                    $datas['nbNews'] = $nb ? $nb->nb : 0;
+                }
+                else
+                {
+                    try
+                    {
+                        $table = DAO::getType($datas['id']);
+                    }
+                    catch(Exception $e)
+                    {
+                        switch($e->getCode())
+                        {
+                            case Exception::E_OWR_NOTICE:
+                            case Exception::E_OWR_WARNING:
+                                Logs::iGet()->log($e->getContent(), $e->getCode());
+                                break 2;
+                            default: throw new Exception($e->getContent(), $e->getCode());
+                                break;
+                        }
+                    }
+
+                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
+                    if('streams' === $table)
+                    {
+                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
+                        $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                    }
+                    elseif('streams_groups' === $table)
+                    {
+                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
+                        $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                    }
+                    elseif('news_tags' === $table)
+                    {
+                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
+                        $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
+                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                    }
+                    else
+                    {
+                        Logs::iGet()->log(Utilities::iGet()->_('Invalid id'));
+                        break;
+                    }
+                }
+
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['news'] = $response->getDatas();
+                if(empty($datas['news']))
+                    break;
+
+                if(!$response->isMultiple()) $datas['news'] = array($datas['news']);
+
+                $datas['pager'] = array('nbNews'         => (int) $datas['nbNews'],
+                                'offset'        => $datas['offset'],
+                                'sort'          => !empty($datas['sort']) ? $datas['sort'] : null,
+                                'dir'           => !empty($datas['dir']) ? $datas['dir'] : null,
+                                'nbNewsByPage'  => $nbNewsByPage);
+
+                unset($datas['news']['ids']);
+                                
+                foreach($datas['news'] as $k => $new)
+                {
+                    if(isset($datas['searchResults'][$new['id']]))
+                        $datas['news'][$k]['search_result'] = (float) $datas['searchResults'][$new['id']];
+                    $datas['news'][$k]['pubDate'] = $this->_getDate($new['pubDate']);
+                    $datas['news'][$k]['abstract'] = $datas['abstract'];
+                }
+            break;
+
+            case 'index':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                $datas['unreads'] = $this->_request->unreads;
+                
+                $this->getPageDatas('categories', $datas, $noCacheDatas);
+                $this->getPageDatas('posts', $datas, $noCacheDatas);
+                $this->getPageDatas('tags', $datas, $noCacheDatas);
+                break;
+
+            case 'categories':
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+                    
+                $request = new Request(array('id' => null));
+                Model::getCachedModel('streams_groups')->view($request, array(), 'name');
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['groups'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                foreach($datas['groups'] as $k => $group)
+                {
+                    $datas['groups'][$k]['groupid'] = $group['id'];
+                    $datas['groups'][$k]['gname'] = $group['name'];
+                    $datas['groups'][$k]['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
+                }
+                break;
+                
+            case 'tags':
+                $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
+                Model::getCachedModel('news_tags')->view($request, array(), 'name');
+                $response = $request->getResponse();
+                if('error' !== $response->getNext())
+                {
+                    $datas['tags'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                    foreach($datas['tags'] as $k => $tag)
+                    {
+                        $datas['tags'][$k]['groupid'] = $tag['id'];
+                        $datas['tags'][$k]['gname'] = $tag['name'];
+                        $datas['tags'][$k]['unread'] = isset($this->_request->unreads[$tag['id']]) ? $this->_request->unreads[$tag['id']] : 0;
+                    }
+                }
+                else
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                }
+                break;
+
+            case 'getopensearch':
+                $datas['surl'] = $this->_cfg->get('surl');
+                break;
+
+            case 'opml':
+                $datas['userlogin'] = $this->_user->getLogin();
+                $noCacheDatas['dateCreated'] = $datas['dateCreated'];
+                unset($datas['dateCreated']);
+                $datas['streams'] = array();
+                $request = new Request(array('id'=>null));
+                Model::getCachedModel('streams')->view($request);
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['streams'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                break;
+
+            case 'user':
+                $noCacheDatas['token'] = $this->_user->getToken();
+                if(empty($datas['id']))
+                { // surely editing a new user
+                    $datas['surl'] = $this->_cfg->get('surl');
+                    $datas['timezones'] = $this->_user->getTimeZones();
+                    $datas['userrights'] = $this->_user->getRights();
+                    break;
+                }
+
+                $request = new Request(array('id' => $datas['id']));
+                $datas['surl'] = $this->_cfg->get('surl');
+                $datas['timezones'] = $this->_user->getTimeZones();
+                $datas['userrights'] = $this->_user->getRights();
+                $datas['ulang'] = substr($this->_user->getLang(), 0, 2);
+                $datas['xmlLang'] = $this->_user->getXMLLang();
+                Model::getCachedModel('users')->view($request);
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas = array_merge($datas, $response->getDatas());
+                break;
+
+            case 'users':
+                $datas['surl'] = $this->_cfg->get('surl');
+                $noCacheDatas['token'] = $this->_user->getToken();
+                $request = new Request($datas);
+                Model::getCachedModel('users')->view($request, array(), 'login');
+                $response = $request->getResponse();
+                if('error' === $response->getNext())
+                {
+                    Logs::iGet()->log($response->getError(), $response->getStatus());
+                    break;
+                }
+
+                $datas['users'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                break;
+
+            case 'rss':
+//                 $request = new Request(array('id'=>null));
+//                 $datas['surl'] = $this->_cfg->get('surl');
+//                 $datas['userlogin'] = $this->_user->getLogin();
+//                 $args = array('status' => 1);
+//                 if(!empty($datas['id']))
+//                     $args['rssid'] = $datas['id'];
+//                 $datas['news'] = $ids = array();
+//                 Model::getCachedModel('news')->view($request, $args);
+//                 $response = $request->getResponse();
+//                 if('error' === $response->getNext())
+//                 {
+//                     Logs::iGet()->log($response->getError(), $response->getStatus());
+//                     break;
+//                 }
+// 
+//                 $datas['news'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+// 
+//                 foreach($datas['news'] as $new)
+//                     $ids[] = $new['id'];
+// 
+//                 if(!empty($ids))
+//                     $this->_db->set('
+//     UPDATE news_relations
+//         SET status=0
+//         WHERE uid='.$this->_user->getUid().' AND newsid IN ('.join(',', $ids).')');
+                break;
+
+            case 'login':
+                $noCacheDatas['back'] = $this->_request->back;
+                break;
+
+            default:
+                break;
+        }
 
         return $this;
     }

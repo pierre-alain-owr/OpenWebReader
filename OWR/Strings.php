@@ -1038,7 +1038,7 @@ class Strings
             }
         }
 
-        $truncate .= $ending;
+        $truncate .= ' ' . $ending;
 
         if ($html)
         {

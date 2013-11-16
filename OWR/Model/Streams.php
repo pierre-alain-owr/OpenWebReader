@@ -204,7 +204,7 @@ class Streams extends Model
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'ok',
-                    'tpl'       => 'menu_part_category',
+                    'tpl'       => 'stream',
                     'datas'     => array('id'=>$request->id, 'gid'=>$request->gid, 'name'=>$request->gname, 'ids' => $ids),
                     'status'    => 201
                 )));
@@ -464,7 +464,7 @@ class Streams extends Model
         {
             $request->setResponse(new Response(array(
                 'do'        => 'ok',
-                'tpl'       => 'menu_part_category',
+                'tpl'       => 'stream',
                 'datas'     => array('id'=>$request->id, 'gid'=>$request->gid, 'name'=>$request->gname, 'ids' => $ids),
                 'status'    => 201
             )));
@@ -835,7 +835,7 @@ class Streams extends Model
         if($request->currentid === $request->id || 0 === $request->currentid)
         {
             $request->setResponse(new Response(array(
-                'tpl'   => 'news',
+                'tpl'   => 'posts',
                 'datas' => array(
                     'id' => $request->currentid,
                     'offset' => $request->offset,

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo $htmllang;?>" xml:lang="<?php echo $xmllang;?>" xmlns:addthis="http://www.addthis.com/help/api-spec">
+    <head>
+<?php   $this->renderBlocks('head'); ?>
+    </head>
+    <body>
+        <noscript>
+            <p class="error">WARNING : PLEASE ENABLE JAVASCRIPT</p>
+        </noscript>
+        <div id="header">
+<?php       $this->renderBlocks('header'); ?>
+        </div>
+        <div id="contents">
+<?php       $this->renderBlocks('contents'); ?>
+        </div>
+        <div id="footer">
+<?php       $this->renderBlocks('footer');?>
+        </div>
+    </body>
+</html>

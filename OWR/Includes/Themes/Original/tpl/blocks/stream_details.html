@@ -3,4 +3,3 @@ if(!empty($stream['contents'])) {
     if(isset($stream['contents']['items'])) unset($stream['contents']['items']);
     echo $this->_utilities->makeList($stream['contents'], 'stream_details', 'stream_detail');
 }
-?>

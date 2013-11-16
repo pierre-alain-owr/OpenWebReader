@@ -87,7 +87,7 @@ class Users extends Model
         if(empty($_POST))
         {
             $request->setResponse(new Response(array(
-                'tpl'       => 'edituser',
+                'tpl'       => 'user',
                 'datas'     => $datas
             )));
             return $this;
@@ -107,7 +107,7 @@ class Users extends Model
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'tpl'       => 'edituser',
+                'tpl'       => 'user',
                 'error'     => 'Please fill all the fields.',
                 'datas'     => $datas,
                 'status'    => Exception::E_OWR_BAD_REQUEST
@@ -119,7 +119,7 @@ class Users extends Model
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'tpl'       => 'edituser',
+                'tpl'       => 'user',
                 'error'     => 'Login too long, please limit it to 55 chars.',
                 'datas'     => $datas,
                 'status'    => Exception::E_OWR_BAD_REQUEST
@@ -134,7 +134,7 @@ class Users extends Model
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'tpl'       => 'edituser',
+                'tpl'       => 'user',
                 'error'     => 'Passwords are not identiquals.',
                 'datas'     => $datas,
                 'status'    => Exception::E_OWR_BAD_REQUEST
@@ -172,7 +172,7 @@ class Users extends Model
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
-                    'tpl'       => 'edituser',
+                    'tpl'       => 'user',
                     'datas'     => $datas,
                     'error'     => 'Login or openid already used. Please choose another.',
                     'status'    => 409 // conflict
@@ -186,7 +186,7 @@ class Users extends Model
             {
                 $request->setResponse(new Response(array(
                     'do'        => 'error',
-                    'tpl'       => 'edituser',
+                    'tpl'       => 'user',
                     'datas'     => $datas,
                     'error'     => 'You can\'t create user with rights higher than yours.',
                     'status'    => Exception::E_OWR_BAD_REQUEST
@@ -284,7 +284,7 @@ class Users extends Model
         {
             $request->setResponse(new Response(array(
                 'do'        => 'error',
-                'tpl'       => 'edituser',
+                'tpl'       => 'user',
                 'datas'     => $datas,
                 'error'     => $e->getContent(),
                 'status'    => Exception::E_OWR_BAD_REQUEST
