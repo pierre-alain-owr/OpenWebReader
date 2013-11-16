@@ -172,6 +172,7 @@ JS;
                                                             'groups' => $datas['groups']));
         
         $noCacheDatas['unread_0'] = isset($datas['unreads'][0]) ? $datas['unreads'][0] : 0;
+        $noCacheDatas['bold_0'] = $noCacheDatas['unread_0'] > 0 ? ' class="bold"' : '';
         $noCacheDatas['token'] = User::iGet()->getToken();
         $noCacheDatas['userlogin'] = htmlentities(User::iGet()->getLogin(), ENT_COMPAT, 'UTF-8');
 
@@ -188,19 +189,9 @@ JS;
         $noCacheDatas['pagetitle'] = 'OpenWebReader';
 
         $this->_view->addBlock('head', 'head', $this->_view->get('head', $datas, null, $noCacheDatas));
-
         $this->_view->addBlock('board', 'header', $this->_view->get('board', $datas, null, $noCacheDatas));
-
-        $this->_view->addBlock('menu_header', 'contents', $this->_view->get('menu_header', $datas, null, array_merge($noCacheDatas, array('bold' => $noCacheDatas['unread_0'] > 0 ? ' class="bold" ' : ''))));
-        $this->_view->addBlock('categories', 'contents', self::categories($datas, $noCacheDatas));
-        $this->_view->addBlock('menu_tags', 'contents', $this->_view->get('menu_tags', $datas, null, $noCacheDatas));
-        $this->_view->addBlock('tags', 'contents', self::tags($datas, $noCacheDatas));
-        $this->_view->addBlock('menu_footer', 'contents', $this->_view->get('menu_footer', $datas, null, $noCacheDatas));
-
-        $this->_view->addBlock('contents_header', 'contents', $this->_view->get('contents_header', $datas, null, $noCacheDatas));
-        $this->_view->addBlock('posts', 'contents', self::posts($datas, $noCacheDatas));
-        $this->_view->addBlock('contents_footer', 'contents', $this->_view->get('contents_footer', $datas, null, $noCacheDatas));
-        
+        $this->_view->addBlock('menu', 'contents', $this->_view->get('menu', $datas, null, $noCacheDatas));
+        $this->_view->addBlock('content', 'contents', $this->_view->get('content', $datas, null, $noCacheDatas));
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
 
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);

@@ -70,6 +70,10 @@ class View extends Singleton
      */
     protected $_statusCode = 200;
 
+    /**
+     * @var array stack of templates blocks
+     * @access protected
+     */
     protected $_blocks = array();
 
     /**
@@ -109,7 +113,7 @@ class View extends Singleton
 
         if(!isset($contents) || false === $contents)
         { // nothing found in cache
-            $contents = $this->_execute($tpl, $datas);
+            $contents = $this->_execute($tpl, $datas, $noCacheDatas);
 
             if($cacheTime > 0)
             {
@@ -137,9 +141,10 @@ class View extends Singleton
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $tpl the template name
      * @param array $datas the datas
+     * @param array $noCacheDatas the datas that are not cached but replaced on-the-fly
      * @return string the template rendered
      */
-    protected function _execute($tpl, array $datas)
+    protected function _execute($tpl, array $datas, array $noCacheDatas)
     {
         extract((array) $datas, EXTR_SKIP);
         ob_start();
@@ -330,21 +335,51 @@ class View extends Singleton
         }
     }
 
+    /**
+     * Adds a block to the stack
+     *
+     * @param string $name name of the block
+     * @param string $layout name of the layout containing the block
+     * @param string $content content of the block
+     * @param string $type type of the block
+     * @access public
+     */
     public function addBlock($name, $layout, $content, $type = 'html')
     {
         $this->_blocks[$layout][$name] = new Block($content, $type);
     }
 
+    /**
+     * Returns all blocks from a layout
+     *
+     * @param string $layout name of the layout
+     * @access public
+     * @return string layout content or null
+     */
     public function getBlocks($layout)
     {
         return isset($this->_blocks[$layout]) ? join('', $this->_blocks[$layout]) : null;
     }
 
+    /**
+     * Returns a block from a layout
+     *
+     * @param string $name name of the block
+     * @param string $layout name of the layout containing the block
+     * @access public
+     * @return string block content from the layout or null
+     */
     public function getBlock($name, $layout)
     {
         return isset($this->_blocks[$layout][$name]) ? $this->_blocks[$layout][$name] : null;
     }
 
+    /**
+     * Renders blocks from a layout
+     *
+     * @param string $layout name of the layout containing the block
+     * @access public
+     */
     public function renderBlocks($layout)
     {
         $blocks = $this->getBlocks($layout);
@@ -352,6 +387,13 @@ class View extends Singleton
             echo $blocks;
     }
 
+    /**
+     * Renders a block from a layout
+     *
+     * @param string $name name of the block
+     * @param string $layout name of the layout containing the block
+     * @access public
+     */
     public function renderBlock($name, $layout)
     {
         $block = $this->getBlock($name, $layout);
@@ -359,6 +401,13 @@ class View extends Singleton
             echo $block;
     }
 
+    /**
+     * Returns translated text
+     *
+     * @param string $name name of the text
+     * @access public
+     * @return string translated text
+     */
     public function _($name)
     {
         return $this->_utilities->_($name);
