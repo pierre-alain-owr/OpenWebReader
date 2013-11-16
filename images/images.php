@@ -23,8 +23,8 @@ while($theme = Themes::getParentTheme());
 
 if(empty($theme))
     die;
-
-switch(strtolower(pathinfo($file, PATHINFO_EXTENSION)))
+$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+switch($ext)
 {
     case 'jpg':
     case 'jpeg':
