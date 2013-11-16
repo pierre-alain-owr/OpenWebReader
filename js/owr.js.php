@@ -10,38 +10,24 @@ define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
 require HOME_PATH . 'cfg.php';
 
-$file = Themes::iGet()->getPath() . 'images' . DIRECTORY_SEPARATOR . basename($_GET['f']);
+$file = Themes::iGet()->getPath() . 'js' . DIRECTORY_SEPARATOR . basename($_GET['f']);
 
 if(!file_exists($file))
     die;
 
-switch(strtolower(pathinfo($file, PATHINFO_EXTENSION)))
-{
-    case 'jpg':
-    case 'jpeg':
-        $mime = 'image/jpeg';
-        break;
 
-    case 'png':
-    case 'gif':
-        $mime = 'image/'.$ext;
-        break;
-
-    default: die;
-}
-
-header('Content-type: ' . $mime);
+header('Content-type: text/javascript; charset=utf-8');
 header('Cache-Control: Public, must-revalidate');
 header("Expires: ".@gmdate("D, d M Y H:i:s", time() + 60*60*24*365)." GMT");
-header("Last-Modified: ".@gmdate("D, d M Y H:i:s", filemtime($file))." GMT"); 
-$etag = '"image-'.md5_file($file).'"';
+header("Last-Modified: ".@gmdate("D, d M Y H:i:s", filemtime($file))." GMT");
+$etag = '"js-'.md5_file($file).'"';
 header('Etag: '.$etag);
 if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
 {
     header("HTTP/1.1 304 Not Modified");
     exit;
 }
-unset($etag,$lastMtime);
+
 // try to gzip the page
 $encoding = false;
 if(extension_loaded('zlib') && !ini_get('zlib.output_compression'))
@@ -50,11 +36,11 @@ if(extension_loaded('zlib') && !ini_get('zlib.output_compression'))
         $encoding = 'gzhandler';
     elseif(!headers_sent() && isset($_SERVER['HTTP_ACCEPT_ENCODING']))
     {
-        if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip') !== false) 
+        if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip') !== false)
         {
             $encoding = 'x-gzip';
-        } 
-        elseif(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') !== false) 
+        }
+        elseif(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') !== false)
         {
             $encoding = 'gzip';
         }
@@ -72,7 +58,9 @@ switch($encoding)
     default:
         break;
 }
+
 readfile($file);
+
 switch($encoding)
 {
     case 'gzhandler':
