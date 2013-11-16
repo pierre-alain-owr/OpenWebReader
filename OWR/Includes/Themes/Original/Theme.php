@@ -113,6 +113,18 @@ JS;
         $noCacheDatas['ttl'] = Config::iGet()->get('defaultMinStreamRefreshTime') * 60 * 1000;
         $noCacheDatas['opensearch'] = isset($datas['opensearch']) ? $datas['opensearch'] : 0;
         $noCacheDatas['pagetitle'] = 'OpenWebReader - ' . $this->_view->_('User creation');
+
+        $datas['themes'] = array();
+        $themes = new \DirectoryIterator(dirname(__DIR__));
+        foreach($themes as $theme)
+        {
+            if(!$themes->isDot() && $theme->isDir())
+                $datas['themes'][(string) $theme] = $this->_name === (string) $theme;
+        }
+
+        if(!empty($datas['themes']))
+            ksort($datas['themes']);
+        
         $this->_view->addBlock('head', 'head', $this->_view->get('head', $datas, null, $noCacheDatas));
         $this->_view->addBlock('user', 'contents', $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas));
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));

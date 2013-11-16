@@ -1,53 +1,60 @@
 <div id="edituser" class="shadow full_rounded">
-        <form action="<?php echo OWR\Config::iGet()->makeURI('edituser');?>" method="post">
-            <fieldset><legend><?php echo $this->_utilities->_('User informations');?></legend>
+    <form action="<?php echo OWR\Config::iGet()->makeURI('edituser');?>" method="post">
+        <fieldset><legend><?php echo $this->_utilities->_('User informations');?></legend>
 <?php   if(isset($error)) {
             echo '<p class="error">'.$error.'</p>';
         } ?>
-            <input type="hidden" name="token" id="token" value="<OWR:NOCACHE NAME='token'/>"/>
-            <input type="hidden" name="id" value="<?php echo isset($id) ? $id : 0;?>"/>
-            <label for="login"><?php echo $this->_utilities->_('Login');?> (*)&nbsp;:</label>
-            <input type="text" name="login" maxlength="55" size="25" id="login" value="<?php if(isset($login)){ echo $login;}?>"/>
-            <label for="passwd"><?php echo $this->_utilities->_('Password');?> (*)&nbsp;:</label>
-            <input type="password" name="passwd" size="25" id="passwd" value=""/>
-            <label for="confirmpasswd"><?php echo $this->_utilities->_('Confirm password');?> (*)&nbsp;:</label>
-            <input type="password" name="confirmpasswd" size="25" id="confirmpasswd" value=""/>
-            <label for="email"><?php echo $this->_utilities->_('Email');?> (*)&nbsp;:</label>
-            <input type="email" name="email" size="25" id="email" value="<?php if(isset($email)){ echo $email;}?>"/>
-            <label for="rights"><?php echo $this->_utilities->_('User rights');?> (*)&nbsp;:</label>
-            <select name="rights" id="rights">
-                <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>
+        <input type="hidden" name="token" id="token" value="<OWR:NOCACHE NAME='token'/>"/>
+        <input type="hidden" name="id" value="<?php echo isset($id) ? $id : 0;?>"/>
+        <label for="login"><?php echo $this->_utilities->_('Login');?> (*)&nbsp;:</label>
+        <input type="text" name="login" maxlength="55" size="25" id="login" value="<?php if(isset($login)){ echo $login;}?>"/>
+        <label for="passwd"><?php echo $this->_utilities->_('Password');?> (*)&nbsp;:</label>
+        <input type="password" name="passwd" size="25" id="passwd" value=""/>
+        <label for="confirmpasswd"><?php echo $this->_utilities->_('Confirm password');?> (*)&nbsp;:</label>
+        <input type="password" name="confirmpasswd" size="25" id="confirmpasswd" value=""/>
+        <label for="email"><?php echo $this->_utilities->_('Email');?> (*)&nbsp;:</label>
+        <input type="email" name="email" size="25" id="email" value="<?php if(isset($email)){ echo $email;}?>"/>
+        <label for="rights"><?php echo $this->_utilities->_('User rights');?> (*)&nbsp;:</label>
+        <select name="rights" id="rights">
+            <option value="<?php echo OWR\User::LEVEL_USER;?>"<?php if(isset($rights) && (int)$rights === OWR\User::LEVEL_USER){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('User');?></option>
 <?php       if($userrights > OWR\User::LEVEL_USER) {
                 echo '<option value="'.OWR\User::LEVEL_ADMIN.'"'.(isset($rights) && $rights == 2 ? ' selected="selected"' : '').'>'.$this->_utilities->_('Administrator').'</option>';
             } ?>
-            </select>
-            <label for="ulang"><?php echo $this->_utilities->_('Interface language');?> (*)&nbsp;:</label>
-            <select name="ulang" id="ulang">
-                <option value="en_US"<?php if(isset($lang) && $lang === 'en_US'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('English');?></option>
-                <option value="fr_FR"<?php if(isset($lang) && $lang === 'fr_FR'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('French');?></option>
-            </select>
-            <label for="timezone"><?php echo $this->_utilities->_('Timezone');?> (*)&nbsp;:</label>
-            <select name="timezone" id="timezone">
+        </select>
+        <label for="ulang"><?php echo $this->_utilities->_('Interface language');?> (*)&nbsp;:</label>
+        <select name="ulang" id="ulang">
+            <option value="en_US"<?php if(isset($lang) && $lang === 'en_US'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('English');?></option>
+            <option value="fr_FR"<?php if(isset($lang) && $lang === 'fr_FR'){ echo ' selected="selected"';}?>><?php echo $this->_utilities->_('French');?></option>
+        </select>
+        <label for="timezone"><?php echo $this->_utilities->_('Timezone');?> (*)&nbsp;:</label>
+        <select name="timezone" id="timezone">
 <?php       foreach($timezones as $tz => $key) {
                 echo '<option value="'.$tz.'"'.(isset($timezone) && strcmp($tz, $timezone) === 0 ? ' selected="selected"' : '').'>'.$tz.'</option>';
             } ?>
-            </select>
-            <label for="config_nbnews"><?php echo $this->_utilities->_('Number of news to display on each page');?> (*)&nbsp;:</label>
-            <select name="config[nbnews]" id="config_nbnews">
-                <option value="10"<?php if(!isset($config['nbnews']) || (int)$config['nbnews'] === 10) { echo ' selected="selected"';}?>>10</option>
-                <option value="20"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 20) { echo ' selected="selected"';}?>>20</option>
-                <option value="30"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 30) { echo ' selected="selected"';}?>>30</option>
-                <option value="40"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 40) { echo ' selected="selected"';}?>>40</option>
-                <option value="50"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 50) { echo ' selected="selected"';}?>>50</option>
-            </select>
-            <label for="config_blockimg"><?php echo $this->_utilities->_('Block images with javascript');?> (*)&nbsp;:</label>
-            <input type="checkbox" name="config[blockimg]" id="config_blockimg"<?php if(!empty($config['blockimg'])) { echo ' checked="checked"';}?>/>
-            <label for="config_abstract"><?php echo $this->_utilities->_('Display an abstract for each news');?> (*)&nbsp;:</label>
-            <input type="checkbox" name="config[abstract]" id="config_abstract"<?php if(!empty($config['abstract'])) { echo ' checked="checked"';}?>/>
-            <label for="openid">OpenID&nbsp;:</label>
-            <input type="text" name="openid" size="25" id="openid" value="<?php if(isset($openid)){ echo $openid;}?>"/>
-            <button type="submit" name="submit" class="btn btn-block"><?php echo $this->_utilities->_('Submit');?></button>
-            <button type="button" class="btn btn-block" onclick="javascript:window.location='<?php echo OWR\Config::iGet()->makeURI('', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>';"><?php echo $this->_utilities->_('Cancel');?></button>
-            </fieldset>
-        </form>
-    </div>
+        </select>
+        <label for="config_nbnews"><?php echo $this->_utilities->_('Number of news to display on each page');?> (*)&nbsp;:</label>
+        <select name="config[nbnews]" id="config_nbnews">
+            <option value="10"<?php if(!isset($config['nbnews']) || (int)$config['nbnews'] === 10) { echo ' selected="selected"';}?>>10</option>
+            <option value="20"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 20) { echo ' selected="selected"';}?>>20</option>
+            <option value="30"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 30) { echo ' selected="selected"';}?>>30</option>
+            <option value="40"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 40) { echo ' selected="selected"';}?>>40</option>
+            <option value="50"<?php if(isset($config['nbnews']) && (int)$config['nbnews'] === 50) { echo ' selected="selected"';}?>>50</option>
+        </select>
+        <label for="config_theme"><?php echo $this->_utilities->_('Theme');?> (*)&nbsp;:</label>
+        <select name="config[theme]" id="config_theme">
+<?php
+            foreach($themes as $theme => $selected)
+                echo '<option value="' . $theme . '"' . ($selected ? ' selected="selected"' : '') . '>' . $theme . '</option>';
+?>
+        </select>
+        <label for="config_blockimg"><?php echo $this->_utilities->_('Block images with javascript');?> (*)&nbsp;:</label>
+        <input type="checkbox" name="config[blockimg]" id="config_blockimg"<?php if(!empty($config['blockimg'])) { echo ' checked="checked"';}?>/>
+        <label for="config_abstract"><?php echo $this->_utilities->_('Display an abstract for each news');?> (*)&nbsp;:</label>
+        <input type="checkbox" name="config[abstract]" id="config_abstract"<?php if(!empty($config['abstract'])) { echo ' checked="checked"';}?>/>
+        <label for="openid">OpenID&nbsp;:</label>
+        <input type="text" name="openid" size="25" id="openid" value="<?php if(isset($openid)){ echo $openid;}?>"/>
+        <button type="submit" name="submit" class="btn btn-block"><?php echo $this->_utilities->_('Submit');?></button>
+        <button type="button" class="btn btn-block" onclick="javascript:window.location='<?php echo OWR\Config::iGet()->makeURI('', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>';"><?php echo $this->_utilities->_('Cancel');?></button>
+        </fieldset>
+    </form>
+</div>
