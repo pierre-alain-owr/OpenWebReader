@@ -1053,14 +1053,20 @@ OWR.prototype = {
                         this.getNew(el.get('id'));
                     } else {
                         var cur = el.getStyle('color');
+                        var scroll = false;
                         if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur || '#ffffff' === cur || '#FFFFFF' === cur || '#fff' === cur || '#ffffff' === cur) {
                             if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).removeClass('hidden'); }
                             el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
                         } else {
                             if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).addClass('hidden'); }
                             el.setStyles({'background-color': '#888888', 'color':'white'});
+                            scroll = true;
                         }
                         element.toggle();
+                        if(scroll) {
+                            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:el.getPosition().y - 105}});
+                            s.toTop();
+                        }
                     }
                 }).delay(200, this);
             }.bindWithEvent(this, item));
@@ -2316,6 +2322,8 @@ OWR.prototype = {
             if(0 === this.currentId) {
                 --this.pageOffset;
             }
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:el.getPosition().y - 105}});
+            s.toTop();
         }.bindWithEvent(this, [n, ids, idc, live, el]));
         r.get({'do': 'getnewcontents', 'id': ids[1], 'live': live, 'currentid': this.currentId, 'offset':this.pageOffset});
     },
