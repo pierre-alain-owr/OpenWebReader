@@ -391,6 +391,8 @@ class Controller extends Singleton
         }
         else
         {
+            if(empty($this->_request->page)) $this->_request->page = '';
+
             View::iGet()->addHeaders(array('Content-type' => 'text/html; charset=utf-8'));
             if(Logs::iGet()->hasLogs())
             {
@@ -480,7 +482,7 @@ class Controller extends Singleton
                         return $this;
                     }
                 }
-
+                if(empty($this->_request->page)) $this->_request->page = '';
                 $now = microtime(true);
                 $this->_request->page .= '<!-- Execution time: '.round($now - $this->_cfg->get('begintime'), 6).'s (Request time: '. round($now - $this->_request->begintime, 6).'s => '.round(DB::getTime(), 6).'s of SQL, '.round(View::getTime(), 6).'s of page rendering) -->';
             }
