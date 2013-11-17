@@ -1,7 +1,10 @@
 <meta charset="utf-8"/>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<?php if (!DEBUG) { ?>
 <link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php?f=owr.min.css" type="text/css" media="screen"/>
-<!-- <link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php?f=owr.css" type="text/css" media="screen"/> -->
+<?php } else { ?>
+<link rel="stylesheet" href="<?php echo $surl;?>css/owr.css.php?f=owr.css" type="text/css" media="screen"/>
+<?php } ?>
 <link rel="search" type="application/opensearchdescription+xml" href="<?php echo OWR\Config::iGet()->makeURI('getopensearch', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Search').' '.$this->_utilities->_('In');?> OWR !"/>
 <link rel="icon" type="image/png" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png"/>
 <link rel="shortcut icon" type="image/png" href="<?php echo $surl;?>images/images.php?f=owr_16_16.png"/>

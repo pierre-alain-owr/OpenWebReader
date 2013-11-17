@@ -1,5 +1,9 @@
-       <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.min.js"></script>
-<!--         <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.js"></script> -->
+<?php
+if(!DEBUG) { ?>
+        <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.min.js"></script>
+<?php } else { ?>
+        <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.js"></script>
+<?php } ?>
         <script type="text/javascript">
             var rP = {};
             var addthis_config = {
