@@ -19,7 +19,7 @@ do
     if(file_exists($file))
         break;
 }
-while($theme = Theme::getParentTheme());
+while($theme = $theme->getParentTheme());
 
 if(empty($theme))
     die;

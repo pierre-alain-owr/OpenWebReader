@@ -63,9 +63,8 @@ abstract class Theme implements iTheme
     /**
      * @var string default theme class name
      * @access protected
-     * @static
      */
-    static protected $_defaultClassName;
+    protected $_defaultClassName;
 
     /**
      * @var string current theme class name
@@ -112,15 +111,14 @@ abstract class Theme implements iTheme
     /**
      * @var string name of parent theme
      * @access protected
-     * @static
      */
-    static protected $_parent;
+    protected $_parent;
 
     /**
      * @var string name of parent class name
      * @access protected
      */
-    static protected $_parentClassName;
+    protected $_parentClassName;
 
     /**
      * Constructor
@@ -131,7 +129,7 @@ abstract class Theme implements iTheme
     {
         $this->_view = View::iGet();
 
-        self::$_defaultClassName = 'OWR\Includes\Themes\\' . self::$_defaultName . '\Theme';
+        $this->_defaultClassName = 'OWR\Includes\Themes\\' . self::$_defaultName . '\Theme';
 
         $this->_name = ucfirst((string) (User::iGet()->getConfig('theme') ?: self::$_defaultName));
 
@@ -205,27 +203,51 @@ abstract class Theme implements iTheme
     {
         if(method_exists(self::$__theme, $name))
             $call = self::$__theme;
-        elseif(isset(self::$_parentClassName) && method_exists(self::$_parentClassName, $name))
-            $call = self::$_parentClassName;
-        elseif(method_exists(self::$_defaultClassName, $name))
-            $call = self::$_defaultClassName;
+        elseif(isset($this->_parentClassName) && method_exists($this->_parentClassName, $name))
+            $call = $this->getParentTheme();
+        elseif(method_exists($this, $name))
+            $call = $this;
         else
             throw new Exception('Invalid call to missing method "' . get_class(self::$__theme) . '::' . $name . '"');
 
-        return call_user_func_array(array($call, $name), array_merge(array('datas' => $datas, 'noCacheDatas' => $noCacheDatas), $args));
+        return call_user_func_array(array($call, $name), $args);
     }
 
+    /**
+     * Wrapper for all theme methods
+     * It will call method in this order : theme, parent theme, default theme
+     *
+     * @param string $name method to call
+     * @param array $args arguments to pass to the method
+     * @access public
+     * @static
+     * @return mixed return from method call
+     */
+    public function __call($name, $args)
+    {
+        if(method_exists(self::$__theme, $name))
+            $call = self::$__theme;
+        elseif(isset($this->_parentClassName) && method_exists($this->_parentClassName, $name))
+            $call = $this->_parentClassName;
+        elseif(method_exists(__CLASS__, $name))
+            $call = __CLASS__;
+        else
+            throw new Exception('Invalid call to missing method "' . get_class(self::$__theme) . '::' . $name . '"');
+
+        return call_user_func_array(array($call, $name), $args);
+    }
+    
     /**
      * Returns parent theme instance if exists
      *
      * @access public
-     * @return mixed self::$_parent instance or false if empty
+     * @return mixed $this->_parent instance or false if empty
      */
-    final static public function getParentTheme()
+    final public function getParentTheme()
     {
-        if(!isset(self::$_parent)) return false;
+        if(!isset($this->_parent)) return false;
         
-        $theme = 'OWR\Includes\Themes\\' . ucfirst((string) self::$_parent) . '\Theme';
+        $theme = 'OWR\Includes\Themes\\' . ucfirst((string) $this->_parent) . '\Theme';
 
         return new $theme;
     }
@@ -234,10 +256,10 @@ abstract class Theme implements iTheme
      * Returns parent theme name
      *
      * @access public
-     * @return string self::$_parent
+     * @return string $this->_parent
      */
     final public function getParent()
     {
-        return self::$_parent;
+        return $this->_parent;
     }
 }
