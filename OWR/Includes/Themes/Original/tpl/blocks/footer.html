@@ -5,6 +5,11 @@ if(!DEBUG) { ?>
         <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.js"></script>
 <?php } ?>
         <script type="text/javascript">
+<?php if(isset($login)) { ?>
+            window.addEvent('domready', function(){
+                $('login').focus();
+            });
+<?php } else { ?>
             var rP = {};
             var addthis_config = {
                 data_use_flash: false
@@ -20,5 +25,5 @@ if(!DEBUG) { ?>
                 s.set('src', 'http://s7.addthis.com/js/250/addthis_widget.js');
                 $('menu').adopt(s);
             });
-
+<?php } ?>
         </script>

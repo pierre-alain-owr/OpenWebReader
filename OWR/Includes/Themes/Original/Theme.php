@@ -41,14 +41,8 @@ class Theme extends Themes
         $noCacheDatas['token'] = User::iGet()->getToken();
 
         $this->_view->addBlock('head', 'head', $this->_view->get('head', $datas, null, $noCacheDatas));
-        $js = <<<JS
-            window.addEvent('domready', function(){
-                $('login').focus();
-            });
-JS;
-        $this->_view->addBlock('main', 'footer', $datas['surl'] . 'js/owr.js.php', 'js');
-        $this->_view->addBlock('login', 'footer', $js, 'js_inline');
-
+        $datas['login'] = true;
+        $this->_view->addBlock('js', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
         $this->_view->addBlock('login', 'contents', $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas));
 
         return $this->_view->get('index', $datas, null, $noCacheDatas);
