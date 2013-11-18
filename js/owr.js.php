@@ -10,7 +10,7 @@ define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
 require HOME_PATH . 'cfg.php';
 
-$theme = Themes::iGet();
+$theme = Theme::iGet();
 $filename = basename($_GET['f']);
 
 do
@@ -19,7 +19,7 @@ do
     if(file_exists($file))
         break;
 }
-while($theme = Themes::getParentTheme());
+while($theme = Theme::getParentTheme());
 
 if(empty($theme))
     die;

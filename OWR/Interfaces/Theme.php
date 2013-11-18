@@ -40,7 +40,7 @@ namespace OWR\Interfaces;
  * @package OWR
  * @subpackage Interfaces
  */
-interface Themes
+interface Theme
 {
     /**
      * Instance getter

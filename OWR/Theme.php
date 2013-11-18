@@ -34,7 +34,7 @@
  * @package OWR
  */
 namespace OWR;
-use OWR\Interfaces\Themes as iThemes;
+use OWR\Interfaces\Theme as iTheme;
 /**
  * Abstract class used to manage themes
  * All themes MUST extends this class
@@ -44,7 +44,7 @@ use OWR\Interfaces\Themes as iThemes;
  * @uses User the current user
  * @package OWR
  */
-abstract class Themes implements iThemes
+abstract class Theme implements iTheme
 {
     /**
      * @var string Default theme name

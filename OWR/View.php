@@ -148,7 +148,7 @@ class View extends Singleton
     {
         extract((array) $datas, EXTR_SKIP);
         ob_start();
-        include Themes::iGet()->getPath($tpl) . $tpl . '.html';
+        include Theme::iGet()->getPath($tpl) . $tpl . '.html';
         return ob_get_clean();
     }
 

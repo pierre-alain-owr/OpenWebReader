@@ -1,7 +1,7 @@
 <?php
 
 namespace OWR\Includes\Themes\Original;
-use OWR\Themes, OWR\User, OWR\Config;
+use OWR\Theme as pTheme, OWR\User, OWR\Config;
 
 /**
  * Default theme
@@ -11,7 +11,7 @@ use OWR\Themes, OWR\User, OWR\Config;
  * @uses Config the config instance
  * @package OWR
  */
-class Theme extends Themes
+class Theme extends pTheme
 {
     /**
      * Constructor

@@ -19,13 +19,13 @@
                                 <a href="javascript:;" class="delete backgrounded opac" onclick="rP.deleteStream(0);" title="<?php echo $this->_utilities->_('Delete everything, categories included');?>"></a>
                             </div>
                         </li>
-<?php echo OWR\Themes::iGet()->categories($datas, $noCacheDatas);?>
+<?php echo OWR\Theme::iGet()->categories($datas, $noCacheDatas);?>
                     </ul>
                 </li>
                 <li class="menu_part_title opac" id="menu_title_tags"><?php echo $this->_utilities->_('Tags');?></li>
                 <li class="noborder">
                     <ul class="menu_streams" id="menu_tags">
-<?php echo OWR\Themes::iGet()->tags($datas, $noCacheDatas);?>
+<?php echo OWR\Theme::iGet()->tags($datas, $noCacheDatas);?>
                     </ul>
                 </li>
                 <li class="menu_part_title opac" id="menu_tools"><?php echo $this->_utilities->_('Tools');?></li>
