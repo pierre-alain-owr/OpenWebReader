@@ -1,7 +1,7 @@
 <?php
 
 namespace OWR\Includes\Themes\Original;
-use OWR\Theme as pTheme, OWR\User, OWR\Config;
+use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates;
 
 /**
  * Default theme
@@ -261,10 +261,10 @@ class Theme extends pTheme
     
     public function stream_details(array $datas, array $noCacheDatas)
     {
-        unset($datas['stream']['title']);
-        $datas['stream']['contents']['nextRefresh'] = $this->_getDate($datas['stream']['lastupd'] + $datas['stream']['ttl']);
-        $datas['stream']['contents']['id'] = $datas['stream']['id'];
-        $datas['stream']['contents']['url'] = $datas['stream']['url'];
+        unset($datas['title']);
+        $datas['contents']['nextRefresh'] = Dates::format($datas['lastupd'] + $datas['ttl']);
+        $datas['contents']['id'] = $datas['id'];
+        $datas['contents']['url'] = $datas['url'];
 
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
@@ -288,10 +288,7 @@ class Theme extends pTheme
 
     public function stream(array $datas, array $noCacheDatas)
     {
-        $unread = $datas['unread'];
-        unset($datas['unread']);
-        $noCacheDatas['unread'] = $unread;
-        $noCacheDatas['bold'] = $unread > 0 ? 'bold ' : '';
+        $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
 
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
@@ -315,7 +312,8 @@ class Theme extends pTheme
         foreach($streamsToDisplay as $stream)
         {
             $block .= self::stream($stream, array(
-                    'groups_select'     => $groups_select[$stream['gid']]
+                    'groups_select'     => $groups_select[$stream['gid']],
+                    'unread'            => $stream['unread']
                     ));
         }
 
@@ -334,7 +332,10 @@ class Theme extends pTheme
     {
         $block = '';
         foreach($datas['groups'] as $group)
+        {
+            $noCacheDatas['unread'] = $group['unread'];
             $block .= self::category($group, $noCacheDatas);
+        }
 
         return $block;
     }
@@ -349,8 +350,7 @@ class Theme extends pTheme
      */
     public function category(array $datas, array $noCacheDatas)
     {
-        $noCacheDatas['unread'] = $datas['unread'];
-        $noCacheDatas['bold'] = $datas['unread'] > 0 ? 'bold ' : '';
+        $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 

@@ -56,6 +56,7 @@ if(!defined('INC_CONFIG')) die('Please include config file');
  * @uses Logs the logs/errors storing object
  * @uses OWR\View\Utilities translate errors
  * @uses Theme the theme manager
+ * @uses Dates the date manager
  * @package OWR
  */
 class Controller extends Singleton
@@ -100,7 +101,7 @@ class Controller extends Singleton
      * @var mixed the \IntlDateFormatter instance
      * @access protected
      */
-    protected $_dateFormatter;
+/*    protected $_dateFormatter;*/
 
     /**
      * @var mixed the Cron instance
@@ -632,6 +633,8 @@ class Controller extends Singleton
      */
     protected function _getDate($timestamp)
     {
+        return Dates::format((int) $timestamp);
+
         isset($this->_dateFormatter) ||
         $this->_dateFormatter = new \IntlDateFormatter(
             $this->_user->getLang(),
@@ -827,7 +830,7 @@ class Controller extends Singleton
      */
     protected function do_getMenuPartStream()
     {
-        $this->_buildPage('stream', array('id'=>$this->_request->id));
+        $this->_buildPage('stream_details', array('id'=>$this->_request->id));
         return $this;
     }
 
@@ -2086,6 +2089,7 @@ class Controller extends Singleton
                 $datas['tags'] = $response->getDatas();
                 break;
 
+            case 'stream_details':
             case 'stream':
                 $request = new Request(array('id' => $datas['id']));
                 Model::getCachedModel('streams')->view($request);
@@ -2096,7 +2100,11 @@ class Controller extends Singleton
                     break;
                 }
                 
-                $datas['stream'] = $response->getDatas();
+                if(empty($this->_request->unreads))
+                    $this->do_getunread(true);
+
+                $datas = array_merge($datas, $response->getDatas());
+                $noCacheDatas['unread'] = isset($this->_request->unreads[$datas['id']]) ? $this->_request->unreads[$datas['id']] : 0;
                 break;
 
             case 'posts':

@@ -961,11 +961,6 @@ OWR.prototype = {
     gstreamsToggle: function(id, el) {
         var element = $('groupContainer_'+id);
         if(!$defined(el.status)) {
-            if(!element) {
-                var e = $('stream_'+id);
-                if(!e) { return; } // hu ?
-                e.adopt(new Element('ul', {'id': 'groupContainer_'+id, 'class': 'menu_groups'}));
-            }
             this.getMenuPartGroup(id);
         } else {
             el.setStyle('background-position', (el.status ? '-303px 0px' : '-319px 0px'));
@@ -1306,8 +1301,8 @@ OWR.prototype = {
         }
         var id = obj.get('id').split('_')[1];
         var contents = $('showStream_'+id).get('html');
-        myRegexp = new RegExp('(.*?)( \\(<span id="unread_\\d+">\\d+</span>\\))', 'gi');
-        var newContents = contents.replace(myRegexp, val + "$2");
+        myRegexp = new RegExp('(<span class="title">)(.*?)(</span>)', 'gi');
+        var newContents = contents.replace(myRegexp, "$1" + val + "$3");
         if(contents == newContents) {
             obj.setStyle('display', 'none');
             this.loading(false);
@@ -2211,6 +2206,9 @@ OWR.prototype = {
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
             this.loading(false, n);
+            if(!$('groupContainer_' + id)) {
+                $('stream_' + id).adopt(new Element('ul', {'id': 'groupContainer_'+id, 'class': 'menu_groups'}));
+            }
             this.parseResponse(json, null, 'groupContainer_'+id);
             this.initSortables();
             $('gstream_toggler_'+id).setStyle('background-position', '-319px 0px').status = 1;

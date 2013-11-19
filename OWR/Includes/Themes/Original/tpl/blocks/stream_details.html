@@ -1,5 +1,5 @@
 <?php
-if(!empty($stream['contents'])) {
-    if(isset($stream['contents']['items'])) unset($stream['contents']['items']);
-    echo $this->_utilities->makeList($stream['contents'], 'stream_details', 'stream_detail');
+if(!empty($contents)) {
+    if(isset($contents['items'])) unset($contents['items']);
+    echo $this->_utilities->makeList($contents, 'stream_details', 'stream_detail');
 }
