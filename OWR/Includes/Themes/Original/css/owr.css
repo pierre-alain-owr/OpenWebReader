@@ -173,12 +173,6 @@ table tr, table td, table th
 }
 /* end generic css */
 
-#container
-{
-    top:25px;
-    position:relative;
-}
-
 div#menu
 {
     width:100%;
@@ -211,12 +205,19 @@ ul#logs li
     font-size:8px;
 }
 
+#main
+{
+    background-color: #EBEBEB;
+    margin: 65px 0 60px 0;
+    padding: 0;
+    width: 100%;
+}
+
 div#contents
 {
     width:100%;
     margin:40px 0 60px 0;
     padding:0;
-    background-color:#EBEBEB;
 }
 
 a#menu_toggler

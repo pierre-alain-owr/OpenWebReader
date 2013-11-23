@@ -973,22 +973,22 @@ OWR.prototype = {
     {
         var board = $('board');
         if(this.boardTogglerStatus === 0) {
-            $('menu').setStyle('top', '65px');
-            $('contents').setStyle('margin-top', '65px');
+            $('main').setStyle('margin-top', '65px');
             if($('news_ordering')) {
-                $('news_ordering').setStyle('top', '60px');
+                $('news_ordering').setStyle('top', '65px');
             }
             board.setStyle('display', 'block');
-            $('board_toggler').setStyle('background-position', '-692px 0px');
+            $('board_toggler').setStyle('background-position', '-692px 0px').setStyle('top', '65px');
+            $('menu_toggler').setStyle('top', '65px');
             this.boardTogglerStatus = 1;
         } else {
             if($('news_ordering')) {
                 $('news_ordering').setStyle('top', '10px');
             }
-            $('menu').setStyle('top', '10px');
-            $('contents').setStyle('margin-top', '10px');
+            $('main').setStyle('margin-top', '10px');
             board.setStyle('display', 'none');
-            $('board_toggler').setStyle('background-position', '-675px 0px');
+            $('board_toggler').setStyle('background-position', '-675px 0px').setStyle('top', '10px');
+            $('menu_toggler').setStyle('top', '10px');
             this.boardTogglerStatus = 0;
         }
     },
