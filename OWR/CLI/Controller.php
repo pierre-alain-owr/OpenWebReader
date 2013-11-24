@@ -163,9 +163,11 @@ class Controller extends MainController
         }
         catch(Exception $e)
         {
-            $this->_cron->unlock($action.'_'.$id, true); // unlink file lock for next processing
+            if(isset($this->_cron))
+                $this->_cron->unlock($action.'_'.$id, true); // unlink file lock for next processing
 
-            $this->_db->rollback();
+            if(isset($this->_db))
+                $this->_db->rollback();
 
             throw new Exception($e->getContent(), $e->getCode());
         }
