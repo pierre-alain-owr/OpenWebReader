@@ -2077,6 +2077,7 @@ class Controller extends Singleton
                 break;
 
             case 'post_tags':
+                $datas['tags'] = array();
                 $request = new Request(array(), true);
                 Model::getCachedModel('news_tags')->view($request, array('newsid' => $datas['id']));
                 $response = $request->getResponse();
@@ -2086,7 +2087,9 @@ class Controller extends Singleton
                     break;
                 }
 
-                $datas['tags'] = $response->getDatas();
+                $tags = $response->getDatas();
+                if(!empty($tags))
+                    $datas['tags'] = $response->isMultiple() ? $tags : array($tags);
                 break;
 
             case 'stream_details':
@@ -2270,7 +2273,8 @@ class Controller extends Singleton
                     $datas['groups'][$k]['unread'] = isset($this->_request->unreads[$group['id']]) ? $this->_request->unreads[$group['id']] : 0;
                 }
                 break;
-                
+            
+            case 'tag':    
             case 'tags':
                 $request = new Request(array('id' => isset($datas['id']) ? $datas['id'] : null, 'ids' => isset($datas['ids']) ? $datas['ids'] : null));
                 Model::getCachedModel('news_tags')->view($request, array(), 'name');

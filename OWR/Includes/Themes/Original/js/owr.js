@@ -2359,7 +2359,11 @@ OWR.prototype = {
                 tags.setStyle('display', 'block');
             }
         } else {
-            tags.setStyle('display', 'none');
+            if('none' == tags.getStyle('display')) {
+                tags.setStyle('display', 'block');
+            } else {
+                tags.setStyle('display', 'none');
+            }
         }
     },
     inputEditTags: function(obj, id) {
