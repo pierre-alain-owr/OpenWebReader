@@ -2264,8 +2264,10 @@ class Controller extends Singleton
                     Logs::iGet()->log($response->getError(), $response->getStatus());
                     break;
                 }
-
-                $datas['groups'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                $groups = $response->getDatas();
+                $datas['groups'] = array();
+                if(!empty($groups))
+                    $datas['groups'] = $response->isMultiple() ? $groups : array($groups);
                 foreach($datas['groups'] as $k => $group)
                 {
                     $datas['groups'][$k]['groupid'] = $group['id'];
@@ -2281,7 +2283,9 @@ class Controller extends Singleton
                 $response = $request->getResponse();
                 if('error' !== $response->getNext())
                 {
-                    $datas['tags'] = $response->isMultiple() ? $response->getDatas() : array($response->getDatas());
+                    $tags = $response->getDatas();
+                    if(!empty($tags))
+                        $datas['tags'] = $response->isMultiple() ? $tags : array($tags);
                     foreach($datas['tags'] as $k => $tag)
                     {
                         $datas['tags'][$k]['groupid'] = $tag['id'];
