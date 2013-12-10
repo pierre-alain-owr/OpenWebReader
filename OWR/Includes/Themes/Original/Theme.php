@@ -248,7 +248,7 @@ class Theme extends pTheme
     {
         $block = '';
 
-        if(empty($datas['search']))
+        if(empty($datas['search']) && !empty($datas['pager']))
             $block .= $this->_view->get('post_tools', $datas['pager']);
 
         unset($datas['news']['ids']);
