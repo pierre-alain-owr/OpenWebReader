@@ -231,6 +231,7 @@ class Theme extends pTheme
      */
     public function tag(array $datas, array $noCacheDatas)
     {
+        if(isset($datas['tags'])) $datas = array_merge($datas, $datas['tags'][0]);
         $noCacheDatas['unread'] = $datas['unread'];
         $noCacheDatas['bold'] = $datas['unread'] > 0 ? 'bold ' : '';
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
