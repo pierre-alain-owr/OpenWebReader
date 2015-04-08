@@ -222,4 +222,14 @@ interface Theme
      * @return string generated content of stats block template
      */
     public function stats(array $datas, array $noCacheDatas);
+
+    /**
+     * Displays CLI logs
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string content of cli log file
+     */
+    public function logs(array $datas, array $noCacheDatas);
 }

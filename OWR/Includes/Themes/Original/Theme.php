@@ -404,4 +404,17 @@ class Theme extends pTheme
     {
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
+
+    /**
+     * Generates CLI logs template
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string generated content of logs template
+     */
+    public function logs(array $datas, array $noCacheDatas)
+    {
+        return $this->_view->get(__FUNCTION__, $datas);
+    }
 }
