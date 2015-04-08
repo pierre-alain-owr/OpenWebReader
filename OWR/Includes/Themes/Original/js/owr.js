@@ -900,6 +900,7 @@ OWR.prototype = {
                 this.messages['Getting tags'] = "Récupération des tags";
                 this.messages['Generating some statistics'] = "Génération des statistiques";
                 this.messages['Asking logs'] = "Affichage des logs CLI";
+                this.messages['Getting category'] = "Récupération de la catégorie";
             break;
             case 'en_US': // don't need here, messages are by default in english
             break;
@@ -1202,6 +1203,48 @@ OWR.prototype = {
         }.bindWithEvent(this, n));
         r.addEvent('success', function(json, n){
             this.loading(false, n);
+            var stream = this.parseResponse(json);
+            if(stream) {
+                var div = new Element('div', {'html':stream});
+                var li = div.getFirst();
+                var gid = $('move_category').get('value');
+                if(gid.toInt()) {
+                    var exists = $('stream_' + gid);
+                    var opened = $('groupContainer_' + gid);
+                    if(exists) {
+                        if(opened) {
+                            li.inject(opened);
+                        } else {
+                            $('gstream_toggler_' + gid).click();
+                        }
+                    } else {
+                        this.getStreamGroup(gid);        
+                    }
+                } else {
+                    this.getStreamGroup();
+                }
+                this.initMenu();
+            }
+        }.bindWithEvent(this, n));
+        r.post($('editstream'));
+        return false;
+    },
+    getStreamGroup: function(id = 0, open = true) {
+        this.loading(true);
+        var n = this.setLog('Getting category');
+        var r = new Request.JSON({
+            url: './?token='+this.token,
+            onSuccess: function(json, text) {
+                if(!json) {
+                    this.parseResponse(null, text);
+                }
+            }.bindWithEvent(this)
+        });
+        r.addEvent('failure', function(xhr, n) {
+            this.raiseXHRError(xhr.responseText, n);
+        }.bindWithEvent(this, n));
+        r.addEvent('success', function(json, n){
+            this.loading(false, n);
             var category = this.parseResponse(json);
             if(category) {
                 var div = new Element('div', {'html':category});
@@ -1214,9 +1257,12 @@ OWR.prototype = {
                     li.inject('menu_streams');
                 }
                 this.initMenu();
+                if(open) {
+                    $('gstream_toggler_' + id.split('_')[1]).click();
+                }
             }
         }.bindWithEvent(this, n));
-        r.post($('editstream'));
+        r.get({'do': 'getstreamgroup', 'id': id});
         return false;
     },
     searchFormAction: function(id)

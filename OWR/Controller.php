@@ -1712,6 +1712,29 @@ class Controller extends Singleton
         return $this;
     }
 
+
+    /**
+     * Renders the category template related to the specified id
+     * If no id is specified, we render the default root category
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access protected
+     * @return $this
+     */
+    protected function do_getStreamGroup()
+    {
+        $args = array();
+        if(0 === $this->_request->id)
+            $args['name'] = 'Root';
+        Model::getCachedModel('streams_groups')->view($this->_request, $args);
+        $response = $this->_request->getResponse();
+        if(!$this->processResponse($response)) return $this;
+
+        $datas = $response->getDatas();
+        $this->_buildPage('category', array('gid'=>$datas['id'], 'name'=>$datas['name']));
+        return $this;
+    }
+
     /**
      * Adds streams from OPML input
      * If an url is passed, we'll try to get the remote opml file
