@@ -196,8 +196,6 @@ class Request extends R
                         ($datas['lang'] = (string) $_POST['lang']);
                         !isset($_POST['email']) ||
                         ($datas['email'] = (string) $_POST['email']);
-                        !isset($_POST['openid']) ||
-                        ($datas['openid'] = (string) $_POST['openid']);
                         !isset($_POST['timezone']) ||
                         ($datas['timezone'] = (string) $_POST['timezone']);
                         if(isset($_POST['passwd']))
@@ -265,8 +263,6 @@ class Request extends R
                         ($datas['lang'] = (string) $data['lang']);
                         !isset($data['email']) ||
                         ($datas['email'] = (string) $data['email']);
-                        !isset($data['openid']) ||
-                        ($datas['openid'] = (string) $data['openid']);
                         !isset($data['timezone']) ||
                         ($datas['timezone'] = (string) $data['timezone']);
                         if(isset($data['passwd']))

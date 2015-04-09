@@ -1,26 +1,3 @@
-# OWR - OpenWebReader
-# Copyright (c) 2009, Pierre-Alain Mignot
-# Home page: http://openwebreader.org
-# E-Mail: contact@openwebreader.org
-# All Rights Reserved
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
-# @author Pierre-Alain Mignot <contact@openwebreader.org>
-# @copyright Copyright (c) 2009, Pierre-Alain Mignot
-# @license http://www.gnu.org/copyleft/gpl.html
-# @package OWR
-# Language file for french traduction
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.2\n"
@@ -33,476 +10,84 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Name"
-msgstr "Titre"
-
-msgid "Submit"
-msgstr "Valider"
-
-msgid "Url"
-msgstr "Url"
-
-msgid "Category"
-msgstr "Catégorie"
-
-msgid "No category (root)"
-msgstr "Pas de catégorie"
-
-msgid "Add a category"
-msgstr "Ajouter une catégorie"
-
-msgid "User creation"
-msgstr "Édition d'un utilisateur"
-
-msgid "User informations"
-msgstr "Informations de l'utilisateur"
-
-msgid "Login"
-msgstr "Identifiant"
-
-msgid "Password"
-msgstr "Mot de passe"
-
-msgid "Confirm password"
-msgstr "Confirmer le mot de passe"
-
-msgid "User rights"
-msgstr "Droits d'utilisateur"
-
-msgid "User"
-msgstr "Utilisateur"
-
-msgid "Administrator"
-msgstr "Administrateur"
-
-msgid "Loading.."
-msgstr "Chargement.."
-
-msgid "Show logs"
-msgstr "Afficher la fenêtre des logs"
-
-msgid "Change the interface language"
-msgstr "Modifier la langue de l'interface"
-
-msgid "English"
-msgstr "Anglais"
-
-msgid "French"
-msgstr "Français"
-
-msgid "Hide logs"
-msgstr "Masquer la fenêtre des logs"
-
-msgid "Clear logs"
-msgstr "Nettoyer les logs"
+msgid ""
+"Aborting parsing of stream \"%s\" and declaring it as unavailable : can't "
+"get the content"
+msgstr ""
+"Abandon de l'analyse du flux \"%s\" et déclaration comme non-accessible : "
+"impossible de récupérer la source"
 
 msgid "Actions"
 msgstr "Actions"
 
-msgid "Add a rss feed"
-msgstr "Ajouter un flux via une url"
-
-msgid "Add RSS"
-msgstr "Ajouter un flux"
-
-msgid "Add rss feed(s) via an opml file"
-msgstr "Importer la liste de vos flux via un fichier OPML"
+msgid "Add Category"
+msgstr "Ajouter une catégorie"
 
 msgid "Add OPML"
 msgstr "Importer vos flux"
 
+msgid "Add RSS"
+msgstr "Ajouter un flux"
+
+msgid "Add a category"
+msgstr "Ajouter une catégorie"
+
 msgid "Add a custom category"
 msgstr "Ajouter une nouvelle catégorie"
 
-msgid "Add Category"
-msgstr "Ajouter une catégorie"
+msgid "Add a rss feed"
+msgstr "Ajouter un flux via une url"
 
-msgid "Search in all news"
-msgstr "Chercher dans toutes les nouvelles"
-
-msgid "Search"
-msgstr "Chercher"
-
-msgid "Keywords"
-msgstr "Mots-clés"
-
-msgid "Find !"
-msgstr "Trouver !"
-
-msgid "Logout"
-msgstr "Se déconnecter"
-
-msgid "Streams"
-msgstr "Flux"
-
-msgid "Mark all the news as read"
-msgstr "Marquer toutes les nouvelles comme lues"
-
-msgid "Mark all as read"
-msgstr "Marquer toutes les nouvelles comme lues"
-
-msgid "Force refresh of all streams"
-msgstr "Rafraîchir tous les flux"
-
-msgid "Refresh all"
-msgstr "Rafraîchir tous les flux"
-
-msgid "Delete all news of all the streams"
-msgstr "Supprimer toutes les nouvelles de tous les flux"
-
-msgid "Clear all"
-msgstr "Supprimer tous les nouvelles"
-
-msgid "Delete everything, categories included"
-msgstr "Supprimer intégralement les flux ainsi que les catégories"
-
-msgid "Delete all"
-msgstr "Tout supprimer"
-
-msgid "Show all unread news"
-msgstr "Afficher toutes les nouvelles non lues"
-
-msgid "Not read"
-msgstr "Non lues"
-
-msgid "Show the news for this category"
-msgstr "Afficher les nouvelles de cette catégorie"
-
-msgid "Mark all the news of this category as read"
-msgstr "Marquer toutes les nouvelles de cette catégorie comme lues"
-
-msgid "Refresh all the streams of this category"
-msgstr "Rafraîchir tous les flux de cette catégorie"
-
-msgid "Delete all the news of this category"
-msgstr "Supprimer toutes les nouvelles de cette catégorie"
-
-msgid "Rename this category"
-msgstr "Renommer cette catégorie"
-
-msgid "Delete this category and all sub-streams"
-msgstr "Supprimer cette catégorie ainsi que tous les flux contenus"
-
-msgid "Show the news for this stream"
-msgstr "Afficher les nouvelles de ce flux"
-
-msgid "Expand this stream"
-msgstr "Afficher les informations de ce flux"
-
-msgid "Mark all the news of this stream as read"
-msgstr "Marquer toutes les nouvelles de ce flux comme lues"
-
-msgid "Force refresh of this stream"
-msgstr "Rafraîchir ce flux"
-
-msgid "Delete all the news of this stream"
-msgstr "Supprimer toutes les nouvelles de ce flux"
-
-msgid "Rename this stream"
-msgstr "Renommer ce flux"
-
-msgid "Move this stream to another category"
-msgstr "Déplacer ce flux dans une autre catégorie"
-
-msgid "Delete this stream"
-msgstr "Supprimer ce flux"
+msgid "Add rss feed(s) via an opml file"
+msgstr "Importer la liste de vos flux via un fichier OPML"
 
 msgid "Administration"
 msgstr "Administration"
 
-msgid "Do maintenance of the database (may take a while..)"
-msgstr "Effectuer la maintenance de la base (peut prendre un certain temps)"
-
-msgid "Maintenance"
-msgstr "Maintenance"
-
-msgid "Create a user"
-msgstr "Ajouter un utilisateur"
-
-msgid "Create user"
-msgstr "Ajouter un nouvel utilisateur"
-
-msgid "See online"
-msgstr "Voir en ligne"
-
-msgid "Enclosure"
-msgstr "Objet (cliquer pour afficher)"
-
-msgid "Restricted access"
-msgstr "Accès restreint"
-
-msgid "Authentication"
-msgstr "Authentification"
-
-msgid "File"
-msgstr "Fichier"
-
-msgid "On"
-msgstr "le"
-
-msgid "In"
-msgstr "dans"
-
-msgid "By"
-msgstr "par"
-
-msgid "Export your feed(s) list to OMPL file"
-msgstr "Exporter la liste de vos flux au format OPML"
-
-msgid "Export to OMPL"
-msgstr "Exporter vos flux"
-
-msgid "Clear the cache"
-msgstr "Supprimer tous les fichiers mis en cache"
-
-msgid "Clear cache"
-msgstr "Supprimer le cache"
-
-msgid "Download your feed(s) in OPML format"
-msgstr "Télécharger la liste de vos flux au format OPML"
-
-msgid "Download OMPL"
-msgstr "Télécharger"
-
-msgid "Interface language"
-msgstr "Langue de l'interface"
-
-msgid "Edit"
-msgstr "Éditer"
-
-msgid "Users list"
-msgstr "Liste des utilisateurs"
-
-msgid "Edit your informations"
-msgstr "Éditer votre compte"
-
-msgid "Tools"
-msgstr "Outils"
-
-msgid "Get the RSS gateway url"
-msgstr "Récupérer l'url de la passerelle RSS vers les nouvelles non lues (utilise une authentification automatique)"
-
-msgid "Rss gateway"
-msgstr "Url de la passerelle RSS"
-
-msgid "Delete"
-msgstr "Supprimer"
-
-msgid "Email"
-msgstr "Courriel"
-
-msgid "Show the new"
-msgstr "Afficher le contenu de la nouvelle (ou double-cliquer pour ouvrir dans une nouvelle fenêtre)"
-
-msgid "Move to page"
-msgstr "Afficher la page"
-
-msgid "Toggle menu"
-msgstr "Afficher/masquer le menu"
-
-msgid "Toggle category"
-msgstr "Afficher/masquer les flux de cette catégorie"
-
-msgid "Refresh"
-msgstr "Rafraîchir"
-
-msgid "And"
-msgstr "et"
-
-msgid "Toggle"
-msgstr "Afficher/masquer"
-
-msgid "Timezone"
-msgstr "Fuseau horaire"
-
-msgid "Cancel"
-msgstr "Annuler"
-
-msgid "Mark all the news of this page as read"
-msgstr "Marquer les nouvelles de cette page comme lues"
-
-msgid "Favicon of"
-msgstr "Icône du flux"
-
-msgid "Set unavailable on"
-msgstr "Marqué non disponible le"
-
-msgid "Show details of the new"
-msgstr "Afficher/masquer toutes les informations de la nouvelle"
-
-msgid "More"
-msgstr "Plus.."
-
-msgid "Order by"
-msgstr "Trier par"
-
-msgid "title"
-msgstr "titre"
-
-msgid "status"
-msgstr "statut"
-
-msgid "pubDate"
-msgstr "date de publication"
-
-msgid "stream"
-msgstr "flux"
-
-msgid "Posted"
-msgstr "Posté"
-
-msgid "Get REST auth tokens"
-msgstr "Récupérer les identifiants de connexion REST"
-
-msgid "REST auth tokens"
-msgstr "Identifiants de connexion REST"
-
-msgid "Clear the DB cache"
-msgstr "Supprimer tous les fichiers mis en cache (DB)"
-
-msgid "Clear DB cache"
-msgstr "Supprimer le cache DB"
-
-msgid "Clear the HTML cache"
-msgstr "Supprimer tous les fichiers mis en cache (HTML)"
-
-msgid "Clear HTML cache"
-msgstr "Supprimer le cache HTML"
-
-msgid "Home"
-msgstr "Accueil"
-
-msgid "Refresh menu"
-msgstr "Rafraîchir le menu"
-
-msgid "Toggle board"
-msgstr "Afficher/masquer le tableau de bord"
-
-msgid "Toggle new status"
-msgstr "Marquer la nouvelle comme lue/non-lue"
-
-msgid "Back to top of the new"
-msgstr "Vers le haut de la nouvelle"
-
-msgid "Edit the url of this stream"
-msgstr "Modifier l'url du flux"
-
-msgid "Number of news to display on each page"
-msgstr "Nombre de nouvelles à afficher par page"
-
-msgid "Block images with javascript"
-msgstr "Bloquer les images à l'aide de javascript"
-
-msgid "Edit tags"
-msgstr "Ajouter/supprimer un ou plusieurs tags"
-
-msgid "Delete new"
-msgstr "Supprimer la nouvelle"
-
-msgid "Mark all the news of this tag as read"
-msgstr "Marquer toutes les nouvelles de ce tag comme lues"
-
-msgid "Show the news for this tag"
-msgstr "Afficher les nouvelles de ce tag"
-
-msgid "Delete this tag (but not the contained news)"
-msgstr "Supprimer ce tag (mais pas les nouvelles contenues)"
-
-msgid "Rename this tag"
-msgstr "Renommer ce tag"
-
-msgid "Delete all the news from this tag"
-msgstr "Enlever toutes les nouvelles de ce tag"
-
-msgid "Non-blocking error(s) occured"
-msgstr "Des erreurs non fatales sont intervenues"
-
-msgid "CLI interface required"
-msgstr "L'interface CLI de PHP est requise pour accéder à cette partie de l'application"
-
-msgid "Invalid action \"%s\""
-msgstr "Action \"%s\" invalide"
-
-msgid "Invalid return from Model"
-msgstr "Retour du modèle invalide"
-
-msgid "Missing id"
-msgstr "ID manquant"
-
-msgid "Missing type"
-msgstr "Type manquant"
-
-msgid "Missing url"
-msgstr "Url manquante"
-
-msgid "Missing operator"
-msgstr "Opérateur manquant"
-
-msgid "You don't have the rights to do that"
-msgstr "Vous n'avez pas les droits nécessaire pour effectuer cette action, contactez votre administrateur"
+msgid "Administrator"
+msgstr "Administrateur"
+
+msgid "All news"
+msgstr "Toutes les nouvelles"
 
 msgid "An id is required"
 msgstr "Veuillez spécifier un ID"
 
-msgid "Empty search, please enter at least one keyword"
-msgstr "Votre recherche est vide, veuillez spécifier au moins un mot-clé d'une longueur d'au moins 3 caractères"
+msgid "And"
+msgstr "et"
 
-msgid "Internal error while redirecting to your OP"
-msgstr "Erreur interne lors de la redirection vers votre opérateur"
+msgid "Authentication"
+msgstr "Authentification"
 
-msgid "Missing type for cron managing"
-msgstr "Type manquant pour la gestion de la crontab"
+msgid "Authentification required"
+msgstr "Authentification requise"
 
-msgid "No way to write into cache directory"
-msgstr "Impossible d'écrire dans le répertoire cache"
+msgid "Back to top of the new"
+msgstr "Vers le haut de la nouvelle"
 
-msgid "No values to save, you surely have an error in your code"
-msgstr "Aucune valeur à enregistrer, vous devez avoir une erreur dans votre code"
+msgid "Block images with javascript"
+msgstr "Bloquer les images à l'aide de javascript"
 
-msgid "Some values are not uniques"
-msgstr "Certaines valeurs ne sont pas uniques"
+msgid "By"
+msgstr "par"
 
-msgid "Don't know what to save"
-msgstr "Je ne sais pas quoi sauvegarder !"
+msgid "CLI interface required"
+msgstr ""
+"L'interface CLI de PHP est requise pour accéder à cette partie de "
+"l'application"
 
-msgid "Missing value for required parameter \"%s\""
-msgstr "Il manque la valeur du champ \"%s\""
+msgid "Can not create the directory \"%s\""
+msgstr "Je ne peux pas créer le répertoire \"%s\""
 
-msgid "Nothing to delete"
-msgstr "Je n'ai rien à supprimer !"
+msgid "Can not execute all threads for action \"%s\" : request timeout"
+msgstr ""
+"Impossible d'éxecuter tous les processus pour l'action \"%s\" : temps dépassé"
 
-msgid "Invalid type"
-msgstr "Type d'objet invalide"
+msgid "Can not open fileinfo"
+msgstr "Impossible d'ouvrir fileinfo"
 
-msgid "Please specify the stream to set as unavailable"
-msgstr "Merci de spécifier quel flux je dois marquer comme non-accessible"
-
-msgid "Invalid email for field \"%s\""
-msgstr "Courriel invalide pour le champ \"%s\""
-
-msgid "Invalid url for field \"%s\""
-msgstr "Url invalide pour le champ \"%s\""
-
-msgid "Invalid IP address for field \"%s\""
-msgstr "Adresse IP invalide pour le champ \"%s\""
-
-msgid "Invalid lang for field \"%s\""
-msgstr "Langue invalide pour le champ \"%s\""
-
-msgid "Invalid login for field \"%s\""
-msgstr "Nom d'utilisateur invalide pour le champ \"%s\""
-
-msgid "Invalid password for field \"%s\""
-msgstr "Mot de passe invalide pour le champ \"%s\""
-
-msgid "Invalid rights for field \"%s\""
-msgstr "Droits invalide pour le champ \"%s\""
-
-msgid "Invalid hash for field \"%s\""
-msgstr "Hash invalide pour le champ \"%s\""
-
-msgid "Unknown fetch type"
-msgstr "Type de récupération inconnu"
+msgid "Can not open temporary OPML file"
+msgstr "Impossible d'ouvrir le fichier OPML"
 
 msgid "Can not parse stream \"%s\""
 msgstr "Impossible de parser le contenu du flux \"%s\""
@@ -510,128 +95,86 @@ msgstr "Impossible de parser le contenu du flux \"%s\""
 msgid "Can't parse the stream"
 msgstr "Impossible de parser le contenu du flux"
 
-msgid "Can not open temporary OPML file"
-msgstr "Impossible d'ouvrir le fichier OPML"
-
-msgid "Missing title for folder"
-msgstr "Il manque le nom de la catégorie"
-
-msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
-msgstr "XML non valide : il manque l'attribut \"%s\" de la balise <%s> contenue dans la balise <%s>"
-
-msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
-msgstr "XML non valide : il manque l'attribut \"%s\" de la balise <%s>"
-
-msgid "Please edit your code, cloning a singleton is not allowed"
-msgstr "Merci de corriger votre code, cloner un singleton n'est pas autorisé"
-
-msgid "Authentification required"
-msgstr "Authentification requise"
-
 msgid "Can't start session"
 msgstr "Impossible de démarrer la session"
 
-msgid "Invalid IP"
-msgstr "Adresse IP invalide"
+msgid "Cancel"
+msgstr "Annuler"
 
-msgid "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
-msgstr "Abandon de l'analyse du flux \"%s\" et déclaration comme non-accessible : impossible de récupérer la source"
+msgid "Categories"
+msgstr "Catégories"
 
-msgid "Invalid uri"
-msgstr "Uri non valide"
+msgid "Category"
+msgstr "Catégorie"
 
-msgid "Invalid stream"
-msgstr "Flux invalide"
+msgid "Change the interface language"
+msgstr "Modifier la langue de l'interface"
 
-msgid "No file \"%s\" uploaded"
-msgstr "Aucun fichier \"%s\" chargé"
+msgid "Clear DB cache"
+msgstr "Supprimer le cache DB"
 
-msgid "I don't accept array"
-msgstr "Je n'accepte pas les tableaux"
+msgid "Clear HTML cache"
+msgstr "Supprimer le cache HTML"
 
-msgid "No way to get at least one uploaded file"
-msgstr "Impossible de récupérer au moins un fichier chargé"
+msgid "Clear all"
+msgstr "Supprimer tous les nouvelles"
 
-msgid "Missing file"
-msgstr "Aucun fichier"
+msgid "Clear cache"
+msgstr "Supprimer le cache"
 
-msgid "Filesize is more than limit configuration"
-msgstr "La taille du fichier est supérieure à la limite de la configuration"
+msgid "Clear logs"
+msgstr "Nettoyer les logs"
 
-msgid "Error while transfering, try again"
-msgstr "Une erreur est survenue pendant le transfert, essayez de nouveau"
+msgid "Clear the DB cache"
+msgstr "Supprimer tous les fichiers mis en cache (DB)"
 
-msgid "SQL errror"
-msgstr "Erreur SQL"
+msgid "Clear the HTML cache"
+msgstr "Supprimer tous les fichiers mis en cache (HTML)"
 
-msgid "Incorrect file name"
-msgstr "Nom de fichier invalide"
+msgid "Clear the cache"
+msgstr "Supprimer tous les fichiers mis en cache"
 
-msgid "Incorrect file type"
-msgstr "Type de fichier invalide"
+msgid "Confirm password"
+msgstr "Confirmer le mot de passe"
 
-msgid "Can not open fileinfo"
-msgstr "Impossible d'ouvrir fileinfo"
+msgid "Create a user"
+msgstr "Ajouter un utilisateur"
 
-msgid "Error while moving uploaded file, try again"
-msgstr "Une erreur est survenue pendant le déplacement du fichier chargé, essayez de nouveau"
+msgid "Create user"
+msgstr "Ajouter un nouvel utilisateur"
 
-msgid "Missing locale ! (%s)"
-msgstr "Il manque la locale \"%s\""
+msgid "Delete"
+msgstr "Supprimer"
 
-msgid "You lost your token ! Confirm back your identity"
-msgstr "Vous avez perdu votre jeton d'authentification ! Merci de confirmer de nouveau votre identité"
+msgid "Delete all"
+msgstr "Tout supprimer"
 
-msgid "Missing ttl for cron managing"
-msgstr "Il manque le ttl pour la gestion de la crontab"
+msgid "Delete all news of all the streams"
+msgstr "Supprimer toutes les nouvelles de tous les flux"
 
-msgid "Invalid type for cron managing"
-msgstr "Type d'action inconnu pour la gestion de la crontab"
+msgid "Delete all the news from this tag"
+msgstr "Enlever toutes les nouvelles de ce tag"
 
-msgid "Invalid login or password. Please try again."
-msgstr "Nom d'utilisateur ou mot de passe invalide. Essayez de nouveau"
+msgid "Delete all the news of this category"
+msgstr "Supprimer toutes les nouvelles de cette catégorie"
 
-msgid "Missing name"
-msgstr "Il manque le nom"
+msgid "Delete all the news of this stream"
+msgstr "Supprimer toutes les nouvelles de ce flux"
 
-msgid "Missing ids of news"
-msgstr "Il manque les ID des nouvelles"
+msgid "Delete everything, categories included"
+msgstr "Supprimer intégralement les flux ainsi que les catégories"
 
-msgid "You can't create user with rights higher than yours."
-msgstr "Vous ne pouvez pas créer d'utilisateur avec un niveau de droits supérieur au vôtre"
+msgid "Delete new"
+msgstr "Supprimer la nouvelle"
 
-msgid "Empty lang"
-msgstr "La langue est vide"
+msgid "Delete this category and all sub-streams"
+msgstr "Supprimer cette catégorie ainsi que tous les flux contenus"
 
-msgid "Login or openid already used. Please choose another."
-msgstr "Nom d'utilisateur ou identifiant OpenID déjà utilisé. Merci d'en choisir un autre"
+msgid "Delete this stream"
+msgstr "Supprimer ce flux"
 
-msgid "Passwords are not identiquals."
-msgstr "Les mots de passes ne sont pas identiques."
-
-msgid "Login too long, please limit it to 55 chars."
-msgstr "Nom d'utilisateur trop long, maximum 55 caractères"
-
-msgid "Please fill all the fields."
-msgstr "Merci de compléter tous les champs requis, ils sont marqués d'une étoile"
-
-msgid "Invalid token"
-msgstr "Jeton d'authentification invalide"
-
-msgid "Session timeout"
-msgstr "Votre session a expirée"
-
-msgid "No results found. Try again by simplifying the request"
-msgstr "Aucun résultats. Essayez de simplifier votre recherche"
-
-msgid "The directory \"%s\" is not writeable"
-msgstr "Je ne peux pas écrire dans le répertoire \"%s\""
-
-msgid "The file \"%s\" exists, is not a dir and can not be removed"
-msgstr "Le fichier \"%s\" existe, n'est pas un répertoire et ne peut être supprimé"
-
-msgid "Can not create the directory \"%s\""
-msgstr "Je ne peux pas créer le répertoire \"%s\""
+msgid "Delete this tag (but not the contained news)"
+msgstr "Supprimer ce tag (mais pas les nouvelles contenues)"
 
 msgid "Display an abstract for each news"
 msgstr "Afficher un extrait des nouvelles"
@@ -639,36 +182,497 @@ msgstr "Afficher un extrait des nouvelles"
 msgid "Display some statistics"
 msgstr "Afficher les statistiques"
 
-msgid "Show statistics"
-msgstr "Statistiques"
+msgid "Do maintenance of the database (may take a while..)"
+msgstr "Effectuer la maintenance de la base (peut prendre un certain temps)"
 
-msgid "Categories"
-msgstr "Catégories"
+msgid "Don't know what to save"
+msgstr "Je ne sais pas quoi sauvegarder !"
 
-msgid "Unreads news"
-msgstr "Nouvelles non-lues"
+msgid "Download OMPL"
+msgstr "Télécharger"
+
+msgid "Download your feed(s) in OPML format"
+msgstr "Télécharger la liste de vos flux au format OPML"
+
+msgid "Edit"
+msgstr "Éditer"
+
+msgid "Edit tags"
+msgstr "Ajouter/supprimer un ou plusieurs tags"
+
+msgid "Edit the url of this stream"
+msgstr "Modifier l'url du flux"
+
+msgid "Edit your informations"
+msgstr "Éditer votre compte"
+
+msgid "Email"
+msgstr "Courriel"
+
+msgid "Empty lang"
+msgstr "La langue est vide"
+
+msgid "Empty search, please enter at least one keyword"
+msgstr ""
+"Votre recherche est vide, veuillez spécifier au moins un mot-clé d'une "
+"longueur d'au moins 3 caractères"
+
+msgid "Enclosure"
+msgstr "Objet (cliquer pour afficher)"
+
+msgid "English"
+msgstr "Anglais"
+
+msgid "Error while moving uploaded file, try again"
+msgstr ""
+"Une erreur est survenue pendant le déplacement du fichier chargé, essayez de "
+"nouveau"
+
+msgid "Error while transfering, try again"
+msgstr "Une erreur est survenue pendant le transfert, essayez de nouveau"
+
+msgid "Expand this stream"
+msgstr "Afficher les informations de ce flux"
+
+msgid "Export to OMPL"
+msgstr "Exporter vos flux"
+
+msgid "Export your feed(s) list to OMPL file"
+msgstr "Exporter la liste de vos flux au format OPML"
+
+msgid "Favicon of"
+msgstr "Icône du flux"
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "Filesize is more than limit configuration"
+msgstr "La taille du fichier est supérieure à la limite de la configuration"
+
+msgid "Find !"
+msgstr "Trouver !"
+
+msgid "Force refresh of all streams"
+msgstr "Rafraîchir tous les flux"
+
+msgid "Force refresh of this stream"
+msgstr "Rafraîchir ce flux"
+
+msgid "French"
+msgstr "Français"
+
+msgid "Get REST auth tokens"
+msgstr "Récupérer les identifiants de connexion REST"
+
+msgid "Get the RSS gateway url"
+msgstr ""
+"Récupérer l'url de la passerelle RSS vers les nouvelles non lues (utilise "
+"une authentification automatique)"
+
+msgid "Hide logs"
+msgstr "Masquer la fenêtre des logs"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "I don't accept array"
+msgstr "Je n'accepte pas les tableaux"
+
+msgid "In"
+msgstr "dans"
+
+msgid "Incorrect file name"
+msgstr "Nom de fichier invalide"
+
+msgid "Incorrect file type"
+msgstr "Type de fichier invalide"
+
+msgid "Interface language"
+msgstr "Langue de l'interface"
+
+msgid "Internal error while redirecting to your OP"
+msgstr "Erreur interne lors de la redirection vers votre opérateur"
+
+msgid "Invalid IP"
+msgstr "Adresse IP invalide"
+
+msgid "Invalid IP address for field \"%s\""
+msgstr "Adresse IP invalide pour le champ \"%s\""
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
+msgstr "XML non valide : il manque l'attribut \"%s\" de la balise <%s>"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+msgstr ""
+"XML non valide : il manque l'attribut \"%s\" de la balise <%s> contenue dans "
+"la balise <%s>"
+
+msgid "Invalid action \"%s\""
+msgstr "Action \"%s\" invalide"
+
+msgid "Invalid email for field \"%s\""
+msgstr "Courriel invalide pour le champ \"%s\""
+
+msgid "Invalid hash for field \"%s\""
+msgstr "Hash invalide pour le champ \"%s\""
+
+msgid "Invalid lang for field \"%s\""
+msgstr "Langue invalide pour le champ \"%s\""
+
+msgid "Invalid login for field \"%s\""
+msgstr "Nom d'utilisateur invalide pour le champ \"%s\""
+
+msgid "Invalid login or password. Please try again."
+msgstr "Nom d'utilisateur ou mot de passe invalide. Essayez de nouveau"
+
+msgid "Invalid password for field \"%s\""
+msgstr "Mot de passe invalide pour le champ \"%s\""
+
+msgid "Invalid return from Model"
+msgstr "Retour du modèle invalide"
+
+msgid "Invalid rights for field \"%s\""
+msgstr "Droits invalide pour le champ \"%s\""
+
+msgid "Invalid stream"
+msgstr "Flux invalide"
+
+msgid "Invalid token"
+msgstr "Jeton d'authentification invalide"
+
+msgid "Invalid type"
+msgstr "Type d'objet invalide"
+
+msgid "Invalid type for cron managing"
+msgstr "Type d'action inconnu pour la gestion de la crontab"
+
+msgid "Invalid uri"
+msgstr "Uri non valide"
+
+msgid "Invalid url for field \"%s\""
+msgstr "Url invalide pour le champ \"%s\""
+
+msgid "Keywords"
+msgstr "Mots-clés"
+
+msgid "Loading.."
+msgstr "Chargement.."
+
+msgid "Login"
+msgstr "Identifiant"
+
+msgid "Login already used. Please choose another."
+msgstr ""
+"Nom d'utilisateur déjà utilisé. Merci d'en choisir un "
+"autre"
+
+msgid "Login too long, please limit it to 55 chars."
+msgstr "Nom d'utilisateur trop long, maximum 55 caractères"
+
+msgid "Logout"
+msgstr "Se déconnecter"
+
+msgid "Maintenance"
+msgstr "Maintenance"
+
+msgid "Mark all as read"
+msgstr "Marquer toutes les nouvelles comme lues"
+
+msgid "Mark all the news as read"
+msgstr "Marquer toutes les nouvelles comme lues"
+
+msgid "Mark all the news of this category as read"
+msgstr "Marquer toutes les nouvelles de cette catégorie comme lues"
+
+msgid "Mark all the news of this page as read"
+msgstr "Marquer les nouvelles de cette page comme lues"
+
+msgid "Mark all the news of this stream as read"
+msgstr "Marquer toutes les nouvelles de ce flux comme lues"
+
+msgid "Mark all the news of this tag as read"
+msgstr "Marquer toutes les nouvelles de ce tag comme lues"
+
+msgid "Missing file"
+msgstr "Aucun fichier"
+
+msgid "Missing id"
+msgstr "ID manquant"
+
+msgid "Missing ids of news"
+msgstr "Il manque les ID des nouvelles"
+
+msgid "Missing locale ! (%s)"
+msgstr "Il manque la locale \"%s\""
+
+msgid "Missing name"
+msgstr "Il manque le nom"
+
+msgid "Missing operator"
+msgstr "Opérateur manquant"
+
+msgid "Missing title for folder"
+msgstr "Il manque le nom de la catégorie"
+
+msgid "Missing ttl for cron managing"
+msgstr "Il manque le ttl pour la gestion de la crontab"
+
+msgid "Missing type"
+msgstr "Type manquant"
+
+msgid "Missing type for cron managing"
+msgstr "Type manquant pour la gestion de la crontab"
+
+msgid "Missing url"
+msgstr "Url manquante"
+
+msgid "Missing value for required parameter \"%s\""
+msgstr "Il manque la valeur du champ \"%s\""
+
+msgid "More"
+msgstr "Plus.."
+
+msgid "Move this stream to another category"
+msgstr "Déplacer ce flux dans une autre catégorie"
+
+msgid "Move to page"
+msgstr "Afficher la page"
+
+msgid "Name"
+msgstr "Titre"
 
 msgid "News"
 msgstr "Nouvelles"
 
-msgid "Users"
-msgstr "Utilisateurs"
+msgid "No category (root)"
+msgstr "Pas de catégorie"
 
-msgid "Total"
-msgstr "Total"
+msgid "No file \"%s\" uploaded"
+msgstr "Aucun fichier \"%s\" chargé"
 
-msgid "Total streams"
-msgstr "Nombre total de flux pour tous les utilisateurs"
+msgid "No results found. Try again by simplifying the request"
+msgstr "Aucun résultats. Essayez de simplifier votre recherche"
 
-msgid "Total news"
-msgstr "Nombre total de nouvelles pour tous les utilisateurs"
+msgid "No values to save, you surely have an error in your code"
+msgstr ""
+"Aucune valeur à enregistrer, vous devez avoir une erreur dans votre code"
 
-msgid "Can not execute all threads for action \"%s\" : request timeout"
-msgstr "Impossible d'éxecuter tous les processus pour l'action \"%s\" : temps dépassé"
+msgid "No way to get at least one uploaded file"
+msgstr "Impossible de récupérer au moins un fichier chargé"
+
+msgid "No way to write into cache directory"
+msgstr "Impossible d'écrire dans le répertoire cache"
+
+msgid "Non-blocking error(s) occured"
+msgstr "Des erreurs non fatales sont intervenues"
+
+msgid "Not read"
+msgstr "Non lues"
+
+msgid "Nothing to delete"
+msgstr "Je n'ai rien à supprimer !"
+
+msgid "Number of news to display on each page"
+msgstr "Nombre de nouvelles à afficher par page"
+
+msgid "On"
+msgstr "le"
+
+msgid "Order by"
+msgstr "Trier par"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Passwords are not identiquals."
+msgstr "Les mots de passes ne sont pas identiques."
+
+msgid "Please edit your code, cloning a singleton is not allowed"
+msgstr "Merci de corriger votre code, cloner un singleton n'est pas autorisé"
+
+msgid "Please fill all the fields."
+msgstr ""
+"Merci de compléter tous les champs requis, ils sont marqués d'une étoile"
+
+msgid "Please specify the stream to set as unavailable"
+msgstr "Merci de spécifier quel flux je dois marquer comme non-accessible"
+
+msgid "Posted"
+msgstr "Posté"
+
+msgid "REST auth tokens"
+msgstr "Identifiants de connexion REST"
+
+msgid "Refresh"
+msgstr "Rafraîchir"
+
+msgid "Refresh all"
+msgstr "Rafraîchir tous les flux"
+
+msgid "Refresh all the streams of this category"
+msgstr "Rafraîchir tous les flux de cette catégorie"
+
+msgid "Refresh menu"
+msgstr "Rafraîchir le menu"
+
+msgid "Rename this category"
+msgstr "Renommer cette catégorie"
+
+msgid "Rename this stream"
+msgstr "Renommer ce flux"
+
+msgid "Rename this tag"
+msgstr "Renommer ce tag"
+
+msgid "Restricted access"
+msgstr "Accès restreint"
+
+msgid "Rss gateway"
+msgstr "Url de la passerelle RSS"
+
+msgid "SQL errror"
+msgstr "Erreur SQL"
+
+msgid "Search"
+msgstr "Chercher"
+
+msgid "Search in all news"
+msgstr "Chercher dans toutes les nouvelles"
+
+msgid "See online"
+msgstr "Voir en ligne"
+
+msgid "Session timeout"
+msgstr "Votre session a expirée"
+
+msgid "Set unavailable on"
+msgstr "Marqué non disponible le"
 
 msgid "Show all news"
 msgstr "Afficher toutes les nouvelles"
 
-msgid "All news"
-msgstr "Toutes les nouvelles"
+msgid "Show all unread news"
+msgstr "Afficher toutes les nouvelles non lues"
 
+msgid "Show details of the new"
+msgstr "Afficher/masquer toutes les informations de la nouvelle"
+
+msgid "Show logs"
+msgstr "Afficher la fenêtre des logs"
+
+msgid "Show statistics"
+msgstr "Statistiques"
+
+msgid "Show the new"
+msgstr ""
+"Afficher le contenu de la nouvelle (ou double-cliquer pour ouvrir dans une "
+"nouvelle fenêtre)"
+
+msgid "Show the news for this category"
+msgstr "Afficher les nouvelles de cette catégorie"
+
+msgid "Show the news for this stream"
+msgstr "Afficher les nouvelles de ce flux"
+
+msgid "Show the news for this tag"
+msgstr "Afficher les nouvelles de ce tag"
+
+msgid "Some values are not uniques"
+msgstr "Certaines valeurs ne sont pas uniques"
+
+msgid "Streams"
+msgstr "Flux"
+
+msgid "Submit"
+msgstr "Valider"
+
+msgid "The directory \"%s\" is not writeable"
+msgstr "Je ne peux pas écrire dans le répertoire \"%s\""
+
+msgid "The file \"%s\" exists, is not a dir and can not be removed"
+msgstr ""
+"Le fichier \"%s\" existe, n'est pas un répertoire et ne peut être supprimé"
+
+msgid "Timezone"
+msgstr "Fuseau horaire"
+
+msgid "Toggle"
+msgstr "Afficher/masquer"
+
+msgid "Toggle board"
+msgstr "Afficher/masquer le tableau de bord"
+
+msgid "Toggle category"
+msgstr "Afficher/masquer les flux de cette catégorie"
+
+msgid "Toggle menu"
+msgstr "Afficher/masquer le menu"
+
+msgid "Toggle new status"
+msgstr "Marquer la nouvelle comme lue/non-lue"
+
+msgid "Tools"
+msgstr "Outils"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Total news"
+msgstr "Nombre total de nouvelles pour tous les utilisateurs"
+
+msgid "Total streams"
+msgstr "Nombre total de flux pour tous les utilisateurs"
+
+msgid "Unknown fetch type"
+msgstr "Type de récupération inconnu"
+
+msgid "Unreads news"
+msgstr "Nouvelles non-lues"
+
+msgid "Url"
+msgstr "Url"
+
+msgid "User"
+msgstr "Utilisateur"
+
+msgid "User creation"
+msgstr "Édition d'un utilisateur"
+
+msgid "User informations"
+msgstr "Informations de l'utilisateur"
+
+msgid "User rights"
+msgstr "Droits d'utilisateur"
+
+msgid "Users"
+msgstr "Utilisateurs"
+
+msgid "Users list"
+msgstr "Liste des utilisateurs"
+
+msgid "You can't create user with rights higher than yours."
+msgstr ""
+"Vous ne pouvez pas créer d'utilisateur avec un niveau de droits supérieur au "
+"vôtre"
+
+msgid "You don't have the rights to do that"
+msgstr ""
+"Vous n'avez pas les droits nécessaire pour effectuer cette action, contactez "
+"votre administrateur"
+
+msgid "You lost your token ! Confirm back your identity"
+msgstr ""
+"Vous avez perdu votre jeton d'authentification ! Merci de confirmer de "
+"nouveau votre identité"
+
+msgid "pubDate"
+msgstr "date de publication"
+
+msgid "status"
+msgstr "statut"
+
+msgid "stream"
+msgstr "flux"
+
+msgid "title"
+msgstr "titre"

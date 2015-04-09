@@ -503,7 +503,7 @@ class User extends Singleton
             $key = (string) $key;
 
             $query = '
-        SELECT id, login, rights, lang, email, openid, timezone, token, token_key
+        SELECT id, login, rights, lang, email, timezone, token, token_key
             FROM users_tokens ut
             JOIN users u ON (u.id=ut.uid)
             WHERE uid=? AND action=?';
@@ -555,31 +555,6 @@ class User extends Singleton
     public function reg()
     {
         $_SESSION['User'] = $this;
-    }
-
-    /**
-     * Auth a user using OpenID
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @access public
-     * @param string $openid the user's openid
-     * @return boolean true on success
-     */
-    public function openIdAuth($openid)
-    {
-        $row = DB::iGet()->getRowP('
-    SELECT id, login, rights, lang, email, openid, timezone
-        FROM users
-        WHERE openid=?', new DBRequest((array)$openid));
-        if(!$row->next())
-        {
-            $this->reset();
-            return false;
-        }
-
-        $this->_setUser((array)$row);
-        $row = null;
-        return true;
     }
 
     /**

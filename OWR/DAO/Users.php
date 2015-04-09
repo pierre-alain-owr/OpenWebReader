@@ -83,12 +83,6 @@ class Users extends DAO
     public $email;
 
     /**
-     * @var int user's OpenID
-     * @access public
-     */
-    public $openid;
-
-    /**
      * @var int user's timezone
      * @access public
      */
@@ -109,7 +103,7 @@ class Users extends DAO
     public function __construct()
     {
         $this->_idField = 'id';
-        $this->_uniqueFields = array('login' => true, 'email' => true, 'openid' => false);
+        $this->_uniqueFields = array('login' => true, 'email' => true);
         $this->_fields = array(
             'id'        => array('required' => true, 'type' => \PDO::PARAM_INT),
             'login'     => array('required' => true, 'type' => DBRequest::PARAM_LOGIN),
@@ -117,7 +111,6 @@ class Users extends DAO
             'rights'    => array('required' => true, 'type' => DBRequest::PARAM_RIGHTS),
             'lang'      => array('required' => true, 'type' => DBRequest::PARAM_LANG),
             'email'     => array('required' => true, 'type' => DBRequest::PARAM_EMAIL),
-            'openid'    => array('required' => false, 'type' => DBRequest::PARAM_URL),
             'timezone'  => array('required' => true, 'type' => DBRequest::PARAM_TIMEZONE),
             'config'    => array('required' => true, 'type' => DBRequest::PARAM_SERIALIZED),
         );

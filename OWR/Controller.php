@@ -201,12 +201,6 @@ class Controller extends Singleton
 
         try
         {
-            if(!empty($this->_request->identifier) || 'verifyopenid' === $this->_request->do)
-            { // openid, add it to include_path
-                ini_set('include_path', HOME_PATH.'libs'.DIRECTORY_SEPARATOR.
-                        'openID'.DIRECTORY_SEPARATOR.PATH_SEPARATOR.ini_get('include_path'));
-            }
-
             if(!$this->_user->isLogged())
             {
                 if(!empty($this->_request->tlogin) && !empty($this->_request->key))
@@ -223,7 +217,7 @@ class Controller extends Singleton
 
                     $this->do_login(true);
                 }
-                elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login' && $this->_request->do !== 'verifyopenid')
+                elseif($this->_request->do !== 'edituser' && $this->_request->do !== 'login')
                 {
                     $this->_user->regenerateToken();
                     $this->redirect('login');
@@ -1166,32 +1160,6 @@ class Controller extends Singleton
     }
 
     /**
-     * Tries to auth user against OpenID
-     *
-     * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @access protected
-     * @return $this
-     */
-    protected function do_verifyOpenID()
-    {// openid login
-        class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
-        $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
-        $consumer = new \Auth_OpenID_Consumer($store);
-
-        $result = $consumer->complete($this->_cfg->get('openIDReturn'));
-        if($result->status != Auth_OpenID_SUCCESS)
-        {
-            unset($result);
-            $this->redirect('logout');
-        }
-
-        $this->do_login(false, $result->getDisplayIdentifier());
-        unset($result);
-
-        return $this;
-    }
-
-    /**
      * Renders results from a search coming from the search toolbar of your favorite browser
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
@@ -1421,11 +1389,10 @@ class Controller extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param boolean $auto automatic auth (gateway mode)
-     * @param string $openid OpenID authentication, optionnal
      * @access protected
      * @return $this
      */
-    protected function do_login($auto=false, $openid=null)
+    protected function do_login($auto=false)
     {
         $exists = DAO::getCachedDAO('users')->get(null, 'id', null, null, 1);
 
@@ -1437,7 +1404,7 @@ class Controller extends Singleton
         }
         unset($exists);
 
-        if(!$auto && empty($_POST) && !isset($openid) && empty($this->_request->identifier))
+        if(!$auto && empty($_POST))
         {
             $datas = array();
             if(isset($this->_request->timeout)) $datas['error'] = Utilities::iGet()->_('Session timeout');
@@ -1457,45 +1424,6 @@ class Controller extends Singleton
                 $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
                 return $this;
             }
-        }
-        elseif($openid)
-        {
-            $token = $this->_user->getToken();
-            // check HTTP User-Agent and token
-            if(($this->_user->getAgent() !== md5($token.
-            (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'X'))) ||
-            $this->_request->token !== $token)
-            {
-                $this->_user->reset();
-                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
-                return $this;
-            }
-            $this->_user->openIdAuth($openid);
-        }
-        elseif(!empty($this->_request->identifier))
-        {
-            $this->_user->checkToken();
-            $login = $this->_request->identifier;
-            if(0 !== mb_strpos($login, 'http://', 0, 'UTF-8'))
-                $login = 'http://'.$login;
-            if('/' !== mb_substr($login, -1, 1, 'UTF-8'))
-                    $login .= '/';
-
-            class_exists('Auth_OpenID_FileStore', false) || include HOME_PATH.'libs/openID/Auth/OpenID/SReg.php';
-            $store = new \Auth_OpenID_FileStore($this->_cfg->get('defaultTmpDir'));
-            $consumer = new \Auth_OpenID_Consumer($store);
-            $authRequest = $consumer->begin($login);
-            $sreg = \Auth_OpenID_SRegRequest::build(array('nickname'), array('fullname', 'email'));
-            $authRequest->addExtension($sreg);
-            $redirectURL = $authRequest->redirectURL($this->_cfg->get('openIDUrl'), $this->_cfg->get('openIDReturn').'&token='.$this->_user->getToken().
-                (!empty($this->_request->back) ? '&back='.urlencode($this->_request->back) : ''));
-            if($redirectURL != null)
-            {
-                header('Location: '.$redirectURL); // Redirection vers l'OP
-                exit;
-            }
-
-            throw new Exception('Internal error while redirecting to your OP');
         }
         else
         {

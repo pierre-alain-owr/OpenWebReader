@@ -122,10 +122,6 @@ $cfg['default_language']        = 'fr_FR';
 define('DEBUG', true);
 /**************************************** STOP EDITING HERE ****************************************/
 
-// OpenID
-$cfg['openIDUrl']               = 'http'.($cfg['httpsecure'] ? 's' : '').'://'.$cfg['url'];
-$cfg['openIDReturn']            = $cfg['surl'].'?do=verifyOpenID&try=1';
-
 // version
 $cfg['version']                 = '0.2.1';
 
@@ -158,15 +154,8 @@ spl_autoload_register(function($c)
     if(false !== $ext)
     { // external libraries
         $f = HOME_PATH."libs".DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $c).'.php';
-        $fOpenID = HOME_PATH."libs".DIRECTORY_SEPARATOR."openID".DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $c).'.php';
         if(!file_exists($f))
-        {
-            if(!file_exists($fOpenID))
-            {
-                return false;
-            }
-            $f = $fOpenID;
-        }
+            return false;
     }
     elseif(false !== $ns)
     {

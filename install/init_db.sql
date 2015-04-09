@@ -258,13 +258,11 @@ CREATE TABLE `users` (
   `rights` tinyint(4) NOT NULL,
   `lang` varchar(7) collate utf8_unicode_ci NOT NULL default 'fr_FR',
   `email` varchar(255) collate utf8_unicode_ci NOT NULL default '',
-  `openid` varchar(255) collate utf8_unicode_ci NOT NULL,
   `timezone` varchar(255) collate utf8_unicode_ci NOT NULL default 'Europe/Paris',
   `config` longtext collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`login`),
   UNIQUE KEY `email` (`email`),
-  KEY `openid` (`openid`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`id`) REFERENCES `objects` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 SET character_set_client = @saved_cs_client;

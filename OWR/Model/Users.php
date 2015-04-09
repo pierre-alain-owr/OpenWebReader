@@ -148,18 +148,7 @@ class Users extends Model
             $query = '
     SELECT id
         FROM users
-        WHERE (login=?';
-
-            if(!empty($request->openid))
-            {
-                if(false === mb_strpos($request->openid, 'http://', 0, 'UTF-8'))
-                        $request->openid = 'http://'.$request->openid;
-                if('/' !== mb_substr($request->openid, -1, 1, 'UTF-8'))
-                        $request->openid .= '/';
-                $query .= ' OR openid=?)';
-                array_push($args, $request->openid);
-            }
-            else $query .= ')';
+        WHERE (login=?)';
 
             if(!empty($request->id))
             {
@@ -174,7 +163,7 @@ class Users extends Model
                     'do'        => 'error',
                     'tpl'       => 'user',
                     'datas'     => $datas,
-                    'error'     => 'Login or openid already used. Please choose another.',
+                    'error'     => 'Login already used. Please choose another.',
                     'status'    => 409 // conflict
                 )));
                 return $this;
@@ -218,7 +207,6 @@ class Users extends Model
                 'email'     => $request->email,
                 'timezone'  => $request->timezone,
                 'id'        => $request->id,
-                'openid'    => $request->openid,
                 'config'    => $cfg
             );
         }
@@ -231,7 +219,6 @@ class Users extends Model
                 'email'     => $request->email,
                 'timezone'  => $request->timezone,
                 'id'        => $request->id,
-                'openid'    => $request->openid,
                 'config'    => $cfg
             );
         }
@@ -390,7 +377,7 @@ class Users extends Model
             $limit = 1;
         }
 
-        $datas = $this->_dao->get($args, 'id,login,rights,lang,email,openid,timezone,config', $order, $groupby, $limit);
+        $datas = $this->_dao->get($args, 'id,login,rights,lang,email,timezone,config', $order, $groupby, $limit);
         if(empty($datas))
         {
             $request->setResponse(new Response(array(

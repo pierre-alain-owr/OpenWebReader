@@ -12,9 +12,6 @@
             <input type="text" placeholder="<?php echo $this->_utilities->_('Login');?>" name="login" maxlength="55" size="31" id="login" />
             <label for="passwd"><?php echo $this->_utilities->_('Password');?>&nbsp;:</label>
             <input type="password" name="passwd" placeholder="<?php echo $this->_utilities->_('Password');?>" size="31" id="passwd" />
-<?php   if(isset($openIDerror)){ echo '<p class="error">'.$openIDerror.'</p>';} ?>
-                    <label for="identifier">OpenID&nbsp;:</label>
-            <input class="openid" type="text" size="31" placeholder="OpenID" name="identifier"/>
             <button type="submit" class="btn btn-block" name="submit"><?php echo $this->_utilities->_('Submit');?></button>
         </fieldset>
     </form>

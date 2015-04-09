@@ -9,7 +9,6 @@ Features :
     * Feeds tagging, with or without use of drag'n'drop
     * Multi-users, two level of rights (user, administrator)
     * Documented source code
-    * Support for OpenID authentification
     * REST API
     * Full-text search
     * OpenSearch compatible
@@ -47,7 +46,6 @@ Thanks to all of them :
 - Icons from http://www.famfamfam.com/lab/icons/silk/preview.php, see images/README.
 - MP3 flash player by <http://alsacreations.fr> <http://www.alsacreations.fr/dewplayer>
 - FLV flash player by <http://alsacreations.fr> <http://www.alsacreations.fr/dewtube>
-- openID library by JanRain <openid@janrain.com>, adapted for php 5.3 <http://sourcecookbook.com/en/recipes/60/janrain-s-php-openid-library-fixed-for-php-5-3-and-how-i-did-it>
 - HTMLPurifier as input purifier <http://htmlpurifier.org>
 - mootools as javascript library <http://mootools.net>
 - addthis service <http://www.addthis.com>

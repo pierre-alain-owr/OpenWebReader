@@ -1,26 +1,3 @@
-# OWR - OpenWebReader
-# Copyright (c) 2009, Pierre-Alain Mignot
-# Home page: http://openwebreader.org
-# E-Mail: contact@openwebreader.org
-# All Rights Reserved
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
-# @author Pierre-Alain Mignot <contact@openwebreader.org>
-# @copyright Copyright (c) 2009, Pierre-Alain Mignot
-# @license http://www.gnu.org/copyleft/gpl.html
-# @package OWR
-# Language file for english traduction
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.2\n"
@@ -33,476 +10,81 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Name"
-msgstr "Name"
-
-msgid "Submit"
-msgstr "Submit"
-
-msgid "Url"
-msgstr "Url"
-
-msgid "Category"
-msgstr "Category"
-
-msgid "No category (root)"
-msgstr "No category"
-
-msgid "Add a category"
-msgstr "Add a category"
-
-msgid "User creation"
-msgstr "User edition"
-
-msgid "User informations"
-msgstr "User informations"
-
-msgid "Login"
-msgstr "Login"
-
-msgid "Password"
-msgstr "Password"
-
-msgid "Confirm password"
-msgstr "Confirm password"
-
-msgid "User rights"
-msgstr "User rights"
-
-msgid "User"
-msgstr "User"
-
-msgid "Administrator"
-msgstr "Administrator"
-
-msgid "Loading.."
-msgstr "Loading.."
-
-msgid "Show logs"
-msgstr "Display logs"
-
-msgid "Change the interface language"
-msgstr "Change the interface language"
-
-msgid "English"
-msgstr "English"
-
-msgid "French"
-msgstr "French"
-
-msgid "Hide logs"
-msgstr "Hide logs"
-
-msgid "Clear logs"
-msgstr "Clear logs"
+msgid ""
+"Aborting parsing of stream \"%s\" and declaring it as unavailable : can't "
+"get the content"
+msgstr ""
+"Aborting parsing of stream \"%s\" and declaring it as unavailable : can't "
+"get the content"
 
 msgid "Actions"
 msgstr "Actions"
 
-msgid "Add a rss feed"
-msgstr "Add a feed via an url"
-
-msgid "Add RSS"
-msgstr "Add feed"
-
-msgid "Add rss feed(s) via an opml file"
-msgstr "Add feed(s) via an OPML file"
+msgid "Add Category"
+msgstr "Add category"
 
 msgid "Add OPML"
 msgstr "Add OPML file"
 
+msgid "Add RSS"
+msgstr "Add feed"
+
+msgid "Add a category"
+msgstr "Add a category"
+
 msgid "Add a custom category"
 msgstr "Add a category"
 
-msgid "Add Category"
-msgstr "Add category"
+msgid "Add a rss feed"
+msgstr "Add a feed via an url"
 
-msgid "Search in all news"
-msgstr "Search in all the news"
-
-msgid "Search"
-msgstr "Search"
-
-msgid "Keywords"
-msgstr "Keywords"
-
-msgid "Find !"
-msgstr "Find !"
-
-msgid "Logout"
-msgstr "Logout"
-
-msgid "Streams"
-msgstr "Feeds"
-
-msgid "Mark all the news as read"
-msgstr "Mark all the news as read"
-
-msgid "Mark all as read"
-msgstr "Mark all as read"
-
-msgid "Force refresh of all streams"
-msgstr "Force refresh of all feeds"
-
-msgid "Refresh all"
-msgstr "Refresh all"
-
-msgid "Delete all news of all the streams"
-msgstr "Delete all news of all the feeds"
-
-msgid "Clear all"
-msgstr "Clear all"
-
-msgid "Delete everything, categories included"
-msgstr "Delete everything, categories included"
-
-msgid "Delete all"
-msgstr "Delete all"
-
-msgid "Show all unread news"
-msgstr "Display all unread news"
-
-msgid "Not read"
-msgstr "Unreads"
-
-msgid "Show the news for this category"
-msgstr "Display the news for this category"
-
-msgid "Mark all the news of this category as read"
-msgstr "Mark all the news of this category as read"
-
-msgid "Refresh all the streams of this category"
-msgstr "Refresh all the feeds of this category"
-
-msgid "Delete all the news of this category"
-msgstr "Delete all the news of this category"
-
-msgid "Rename this category"
-msgstr "Rename this category"
-
-msgid "Delete this category and all sub-streams"
-msgstr "Delete this category and all contained feeds"
-
-msgid "Show the news for this stream"
-msgstr "Display the news for this feed"
-
-msgid "Expand this stream"
-msgstr "Toggle feed informations"
-
-msgid "Mark all the news of this stream as read"
-msgstr "Mark all the news of this feed as read"
-
-msgid "Force refresh of this stream"
-msgstr "Refresh this feed"
-
-msgid "Delete all the news of this stream"
-msgstr "Delete all the news of this feed"
-
-msgid "Rename this stream"
-msgstr "Rename this feed"
-
-msgid "Move this stream to another category"
-msgstr "Move this feed to another category"
-
-msgid "Delete this stream"
-msgstr "Delete this feed"
+msgid "Add rss feed(s) via an opml file"
+msgstr "Add feed(s) via an OPML file"
 
 msgid "Administration"
 msgstr "Administration"
 
-msgid "Do maintenance of the database (may take a while..)"
-msgstr "Do maintenance of the database (may take a while..)"
-
-msgid "Maintenance"
-msgstr "Maintenance"
-
-msgid "Create a user"
-msgstr "Create a user"
-
-msgid "Create user"
-msgstr "Create user"
-
-msgid "See online"
-msgstr "See online"
-
-msgid "Enclosure"
-msgstr "Enclosure (click to see it)"
-
-msgid "Restricted access"
-msgstr "Restricted access"
-
-msgid "Authentication"
-msgstr "Authentication"
-
-msgid "File"
-msgstr "File"
-
-msgid "On"
-msgstr "on"
-
-msgid "In"
-msgstr "in"
-
-msgid "By"
-msgstr "by"
-
-msgid "Export your feed(s) list to OMPL file"
-msgstr "Export your feed(s) list to OPML format"
-
-msgid "Export to OMPL"
-msgstr "Export you feeds"
-
-msgid "Clear the cache"
-msgstr "Delete all files from cache"
-
-msgid "Clear cache"
-msgstr "Clear cache"
-
-msgid "Download your feed(s) in OPML format"
-msgstr "Get your feed(s) in OPML format"
-
-msgid "Download OMPL"
-msgstr "Download"
-
-msgid "Interface language"
-msgstr "Interface language"
-
-msgid "Edit"
-msgstr "Edit"
-
-msgid "Users list"
-msgstr "Users list"
-
-msgid "Edit your informations"
-msgstr "Edit your account"
-
-msgid "Tools"
-msgstr "Tools"
-
-msgid "Get the RSS gateway url"
-msgstr "Get the url for RSS gateway to unread news (uses an automatic user authentication)"
-
-msgid "Rss gateway"
-msgstr "Url RSS gateway"
-
-msgid "Delete"
-msgstr "Delete"
-
-msgid "Email"
-msgstr "Email"
-
-msgid "Show the new"
-msgstr "Display the contents of the new (or double-click to open in a new window)"
-
-msgid "Move to page"
-msgstr "Display the page"
-
-msgid "Toggle menu"
-msgstr "Toggle menu"
-
-msgid "Toggle category"
-msgstr "Toggle feeds' category"
-
-msgid "Refresh"
-msgstr "Refresh"
-
-msgid "And"
-msgstr "and"
-
-msgid "Toggle"
-msgstr "Display/Hide"
-
-msgid "Timezone"
-msgstr "Timezone"
-
-msgid "Cancel"
-msgstr "Cancel"
-
-msgid "Mark all the news of this page as read"
-msgstr "Mark all the news of this page as read"
-
-msgid "Favicon of"
-msgstr "Favicon of feed"
-
-msgid "Set unavailable on"
-msgstr "Set unavailable on"
-
-msgid "Show/hide details of the new"
-msgstr "Display/hide all details of the new"
-
-msgid "More"
-msgstr "More.."
-
-msgid "Order by"
-msgstr "Order by"
-
-msgid "title"
-msgstr "title"
-
-msgid "status"
-msgstr "status"
-
-msgid "pubDate"
-msgstr "publication date"
-
-msgid "stream"
-msgstr "feed"
-
-msgid "Posted"
-msgstr "Posted"
-
-msgid "Get REST auth tokens"
-msgstr "Get REST auth tokens"
-
-msgid "REST auth tokens"
-msgstr "REST auth tokens"
-
-msgid "Clear the DB cache"
-msgstr "Clear the DB cache"
-
-msgid "Clear DB cache"
-msgstr "Clear DB cache"
-
-msgid "Clear the HTML cache"
-msgstr "Clear the HTML cache"
-
-msgid "Clear HTML cache"
-msgstr "Clear HTML cache"
-
-msgid "Home"
-msgstr "Home"
-
-msgid "Refresh menu"
-msgstr "Refresh menu"
-
-msgid "Toggle board"
-msgstr "Display/hide the board"
-
-msgid "Toggle new status"
-msgstr "Toggle new status"
-
-msgid "Back to top of the new"
-msgstr "Back to top of the new"
-
-msgid "Edit the url of this stream"
-msgstr "Edit the url of this stream"
-
-msgid "Number of news to display on each page"
-msgstr "Number of news to display on each page"
-
-msgid "Block images with javascript"
-msgstr "Block images with javascript"
-
-msgid "Edit tags"
-msgstr "Add/remove tag(s)"
-
-msgid "Delete new"
-msgstr "Delete the new"
-
-msgid "Mark all the news of this tag as read"
-msgstr "Mark all the news of this tag as read"
-
-msgid "Show the news for this tag"
-msgstr "Show the news for this tag"
-
-msgid "Delete this tag (but not the contained news)"
-msgstr "Delete this tag (but not the contained news)"
-
-msgid "Rename this tag"
-msgstr "Rename this tag"
-
-msgid "Delete all the news from this tag"
-msgstr "Remove all the news from this tag"
-
-msgid "Non-blocking error(s) occured"
-msgstr "Non-blocking error(s) occured"
-
-msgid "CLI interface required"
-msgstr "CLI interface required"
-
-msgid "Invalid action \"%s\""
-msgstr "Invalid action \"%s\""
-
-msgid "Invalid return from Model"
-msgstr "Invalid return from Model"
-
-msgid "Missing id"
-msgstr "Missing id"
-
-msgid "Missing type"
-msgstr "Missing type"
-
-msgid "Missing url"
-msgstr "Missing url"
-
-msgid "Missing operator"
-msgstr "Missing operator"
-
-msgid "You don't have the rights to do that"
-msgstr "You don't have the rights to do that, contact your administrator"
+msgid "Administrator"
+msgstr "Administrator"
+
+msgid "All news"
+msgstr "All news"
 
 msgid "An id is required"
 msgstr "An id is required"
 
-msgid "Empty search, please enter at least a keyword"
-msgstr "Empty search, please enter at least one keyword of 3 chars length"
+msgid "And"
+msgstr "and"
 
-msgid "Internal error while redirecting to your OP"
-msgstr "Internal error while redirecting to your OP"
+msgid "Authentication"
+msgstr "Authentication"
 
-msgid "Missing type for cron managing"
-msgstr "Missing type for cron managing"
+msgid "Authentification required"
+msgstr "Authentification required"
 
-msgid "No way to write into cache directory"
-msgstr "No way to write into cache directory"
+msgid "Back to top of the new"
+msgstr "Back to top of the new"
 
-msgid "No values to save, you surely have an error in your code"
-msgstr "No values to save, you surely have an error in your code"
+msgid "Block images with javascript"
+msgstr "Block images with javascript"
 
-msgid "Some values are not uniques"
-msgstr "Some values are not uniques"
+msgid "By"
+msgstr "by"
 
-msgid "Don't know what to save"
-msgstr "Don't know what to save !"
+msgid "CLI interface required"
+msgstr "CLI interface required"
 
-msgid "Missing value for required parameter \"%s\""
-msgstr "Missing value for required parameter \"%s\""
+msgid "Can not create the directory \"%s\""
+msgstr "Can not create the directory \"%s\""
 
-msgid "Nothing to delete"
-msgstr "Nothing to delete !"
+msgid "Can not execute all threads for action \"%s\" : request timeout"
+msgstr "Can not execute all threads for action \"%s\" : request timeout"
 
-msgid "Invalid type"
-msgstr "Invalid type of object"
+msgid "Can not open fileinfo"
+msgstr "Can not open fileinfo"
 
-msgid "Please specify the stream to set as unavailable"
-msgstr "Please specify the stream to set as unavailable"
-
-msgid "Invalid email for field \"%s\""
-msgstr "Invalid email for field \"%s\""
-
-msgid "Invalid url for field \"%s\""
-msgstr "Invalid url for field \"%s\""
-
-msgid "Invalid IP address for field \"%s\""
-msgstr "Invalid IP address for field \"%s\""
-
-msgid "Invalid lang for field \"%s\""
-msgstr "Invalid lang for field \"%s\""
-
-msgid "Invalid login for field \"%s\""
-msgstr "Invalid login for field \"%s\""
-
-msgid "Invalid password for field \"%s\""
-msgstr "Invalid password for field \"%s\""
-
-msgid "Invalid rights for field \"%s\""
-msgstr "Invalid rights for field \"%s\""
-
-msgid "Invalid hash for field \"%s\""
-msgstr "Invalid hash for field \"%s\""
-
-msgid "Unknown fetch type"
-msgstr "Unknown fetch type"
+msgid "Can not open temporary OPML file"
+msgstr "Can not open OPML file"
 
 msgid "Can not parse stream \"%s\""
 msgstr "Can not parse stream \"%s\""
@@ -510,128 +92,86 @@ msgstr "Can not parse stream \"%s\""
 msgid "Can't parse the stream"
 msgstr "Can't parse the stream"
 
-msgid "Can not open temporary OPML file"
-msgstr "Can not open OPML file"
-
-msgid "Missing title for folder"
-msgstr "Missing title for folder"
-
-msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
-msgstr "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
-
-msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
-msgstr "Invalid XML : needed attribute \"%s\" in tag <%s>"
-
-msgid "Please edit your code, cloning a singleton is not allowed"
-msgstr "Please edit your code, cloning a singleton is not allowed"
-
-msgid "Authentification required"
-msgstr "Authentification required"
-
 msgid "Can't start session"
 msgstr "Can't start session"
 
-msgid "Invalid IP"
-msgstr "Invalid IP"
+msgid "Cancel"
+msgstr "Cancel"
 
-msgid "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
-msgstr "Aborting parsing of stream \"%s\" and declaring it as unavailable : can't get the content"
+msgid "Categories"
+msgstr "Categories"
 
-msgid "Invalid uri"
-msgstr "Invalid uri"
+msgid "Category"
+msgstr "Category"
 
-msgid "Invalid stream"
-msgstr "Invalid stream"
+msgid "Change the interface language"
+msgstr "Change the interface language"
 
-msgid "No file \"%s\" uploaded"
-msgstr "No file \"%s\" uploaded"
+msgid "Clear DB cache"
+msgstr "Clear DB cache"
 
-msgid "I don't accept array"
-msgstr "I don't accept array"
+msgid "Clear HTML cache"
+msgstr "Clear HTML cache"
 
-msgid "No way to get at least one uploaded file"
-msgstr "No way to get at least one uploaded file"
+msgid "Clear all"
+msgstr "Clear all"
 
-msgid "Missing file"
-msgstr "Missing file"
+msgid "Clear cache"
+msgstr "Clear cache"
 
-msgid "Filesize is more than limit configuration"
-msgstr "Filesize is more than limit configuration"
+msgid "Clear logs"
+msgstr "Clear logs"
 
-msgid "Error while transfering, try again"
-msgstr "Error while transfering, try again"
+msgid "Clear the DB cache"
+msgstr "Clear the DB cache"
 
-msgid "SQL errror"
-msgstr "SQL errror"
+msgid "Clear the HTML cache"
+msgstr "Clear the HTML cache"
 
-msgid "Incorrect file name"
-msgstr "Incorrect file name"
+msgid "Clear the cache"
+msgstr "Delete all files from cache"
 
-msgid "Incorrect file type"
-msgstr "Incorrect file type"
+msgid "Confirm password"
+msgstr "Confirm password"
 
-msgid "Can not open fileinfo"
-msgstr "Can not open fileinfo"
+msgid "Create a user"
+msgstr "Create a user"
 
-msgid "Error while moving uploaded file, try again"
-msgstr "Error while moving uploaded file, try again"
+msgid "Create user"
+msgstr "Create user"
 
-msgid "Missing locale ! (%s)"
-msgstr "Missing locale \"%s\""
+msgid "Delete"
+msgstr "Delete"
 
-msgid "You lost your token ! Confirm back your identity"
-msgstr "You lost your authentication token ! Please confirm back your identity"
+msgid "Delete all"
+msgstr "Delete all"
 
-msgid "Missing ttl for cron managing"
-msgstr "Missing ttl for cron managing"
+msgid "Delete all news of all the streams"
+msgstr "Delete all news of all the feeds"
 
-msgid "Invalid type for cron managing"
-msgstr "Invalid type for cron managing"
+msgid "Delete all the news from this tag"
+msgstr "Remove all the news from this tag"
 
-msgid "Invalid login or password. Please try again."
-msgstr "Invalid login or password. Please try again"
+msgid "Delete all the news of this category"
+msgstr "Delete all the news of this category"
 
-msgid "Missing name"
-msgstr "Missing name"
+msgid "Delete all the news of this stream"
+msgstr "Delete all the news of this feed"
 
-msgid "Missing ids of news"
-msgstr "Missing ids of news"
+msgid "Delete everything, categories included"
+msgstr "Delete everything, categories included"
 
-msgid "You can't create user with rights higher than yours."
-msgstr "You can't create user with rights higher than yours."
+msgid "Delete new"
+msgstr "Delete the new"
 
-msgid "Empty lang"
-msgstr "Empty lang"
+msgid "Delete this category and all sub-streams"
+msgstr "Delete this category and all contained feeds"
 
-msgid "Login or openid already used. Please choose another."
-msgstr "Login or openid already used. Please choose another."
+msgid "Delete this stream"
+msgstr "Delete this feed"
 
-msgid "Passwords are not identiquals."
-msgstr "Passwords are not identiquals."
-
-msgid "Login too long, please limit it to 55 chars."
-msgstr "Login too long, please limit it to 55 chars length."
-
-msgid "Please fill all the fields."
-msgstr "Please fill all required fields, they are marked with a star"
-
-msgid "Invalid token"
-msgstr "Invalid authentication token"
-
-msgid "Session timeout"
-msgstr "Session timeout"
-
-msgid "No results found. Try again by simplifying the request"
-msgstr "No results found. Try again by simplifying the request"
-
-msgid "The directory \"%s\" is not writeable"
-msgstr "The directory \"%s\" is not writeable"
-
-msgid "The file \"%s\" exists, is not a dir and can not be removed"
-msgstr "The file \"%s\" exists, is not a dir and can not be removed"
-
-msgid "Can not create the directory \"%s\""
-msgstr "Can not create the directory \"%s\""
+msgid "Delete this tag (but not the contained news)"
+msgstr "Delete this tag (but not the contained news)"
 
 msgid "Display an abstract for each news"
 msgstr "Display an abstract for each news"
@@ -639,36 +179,479 @@ msgstr "Display an abstract for each news"
 msgid "Display some statistics"
 msgstr "Display some statistics"
 
-msgid "Show statistics"
-msgstr "Statistics"
+msgid "Do maintenance of the database (may take a while..)"
+msgstr "Do maintenance of the database (may take a while..)"
 
-msgid "Categories"
-msgstr "Categories"
+msgid "Don't know what to save"
+msgstr "Don't know what to save !"
 
-msgid "Unreads news"
-msgstr "Unreads news"
+msgid "Download OMPL"
+msgstr "Download"
+
+msgid "Download your feed(s) in OPML format"
+msgstr "Get your feed(s) in OPML format"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Edit tags"
+msgstr "Add/remove tag(s)"
+
+msgid "Edit the url of this stream"
+msgstr "Edit the url of this stream"
+
+msgid "Edit your informations"
+msgstr "Edit your account"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Empty lang"
+msgstr "Empty lang"
+
+msgid "Empty search, please enter at least a keyword"
+msgstr "Empty search, please enter at least one keyword of 3 chars length"
+
+msgid "Enclosure"
+msgstr "Enclosure (click to see it)"
+
+msgid "English"
+msgstr "English"
+
+msgid "Error while moving uploaded file, try again"
+msgstr "Error while moving uploaded file, try again"
+
+msgid "Error while transfering, try again"
+msgstr "Error while transfering, try again"
+
+msgid "Expand this stream"
+msgstr "Toggle feed informations"
+
+msgid "Export to OMPL"
+msgstr "Export you feeds"
+
+msgid "Export your feed(s) list to OMPL file"
+msgstr "Export your feed(s) list to OPML format"
+
+msgid "Favicon of"
+msgstr "Favicon of feed"
+
+msgid "File"
+msgstr "File"
+
+msgid "Filesize is more than limit configuration"
+msgstr "Filesize is more than limit configuration"
+
+msgid "Find !"
+msgstr "Find !"
+
+msgid "Force refresh of all streams"
+msgstr "Force refresh of all feeds"
+
+msgid "Force refresh of this stream"
+msgstr "Refresh this feed"
+
+msgid "French"
+msgstr "French"
+
+msgid "Get REST auth tokens"
+msgstr "Get REST auth tokens"
+
+msgid "Get the RSS gateway url"
+msgstr ""
+"Get the url for RSS gateway to unread news (uses an automatic user "
+"authentication)"
+
+msgid "Hide logs"
+msgstr "Hide logs"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "I don't accept array"
+msgstr "I don't accept array"
+
+msgid "In"
+msgstr "in"
+
+msgid "Incorrect file name"
+msgstr "Incorrect file name"
+
+msgid "Incorrect file type"
+msgstr "Incorrect file type"
+
+msgid "Interface language"
+msgstr "Interface language"
+
+msgid "Internal error while redirecting to your OP"
+msgstr "Internal error while redirecting to your OP"
+
+msgid "Invalid IP"
+msgstr "Invalid IP"
+
+msgid "Invalid IP address for field \"%s\""
+msgstr "Invalid IP address for field \"%s\""
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s>"
+msgstr "Invalid XML : needed attribute \"%s\" in tag <%s>"
+
+msgid "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+msgstr "Invalid XML : needed attribute \"%s\" in tag <%s> in parent tag <%s>"
+
+msgid "Invalid action \"%s\""
+msgstr "Invalid action \"%s\""
+
+msgid "Invalid email for field \"%s\""
+msgstr "Invalid email for field \"%s\""
+
+msgid "Invalid hash for field \"%s\""
+msgstr "Invalid hash for field \"%s\""
+
+msgid "Invalid lang for field \"%s\""
+msgstr "Invalid lang for field \"%s\""
+
+msgid "Invalid login for field \"%s\""
+msgstr "Invalid login for field \"%s\""
+
+msgid "Invalid login or password. Please try again."
+msgstr "Invalid login or password. Please try again"
+
+msgid "Invalid password for field \"%s\""
+msgstr "Invalid password for field \"%s\""
+
+msgid "Invalid return from Model"
+msgstr "Invalid return from Model"
+
+msgid "Invalid rights for field \"%s\""
+msgstr "Invalid rights for field \"%s\""
+
+msgid "Invalid stream"
+msgstr "Invalid stream"
+
+msgid "Invalid token"
+msgstr "Invalid authentication token"
+
+msgid "Invalid type"
+msgstr "Invalid type of object"
+
+msgid "Invalid type for cron managing"
+msgstr "Invalid type for cron managing"
+
+msgid "Invalid uri"
+msgstr "Invalid uri"
+
+msgid "Invalid url for field \"%s\""
+msgstr "Invalid url for field \"%s\""
+
+msgid "Keywords"
+msgstr "Keywords"
+
+msgid "Loading.."
+msgstr "Loading.."
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Login already used. Please choose another."
+msgstr "Login already used. Please choose another."
+
+msgid "Login too long, please limit it to 55 chars."
+msgstr "Login too long, please limit it to 55 chars length."
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Maintenance"
+msgstr "Maintenance"
+
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+msgid "Mark all the news as read"
+msgstr "Mark all the news as read"
+
+msgid "Mark all the news of this category as read"
+msgstr "Mark all the news of this category as read"
+
+msgid "Mark all the news of this page as read"
+msgstr "Mark all the news of this page as read"
+
+msgid "Mark all the news of this stream as read"
+msgstr "Mark all the news of this feed as read"
+
+msgid "Mark all the news of this tag as read"
+msgstr "Mark all the news of this tag as read"
+
+msgid "Missing file"
+msgstr "Missing file"
+
+msgid "Missing id"
+msgstr "Missing id"
+
+msgid "Missing ids of news"
+msgstr "Missing ids of news"
+
+msgid "Missing locale ! (%s)"
+msgstr "Missing locale \"%s\""
+
+msgid "Missing name"
+msgstr "Missing name"
+
+msgid "Missing operator"
+msgstr "Missing operator"
+
+msgid "Missing title for folder"
+msgstr "Missing title for folder"
+
+msgid "Missing ttl for cron managing"
+msgstr "Missing ttl for cron managing"
+
+msgid "Missing type"
+msgstr "Missing type"
+
+msgid "Missing type for cron managing"
+msgstr "Missing type for cron managing"
+
+msgid "Missing url"
+msgstr "Missing url"
+
+msgid "Missing value for required parameter \"%s\""
+msgstr "Missing value for required parameter \"%s\""
+
+msgid "More"
+msgstr "More.."
+
+msgid "Move this stream to another category"
+msgstr "Move this feed to another category"
+
+msgid "Move to page"
+msgstr "Display the page"
+
+msgid "Name"
+msgstr "Name"
 
 msgid "News"
 msgstr "News"
 
-msgid "Users"
-msgstr "Users"
+msgid "No category (root)"
+msgstr "No category"
 
-msgid "Total"
-msgstr "Total"
+msgid "No file \"%s\" uploaded"
+msgstr "No file \"%s\" uploaded"
 
-msgid "Total streams"
-msgstr "Total streams for all users"
+msgid "No results found. Try again by simplifying the request"
+msgstr "No results found. Try again by simplifying the request"
 
-msgid "Total news"
-msgstr "Total news for all users"
+msgid "No values to save, you surely have an error in your code"
+msgstr "No values to save, you surely have an error in your code"
 
-msgid "Can not execute all threads for action \"%s\" : request timeout"
-msgstr "Can not execute all threads for action \"%s\" : request timeout"
+msgid "No way to get at least one uploaded file"
+msgstr "No way to get at least one uploaded file"
+
+msgid "No way to write into cache directory"
+msgstr "No way to write into cache directory"
+
+msgid "Non-blocking error(s) occured"
+msgstr "Non-blocking error(s) occured"
+
+msgid "Not read"
+msgstr "Unreads"
+
+msgid "Nothing to delete"
+msgstr "Nothing to delete !"
+
+msgid "Number of news to display on each page"
+msgstr "Number of news to display on each page"
+
+msgid "On"
+msgstr "on"
+
+msgid "Order by"
+msgstr "Order by"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Passwords are not identiquals."
+msgstr "Passwords are not identiquals."
+
+msgid "Please edit your code, cloning a singleton is not allowed"
+msgstr "Please edit your code, cloning a singleton is not allowed"
+
+msgid "Please fill all the fields."
+msgstr "Please fill all required fields, they are marked with a star"
+
+msgid "Please specify the stream to set as unavailable"
+msgstr "Please specify the stream to set as unavailable"
+
+msgid "Posted"
+msgstr "Posted"
+
+msgid "REST auth tokens"
+msgstr "REST auth tokens"
+
+msgid "Refresh"
+msgstr "Refresh"
+
+msgid "Refresh all"
+msgstr "Refresh all"
+
+msgid "Refresh all the streams of this category"
+msgstr "Refresh all the feeds of this category"
+
+msgid "Refresh menu"
+msgstr "Refresh menu"
+
+msgid "Rename this category"
+msgstr "Rename this category"
+
+msgid "Rename this stream"
+msgstr "Rename this feed"
+
+msgid "Rename this tag"
+msgstr "Rename this tag"
+
+msgid "Restricted access"
+msgstr "Restricted access"
+
+msgid "Rss gateway"
+msgstr "Url RSS gateway"
+
+msgid "SQL errror"
+msgstr "SQL errror"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Search in all news"
+msgstr "Search in all the news"
+
+msgid "See online"
+msgstr "See online"
+
+msgid "Session timeout"
+msgstr "Session timeout"
+
+msgid "Set unavailable on"
+msgstr "Set unavailable on"
 
 msgid "Show all news"
 msgstr "Show all news"
 
-msgid "All news"
-msgstr "All news"
+msgid "Show all unread news"
+msgstr "Display all unread news"
 
+msgid "Show logs"
+msgstr "Display logs"
+
+msgid "Show statistics"
+msgstr "Statistics"
+
+msgid "Show the new"
+msgstr ""
+"Display the contents of the new (or double-click to open in a new window)"
+
+msgid "Show the news for this category"
+msgstr "Display the news for this category"
+
+msgid "Show the news for this stream"
+msgstr "Display the news for this feed"
+
+msgid "Show the news for this tag"
+msgstr "Show the news for this tag"
+
+msgid "Show/hide details of the new"
+msgstr "Display/hide all details of the new"
+
+msgid "Some values are not uniques"
+msgstr "Some values are not uniques"
+
+msgid "Streams"
+msgstr "Feeds"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "The directory \"%s\" is not writeable"
+msgstr "The directory \"%s\" is not writeable"
+
+msgid "The file \"%s\" exists, is not a dir and can not be removed"
+msgstr "The file \"%s\" exists, is not a dir and can not be removed"
+
+msgid "Timezone"
+msgstr "Timezone"
+
+msgid "Toggle"
+msgstr "Display/Hide"
+
+msgid "Toggle board"
+msgstr "Display/hide the board"
+
+msgid "Toggle category"
+msgstr "Toggle feeds' category"
+
+msgid "Toggle menu"
+msgstr "Toggle menu"
+
+msgid "Toggle new status"
+msgstr "Toggle new status"
+
+msgid "Tools"
+msgstr "Tools"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Total news"
+msgstr "Total news for all users"
+
+msgid "Total streams"
+msgstr "Total streams for all users"
+
+msgid "Unknown fetch type"
+msgstr "Unknown fetch type"
+
+msgid "Unreads news"
+msgstr "Unreads news"
+
+msgid "Url"
+msgstr "Url"
+
+msgid "User"
+msgstr "User"
+
+msgid "User creation"
+msgstr "User edition"
+
+msgid "User informations"
+msgstr "User informations"
+
+msgid "User rights"
+msgstr "User rights"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Users list"
+msgstr "Users list"
+
+msgid "You can't create user with rights higher than yours."
+msgstr "You can't create user with rights higher than yours."
+
+msgid "You don't have the rights to do that"
+msgstr "You don't have the rights to do that, contact your administrator"
+
+msgid "You lost your token ! Confirm back your identity"
+msgstr "You lost your authentication token ! Please confirm back your identity"
+
+msgid "pubDate"
+msgstr "publication date"
+
+msgid "status"
+msgstr "status"
+
+msgid "stream"
+msgstr "feed"
+
+msgid "title"
+msgstr "title"

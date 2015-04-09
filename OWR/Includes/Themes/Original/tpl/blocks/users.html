@@ -6,7 +6,6 @@
             <tr>
                 <th class="full_rounded"><?php echo $this->_utilities->_('Login');?></th>
                 <th class="full_rounded"><?php echo $this->_utilities->_('Email');?></th>
-                <th class="full_rounded">OpenId</th>
                 <th class="empty">&nbsp;</th>
             </tr>
         </thead>
@@ -23,9 +22,6 @@
                 </td>
                 <td class="full_rounded">
                     <?php echo $user['email'];?>
-                </td>
-                <td class="full_rounded">
-                    <?php echo $user['openid'];?>
                 </td>
                 <td class="actions full_rounded">
                     <a class="icon_user_delete backgrounded opac" href="javascript:;" onclick="rP.deleteUser(<?php echo $user['id'];?>);" title="<?php echo $this->_utilities->_('Delete');?>"></a>

@@ -618,12 +618,12 @@ div#loginbox, div#edituser
     border:none;
 }
 
-div#loginbox fieldset, div#loginOpenID fieldset, div#edituser fieldset
+div#loginbox fieldset, div#edituser fieldset
 {
     border:none;
 }
 
-div#loginbox legend, div#loginOpenID legend, div#edituser legend
+div#loginbox legend, div#edituser legend
 {
     text-shadow:1px 1px 0 gray;
     border-bottom:1px solid gray;
@@ -690,16 +690,6 @@ div.users, div.stats
 a.current.hidden, a.current_stream.hidden, input.hidden
 {
     display:none;
-}
-
-
-
-input.openid
-{
-    background-image:url(../images/images.php?f=icons.png);
-    background-position:-782px 5px;
-    background-repeat:no-repeat;
-    padding-left:20px;
 }
 
 .icon_unavailable_feed
