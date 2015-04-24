@@ -1069,7 +1069,7 @@ OWR.prototype = {
             item.addEvent('dblclick', function(e, el) {
                 if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags')) {return false;}
                 $clear(timer);
-                window.open(el.getFirst().getChildren('.link_go').get('href'));
+                window.open(el.getElements('.link_go').get('href'));
                 if(el.hasClass('new_container_nread')) {
                     this.updateNews(el.get('id').split('_')[1]);
                 }
