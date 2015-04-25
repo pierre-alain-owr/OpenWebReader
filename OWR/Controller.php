@@ -2235,13 +2235,16 @@ class Controller extends Singleton
                 if('error' !== $response->getNext())
                 {
                     $tags = $response->getDatas();
+                    $datas['tags'] = array();
                     if(!empty($tags))
-                        $datas['tags'] = $response->isMultiple() ? $tags : array($tags);
-                    foreach($datas['tags'] as $k => $tag)
                     {
-                        $datas['tags'][$k]['groupid'] = $tag['id'];
-                        $datas['tags'][$k]['gname'] = $tag['name'];
-                        $datas['tags'][$k]['unread'] = isset($this->_request->unreads[$tag['id']]) ? $this->_request->unreads[$tag['id']] : 0;
+                        $datas['tags'] = $response->isMultiple() ? $tags : array($tags);
+                        foreach($datas['tags'] as $k => $tag)
+                        {
+                            $datas['tags'][$k]['groupid'] = $tag['id'];
+                            $datas['tags'][$k]['gname'] = $tag['name'];
+                            $datas['tags'][$k]['unread'] = isset($this->_request->unreads[$tag['id']]) ? $this->_request->unreads[$tag['id']] : 0;
+                        }
                     }
                 }
                 else
