@@ -145,6 +145,7 @@ class Theme extends pTheme
     public function users(array $datas, array $noCacheDatas)
     {
         $datas['nbusers'] = count($datas['users']);
+        $noCacheDatas['token'] = User::iGet()->getToken();
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 

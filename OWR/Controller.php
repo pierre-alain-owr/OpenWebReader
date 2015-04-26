@@ -2275,7 +2275,6 @@ class Controller extends Singleton
                 break;
 
             case 'user':
-                $noCacheDatas['token'] = $this->_user->getToken();
                 if(empty($datas['id']))
                 { // surely editing a new user
                     $datas['surl'] = $this->_cfg->get('surl');
@@ -2303,7 +2302,6 @@ class Controller extends Singleton
 
             case 'users':
                 $datas['surl'] = $this->_cfg->get('surl');
-                $noCacheDatas['token'] = $this->_user->getToken();
                 $request = new Request($datas);
                 Model::getCachedModel('users')->view($request, array(), 'login');
                 $response = $request->getResponse();
