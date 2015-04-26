@@ -174,7 +174,6 @@ class Theme extends pTheme
         
         $noCacheDatas['unread_0'] = isset($datas['unreads'][0]) ? $datas['unreads'][0] : 0;
         $noCacheDatas['bold_0'] = $noCacheDatas['unread_0'] > 0 ? ' class="bold"' : '';
-        $noCacheDatas['token'] = User::iGet()->getToken();
         $noCacheDatas['userlogin'] = htmlentities(User::iGet()->getLogin(), ENT_COMPAT, 'UTF-8');
 
         $datas['userrights'] = User::iGet()->getRights();
@@ -194,6 +193,8 @@ class Theme extends pTheme
         $this->_view->addBlock('menu', 'contents', $this->_view->get('menu', $datas, null, $noCacheDatas));
         $this->_view->addBlock('content', 'contents', $this->_view->get('content', $datas, null, $noCacheDatas));
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
+
+        $noCacheDatas['token'] = User::iGet()->getToken();
 
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
