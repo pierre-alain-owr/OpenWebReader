@@ -97,7 +97,7 @@ class Theme extends pTheme
     }
 
     /**
-     * Generates use template
+     * Generates user template
      *
      * @param array $datas datas to generate template
      * @param array $noCacheDatas not cached datas to generate template
@@ -106,7 +106,6 @@ class Theme extends pTheme
      */
     public function user(array $datas, array $noCacheDatas)
     {
-        $noCacheDatas['token'] = User::iGet()->getToken();
         $datas['lang'] = User::iGet()->getLang();
         $datas['xmllang'] = User::iGet()->getXMLLang();
         $datas['htmllang'] = substr($datas['lang'], 0, 2);
@@ -129,6 +128,9 @@ class Theme extends pTheme
         $this->_view->addBlock('head', 'head', $this->_view->get('head', $datas, null, $noCacheDatas));
         $this->_view->addBlock('user', 'contents', $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas));
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
+
+        $noCacheDatas['token'] = User::iGet()->getToken();
+
         return $this->_view->get('index', $datas, null, $noCacheDatas);
     }
 
