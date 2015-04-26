@@ -342,20 +342,16 @@ abstract class DAO implements iDAO
                     $chkUniQuery .= ' AND uid='.$this->uid;
                 }
 
-                if($this->_idField)
-                {
-                    if(isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
-                    {
-                        $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
-                    }
-                    $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
+                if($this->_idField && isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
+                    $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
 
-                    if($exists->next() && $exists->nb > 0)
-                    {
-                        throw new Exception('Some values are not uniques', 409);
-                    }
-                    unset($exists);
+                $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
+
+                if($exists->next() && $exists->nb > 0)
+                {
+                    throw new Exception('Some values are not uniques', 409);
                 }
+                unset($exists);
             }
 
             unset($whereFields, $whereFieldsDecl);
