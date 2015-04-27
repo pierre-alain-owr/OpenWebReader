@@ -532,6 +532,8 @@ class Streams extends Model
             $datas['contents'] = unserialize($datas['contents']);
         }
 
+        $this->_setUserTimestamp($datas);
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => $multiple
@@ -1193,7 +1195,7 @@ class Streams extends Model
                         continue;
                     }
 
-                    if(empty($icon) || false === strpos($headers['Content-Type'], 'image')) continue;
+                    if(empty($icon) /*|| false === strpos($headers['Content-Type'], 'image')*/) continue;
 
                     if(class_exists('Imagick', false))
                     {
