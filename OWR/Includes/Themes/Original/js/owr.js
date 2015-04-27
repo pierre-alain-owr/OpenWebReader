@@ -1038,7 +1038,7 @@ OWR.prototype = {
                     }
                     return false;
                 }
-                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags')) {return false;}
+                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags') || e.target.hasClass('delete')) {return false;}
                 e.stop();
                 timer = (function(){
                     var id = el.get('id').split('_');
@@ -1818,7 +1818,7 @@ OWR.prototype = {
         if('object' === typeof id) {
             r.get({'ids': id, 'do': 'upnew', 'currentid': this.currentId, 'status': status});
         } else {
-            r.get({'id': id, 'do': 'upnew', 'currentid': this.currentId, 'status': status, 'timestamp':this.getCurrentTS(id)});
+            r.get({'id': id, 'do': 'upnew', 'currentid': this.currentId, 'status': status});
         }
     },
     clearLogs: function() { $('logs').empty();this.nbLogsLine=0; },
@@ -2333,6 +2333,8 @@ OWR.prototype = {
                 return this.TS[this.currentId];
             }
         }
+        if(this.lastUpd) return this.lastUpd;
+        if($defined(this.TS[0])) return this.TS[0];
         return 0;
     },
     getNew: function(id) {
