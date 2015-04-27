@@ -14,7 +14,7 @@
             </tr>
             <tr>
                 <td class="full_rounded"><?php echo $this->_utilities->_('Streams');?></td>
-                <td class="full_rounded"><?php echo $nbStreams;?></td>
+                <td class="full_rounded"><?php echo $nbStreams . ' (-' . $nbDeadStreams . ')';?></td>
             </tr>
             <tr>
                 <td class="full_rounded"><?php echo $this->_utilities->_('News');?></td>
@@ -37,7 +37,7 @@
       if(isset($nbTotalStreams)) {?>
             <tr>
                 <td class="full_rounded"><?php echo $this->_utilities->_('Total streams');?></td>
-                <td class="full_rounded"><?php echo $nbTotalStreams;?></td>
+                <td class="full_rounded"><?php echo $nbTotalStreams . ' (-' . $nbTotalDeadStreams . ')';?></td>
             </tr>
 <?php }
       if(isset($nbTotalNews)) {?>

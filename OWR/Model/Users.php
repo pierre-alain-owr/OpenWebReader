@@ -488,6 +488,7 @@ class Users extends Model
         $datas = array();
         $datas['nbCategories'] = DAO::getCachedDAO('streams_groups')->count()->nb;
         $datas['nbStreams'] = DAO::getCachedDAO('streams_relations')->count()->nb;
+        $datas['nbDeadStreams'] = $datas['nbStreams'] - DAO::getCachedDAO('streams_relations')->count(array('streams.status' => 0))->nb;
         $datas['nbNews'] = DAO::getCachedDAO('news_relations')->count()->nb;
         $datas['nbUnreads'] = DAO::getCachedDAO('news_relations')->count(array('status' => 1))->nb;
         $datas['nbTags'] = DAO::getCachedDAO('news_tags')->count()->nb;
@@ -497,6 +498,7 @@ class Users extends Model
             $datas['nbUsers'] = $this->_dao->count()->nb;
             $datas['nbTotalStreams'] = DAO::getCachedDAO('streams')->count()->nb;
             $datas['nbTotalNews'] = DAO::getCachedDAO('news')->count()->nb;
+            $datas['nbTotalDeadStreams'] = $datas['nbTotalStreams'] - DAO::getCachedDAO('streams')->count(array('status' => 0))->nb;
         }
 
         $request->setResponse(new Response(array(
