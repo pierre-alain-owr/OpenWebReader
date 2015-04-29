@@ -1574,10 +1574,17 @@ OWR.prototype = {
     },
     initSortables: function()
     {
-        if(this.sortables) { delete this.sortables; }
+        if(this.sortables) {
+            $$('ul.menu_groups').each(function(e) {
+                if(!this.sortables.lists.contains(e))
+                    this.sortables.addLists(e);
+            }, this);
+            return;
+        }
         this.sortables = new Sortables($$('ul.menu_groups'), {
             clone: true,
             revert:true,
+            opacity:0.5,
             onStart: function(e) {
                 this.currentgid = e.getParent().get('id').split('_')[1].toInt();
             }
@@ -2255,6 +2262,8 @@ OWR.prototype = {
             if(!$('groupContainer_' + id)) {
                 $('stream_' + id).adopt(new Element('ul', {'id': 'groupContainer_'+id, 'class': 'menu_groups'}));
             }
+            if(this.sortables)
+                this.sortables.removeLists($('groupContainer_'+id));
             this.parseResponse(json, null, 'groupContainer_'+id);
             this.initSortables();
             $('gstream_toggler_'+id).setStyle('background-position', '-319px 0px').status = 1;
