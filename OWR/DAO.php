@@ -263,6 +263,9 @@ abstract class DAO implements iDAO
 
         $checkUnique = $insert = $update = false;
 
+        if(isset($this->_fields['uid']))
+            $this->uid = $this->uid ?: User::iGet()->getUid();
+
         if($this->_idField)
         {
             unset($requestFields[$this->_idField]);
@@ -273,10 +276,7 @@ abstract class DAO implements iDAO
     UPDATE ';
                 $wheres[] = $this->_idField;
                 if(isset($this->_fields['uid']))
-                {
-                    $this->uid = $this->uid ?: User::iGet()->getUid();
                     empty($wheres) || ($wheres[] = 'uid');
-                }
             }
             else
             {
@@ -328,30 +328,61 @@ abstract class DAO implements iDAO
                 }
             }
 
-            if($whereFields)
+            if(!empty($whereFields) && ($this->_idField || isset($this->_fields['uid'])))
             {
                 $chkUniQuery = '
     SELECT COUNT('.($this->_idField ?: '*').') AS nb
         FROM '.$this->_name.'
         WHERE ';
-                $chkUniQuery .= '('.join('=? OR ', $whereFields).'=?)';
 
-                if(isset($this->_fields['uid']))
+                if($this->_idField)
                 {
-                    $this->uid = $this->uid ?: User::iGet()->getUid();
-                    $chkUniQuery .= ' AND uid='.$this->uid;
+                    $chkUniQuery .= '('.join('=? OR ', $whereFields).'=?)';
+                    
+                    if(isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
+                        $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
+                        
+                    if(isset($this->_fields['uid']))
+                        $chkUniQuery .= ' AND uid='.$this->uid;
                 }
-
-                if($this->_idField && isset($this->{$this->_idField}) && $this->{$this->_idField} > 0)
-                    $chkUniQuery .= ' AND '.$this->_idField.'!='.self::$_db->quote($this->{$this->_idField});
-
-                $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
-
-                if($exists->next() && $exists->nb > 0)
+                else
                 {
-                    throw new Exception('Some values are not uniques', 409);
+                // there is no key id field
+                // and $this->_fields['uid'] is set so we assume we are checking for relations between object and user
+                    $tmpChkUniQuery = array();
+                    foreach($whereFields as $field)
+                    {
+                        foreach($this->_relations as $krel => $vrel)
+                        {
+                            if(isset($vrel[$field]))
+                            {
+                                unset($whereFieldsDecl[$field]);
+                                continue 2; // it's an id relation field
+                            }
+                        }
+                        foreach($this->_userRelations as $krel => $vrel)
+                        {
+                            if(isset($vrel[$field]))
+                            {
+                                unset($whereFieldsDecl[$field]);
+                                continue 2; // it's an id relation field
+                            }
+                        }
+                        $tmpChkUniQuery[] = '(' . $field . '=? AND uid=' . $this->uid . ')';
+                    }
+                    if(empty($tmpChkUniQuery)) $skip = 1;
+                    $chkUniQuery .= '(' . join(') OR (', $tmpChkUniQuery) . ')';
+                }            
+
+                if(!isset($skip))
+                {
+                    $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
+
+                    if($exists->next() && $exists->nb > 0)
+                        throw new Exception('Some values are not uniques ' . $chkUniQuery . '          /          ' . $query, 409);
+
+                    unset($exists);
                 }
-                unset($exists);
             }
 
             unset($whereFields, $whereFieldsDecl);
@@ -377,36 +408,29 @@ abstract class DAO implements iDAO
             {
                 if($decl['required'])
                 {
-                    if('uid' === $field)
+                    if(!isset($this->$field))
+                        throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
+
+                    switch($decl['type'])
                     {
-                        $this->uid = $this->uid ?: User::iGet()->getUid();
-                    }
-                    else
-                    {
-                        if(!isset($this->$field))
-                            throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
-
-                        switch($decl['type'])
-                        {
-                            case DBRequest::PARAM_PASSWD:
-                                if(!empty($this->{$this->_idField}))
-                                    break;
-
-                            case DBRequest::PARAM_RIGHTS:
-                            case DBRequest::PARAM_LOGIN:
-                            case DBRequest::PARAM_LANG:
-                            case DBRequest::PARAM_EMAIL:
-                            case DBRequest::PARAM_URL:
-                            case DBRequest::PARAM_TIMEZONE:
-                            case DBRequest::PARAM_HASH:
-                            case DBRequest::PARAM_IP:
-                            case \PDO::PARAM_STR:
-                                if(empty($this->$field))
-                                    throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
-
-                            default:
+                        case DBRequest::PARAM_PASSWD:
+                            if(!empty($this->{$this->_idField}))
                                 break;
-                        }
+
+                        case DBRequest::PARAM_RIGHTS:
+                        case DBRequest::PARAM_LOGIN:
+                        case DBRequest::PARAM_LANG:
+                        case DBRequest::PARAM_EMAIL:
+                        case DBRequest::PARAM_URL:
+                        case DBRequest::PARAM_TIMEZONE:
+                        case DBRequest::PARAM_HASH:
+                        case DBRequest::PARAM_IP:
+                        case \PDO::PARAM_STR:
+                            if(empty($this->$field))
+                                throw new Exception(sprintf(Utilities::iGet()->_('Missing value for required parameter "%s"'), $field), Exception::E_OWR_BAD_REQUEST);
+
+                        default:
+                            break;
                     }
                 }
                 elseif(!isset($this->$field))
