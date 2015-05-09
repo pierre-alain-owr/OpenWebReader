@@ -125,6 +125,12 @@ class User extends Singleton
     private $_config = array();
 
     /**
+    * @var array timestamp of last user request
+    * @access private
+    */
+    private $_timestamp = array();
+
+    /**
      * Constructor
      *
      * @access protected
@@ -140,7 +146,7 @@ class User extends Singleton
             $this->_lang = Config::iGet()->get('default_language');
             $this->_xmlLang = str_replace('_', '-', $this->_lang);
         }
-
+        $this->_timestamp[0] = time();
         $this->setTimezone();
     }
 
@@ -153,7 +159,7 @@ class User extends Singleton
      */
     public function __sleep()
     {
-        return array('_rights', '_timezone', '_lang', '_login', '_uid', '_token', '_agent', '_config');
+        return array('_rights', '_timezone', '_lang', '_login', '_uid', '_token', '_agent', '_config', '_timestamp');
     }
 
     /**
@@ -749,5 +755,33 @@ class User extends Singleton
         DB::iGet()->setP($query, new DBRequest(array($action, $this->_uid, $tokens['tlogin'], $tokens['tlogin_key'])));
 
         return $tokens;
+    }
+
+    /**
+     *
+     * Returns the user's timestamp, which corresponds to the last http request timestamp for this user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param $id stream/group/tag id
+     * @return int the user's stream/group/tag timestamp
+     */
+    public function getTimestamp($id = 0)
+    {
+        return (int) (isset($this->_timestamp[$id]) ? $this->_timestamp[$id] : time());
+    }
+
+    /**
+     * Sets the user's timestamp, which corresponds to the last http request timestamp for this user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param int $id stream/group/tag id
+     * @param int $timestamp the timestamp
+     * @return int the user's stream/group/tag timestamp
+     */
+    public function setTimestamp($id = 0, $timestamp = 0)
+    {
+        return (int) ($this->_timestamp[$id] = (!empty($timestamp) ? $timestamp : time()));
     }
 }

@@ -138,4 +138,22 @@ abstract class Model implements iModel
 
         return self::$_cachedModels[$model];
     }
+
+    /**
+     * Sets the user's timestamp, which corresponds to the last http request timestamp for this user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param array $datas the datas retrieved from DB
+     */
+    protected function _setUserTimestamp(array $datas)
+    {
+        if(isset($datas['id']))
+            User::iGet()->setTimestamp($datas['id']);
+        else
+        {
+            foreach($datas as $data)
+                User::iGet()->setTimestamp($data['id']);
+        }
+    }
 }

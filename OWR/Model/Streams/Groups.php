@@ -218,6 +218,8 @@ class Groups extends Model
             return $this;
         }
 
+        $this->_setUserTimestamp($datas);
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => !isset($datas['id'])

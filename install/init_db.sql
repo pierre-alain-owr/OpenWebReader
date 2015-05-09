@@ -19,7 +19,7 @@ SET character_set_client = utf8;
 CREATE TABLE `news` (
   `id` int(11) NOT NULL,
   `rssid` int(11) NOT NULL,
-  `lastupd` int(10) unsigned NOT NULL,
+  `lastupd` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `title` varchar(255) NOT NULL,
   `link` varchar(350) NOT NULL,
   `pubDate` int(10) unsigned NOT NULL,

@@ -947,6 +947,8 @@ class Controller extends Singleton
         else
             $this->_request->unreads = $unreads;
 
+        $this->_user->setTimestamp();
+
         return $this;
     }
 

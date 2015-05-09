@@ -336,35 +336,35 @@ class News extends Model
 
             if('streams' === $table)
             {
-                if($request->timestamp > 0)
-                {
+//                if($request->timestamp > 0)
+  //              {
                     $query = '
     UPDATE news_relations nr
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
         WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
-        AND nr.rssid='.$request->id.' AND lastupd < '.$request->timestamp;
-                }
-                else
-                {
-                    $query = '
-    UPDATE news_relations
-        SET status='.$status.'
-        WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rssid='.$request->id;
-                }
+        AND nr.rssid='.$request->id.' AND lastupd < FROM_UNIXTIME('.User::iGet()->getTimestamp($request->id).')';
+    //            }
+     //           else
+      //         {
+        //            $query = '
+//    UPDATE news_relations
+  //      SET status='.$status.'
+    //    WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rssid='.$request->id;
+      //          }
             }
             elseif('streams_groups' === $table)
             {
-                if($request->timestamp > 0)
-                {
+//                if($request->timestamp > 0)
+ //               {
                     $query = '
     UPDATE news_relations nr
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
         WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
-        AND rr.gid='.$request->id.' AND lastupd < '.$request->timestamp;
-                }
+        AND rr.gid='.$request->id.' AND lastupd < FROM_UNIXTIME('.User::iGet()->getTimestamp($request->id).')';
+/*                }
                 else
                 {
                     $query = '
@@ -372,20 +372,20 @@ class News extends Model
         JOIN streams_relations rr ON (nr.rssid=rr.rssid)
         SET status='.$status.'
         WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND rr.gid='.$request->id;
-                }
+                }*/
             }
             elseif('news_tags' === $table)
             {
-                if($request->timestamp > 0)
-                {
+  //              if($request->timestamp > 0)
+//                {
                     $query = '
     UPDATE news_relations nr
         JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
         WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.'
-        AND nrt.tid='.$request->id.' AND lastupd < '.$request->timestamp;
-                }
+        AND nrt.tid='.$request->id.' AND lastupd < FROM_UNIXTIME('.User::iGet()->getTimestamp($request->id).')';
+/*                }
                 else
                 {
                     $query = '
@@ -393,7 +393,7 @@ class News extends Model
         JOIN news_relations_tags nrt ON (nrt.newsid=nr.newsid)
         SET status='.$status.'
         WHERE nr.uid='.User::iGet()->getUid().' AND status='.(int) !$status.' AND nrt.tid='.$request->id;
-                }
+                }*/
             }
             elseif('news' === $table)
             {
@@ -419,13 +419,12 @@ class News extends Model
         JOIN news n ON (nr.newsid=n.id)
         SET status='.$status.'
         WHERE uid='.User::iGet()->getUid().' AND status='.(int) !$status;
-            if($request->timestamp > 0)
-            {
-                $query .= ' AND lastupd < '.$request->timestamp;
+//            if($request->timestamp > 0)
+  //          {
+                $query .= ' AND lastupd < FROM_UNIXTIME('.User::iGet()->getTimestamp().')';
 
-            }
+//            }
         }
-
         $this->_db->set($query);
 
         $request->setResponse(new Response);
