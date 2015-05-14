@@ -169,6 +169,9 @@ class Controller extends Singleton
         }
         catch(Exception $e)
         {
+            if(Exception::E_OWR_UNAUTHORIZED === $e->getCode())
+                $this->redirect('login');
+
             throw new Exception($e->getContent(), Exception::E_OWR_UNAVAILABLE);
         }
 

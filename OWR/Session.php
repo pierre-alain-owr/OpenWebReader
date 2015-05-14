@@ -137,13 +137,9 @@ class Session extends Singleton
         if($row = $ret->fetch())
         {
             if($row['ip'] === $_SERVER['REMOTE_ADDR'])
-            {
                 return $row['data'];
-            }
-            else
-            {
-                throw new Exception("Invalid IP");
-            }
+
+            throw new Exception("Invalid IP", Exception::E_OWR_UNAUTHORIZED);
         }
 
         return '';
