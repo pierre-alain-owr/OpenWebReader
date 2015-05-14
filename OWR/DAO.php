@@ -379,7 +379,7 @@ abstract class DAO implements iDAO
                     $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
 
                     if($exists->next() && $exists->nb > 0)
-                        throw new Exception('Some values are not uniques ' . $chkUniQuery . '          /          ' . $query, 409);
+                        throw new Exception('Some values are not uniques', 409);
 
                     unset($exists);
                 }
