@@ -104,7 +104,7 @@ class DB extends PDO implements iDB
             parent::__construct($cfg->get('dsn'), $cfg->get('dbuser'), $cfg->get('dbpasswd'));
             $this->setAttribute(self::ATTR_ERRMODE, self::ERRMODE_EXCEPTION);
             $this->setAttribute(self::ATTR_ORACLE_NULLS, self::NULL_TO_STRING);
-            $this->exec("SET NAMES UTF8");
+            $this->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
         }
         catch(\Exception $e)
         {
