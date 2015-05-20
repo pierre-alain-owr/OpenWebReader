@@ -39,6 +39,9 @@ if(defined('INC_CONFIG'))
 if(!defined('PATH') || !defined('HOME_PATH'))
     die('please define constants HOME and HOME_PATH before including the config file');
 
+define('OWR_THEMES_PATH', HOME_PATH . 'Includes' . DIRECTORY_SEPARATOR . 'Themes' . DIRECTORY_SEPARATOR);
+define('OWR_PLUGINS_PATH', HOME_PATH . 'Includes' . DIRECTORY_SEPARATOR . 'Plugins' . DIRECTORY_SEPARATOR);
+
 // init UTF8 support
 if(!function_exists('mb_internal_encoding') || !mb_internal_encoding('UTF-8'))
     die("Can not set internal encoding to utf8");
