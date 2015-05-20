@@ -702,6 +702,19 @@ class User extends Singleton
     }
 
     /**
+     * Set a config value for the current user
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @param string $var the var name
+     * @param mixed $value the value
+     */
+    public function setConfig($var, $value)
+    {
+        $this->_config[$var] = $value;
+    }
+
+    /**
      * Returns the user's browser agent
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
