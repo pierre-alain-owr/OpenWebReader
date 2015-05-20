@@ -145,7 +145,7 @@ table tr, table td, table th
 .backgrounded
 {
     background-repeat:no-repeat;
-    background-image:url(../images/images.php?f=icons.png);
+    background-image:url(display.php?f=icons.png);
     width:16px;
     height:16px;
     display:inline-block;
