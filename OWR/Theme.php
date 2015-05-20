@@ -135,7 +135,7 @@ abstract class Theme implements iTheme
 
         $this->_className = 'OWR\Includes\Themes\\' . $this->_name . '\Theme';
 
-        $this->_path = __DIR__ . DIRECTORY_SEPARATOR . 'Includes' . DIRECTORY_SEPARATOR . 'Themes' . DIRECTORY_SEPARATOR . $this->_name . DIRECTORY_SEPARATOR;
+        $this->_path = OWR_THEMES_PATH . $this->_name . DIRECTORY_SEPARATOR;
         $this->_pagesPath = $this->_path . 'tpl' . DIRECTORY_SEPARATOR;
         $this->_blocksPath = $this->_path . 'tpl' . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR;
 
@@ -261,5 +261,47 @@ abstract class Theme implements iTheme
     final public function getParent()
     {
         return $this->_parent;
+    }
+
+    /**
+     * Returns the list of all available themes
+     *
+     * @author Pierre-Alain Mignot <contact@openwebreader.org>
+     * @access public
+     * @return array list of available themes
+     */
+    static public function getList()
+    {
+        $themes = array();
+
+        $userTheme = User::iGet()->getConfig('theme');
+        
+        foreach(new \DirectoryIterator(OWR_THEMES_PATH) as $theme)
+        {
+            if($theme->isDot() || !$theme->isDir()) continue;
+            
+            $name = $theme->getBaseName();
+            $themes[$name] = $userTheme === $name;
+        }
+
+        return $themes;
+    }
+
+    /**
+     * Removes all indentation from file
+     *
+     * @access public
+     * @var string $file the file to minify
+     * @return string the mimnified file
+     */
+    public function minify($file)
+    {
+        $content = @file_get_contents($file);
+        if(empty($content)) return '';
+
+//        $content = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $content);
+        $content = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $content);
+
+        return $content;
     }
 }
