@@ -181,6 +181,8 @@ class Controller extends Singleton
             $this->_user = User::iGet();
             $this->_user->reg(); // populate into the session
         }
+
+        Plugins::init();
     }
 
     /**
@@ -204,6 +206,8 @@ class Controller extends Singleton
 
         try
         {
+            Plugins::pretrigger($this->_request);
+
             if(!$this->_user->isLogged())
             {
                 if(!empty($this->_request->tlogin) && !empty($this->_request->key))
@@ -248,7 +252,8 @@ class Controller extends Singleton
             $action = 'do_'.$this->_request->do;
 
             if(!method_exists($this, $action)) // surely change this to a __call function to allow plugin
-                throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
+                Plugins::execute($this->_request);
+        //        throw new Exception(sprintf(Utilities::iGet()->_('Invalid action "%s"'), $this->_request->do), Exception::E_OWR_BAD_REQUEST);
 
             if($this->_user->isAdmin())
             {
@@ -272,6 +277,8 @@ class Controller extends Singleton
             }
 
             $this->$action(); // execute the given action
+
+            Plugins::posttrigger($this->_request);
 
             // wait for all the threads for this action to ends properly if any
             $this->_wait();
@@ -317,6 +324,8 @@ class Controller extends Singleton
             }
             while($error = @ob_get_clean());
         }
+
+        Plugins::trigger($this->_request);
 
         if(isset($_SERVER['HTTP_ACCEPT']) && (false !== strpos($_SERVER['HTTP_ACCEPT'], 'application/json')))
         {
@@ -683,7 +692,9 @@ class Controller extends Singleton
         $noCacheDatas = array();
         
         $this->getPageDatas($tpl, $datas, $noCacheDatas);
-        
+        $this->_request->_datas = $datas;
+        $this->_request->_noCacheDatas = $noCacheDatas;
+
         $page = Theme::iGet()->$tpl($datas, $noCacheDatas);
         
         if(!empty($page))
