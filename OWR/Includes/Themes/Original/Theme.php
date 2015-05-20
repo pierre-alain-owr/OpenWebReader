@@ -1,14 +1,49 @@
 <?php
-
+/**
+ * Themes class
+ * This class is used to manage theme
+ *
+ * PHP 5
+ *
+ * OWR - OpenWebReader
+ *
+ * Copyright (c) 2009, Pierre-Alain Mignot
+ *
+ * Home page: http://openwebreader.org
+ *
+ * E-Mail: contact@openwebreader.org
+ *
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * @author Pierre-Alain Mignot <contact@openwebreader.org>
+ * @copyright Copyright (c) 2009, Pierre-Alain Mignot
+ * @license http://www.gnu.org/copyleft/gpl.html
+ * @package OWR
+ */
 namespace OWR\Includes\Themes\Original;
-use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates;
+use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins;
 
 /**
  * Default theme
  *
- * @uses View the page renderer
- * @uses User the current user
- * @uses Config the config instance
+ * @uses OWR\View the page renderer
+ * @uses OWR\User the current user
+ * @uses OWR\Config the config instance
+ * @uses OWR\Plugins the plugins object
  * @package OWR
  */
 class Theme extends pTheme
@@ -80,7 +115,7 @@ class Theme extends pTheme
     {
         $streams = $datas['streams'];
         unset($datas['streams']);
-        
+
         foreach($streams as $stream)
         {
             if(!isset($datas['groups'][$stream['gid']]))
@@ -91,6 +126,14 @@ class Theme extends pTheme
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 
+    /**
+     * Generates upload iframe template
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string generated content of upload template
+     */
     public function upload(array $datas, array $noCacheDatas)
     {
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
@@ -114,17 +157,9 @@ class Theme extends pTheme
         $noCacheDatas['opensearch'] = isset($datas['opensearch']) ? $datas['opensearch'] : 0;
         $noCacheDatas['pagetitle'] = 'OpenWebReader - ' . $this->_view->_('User creation');
 
-        $datas['themes'] = array();
-        $themes = new \DirectoryIterator(dirname(__DIR__));
-        foreach($themes as $theme)
-        {
-            if(!$themes->isDot() && $theme->isDir())
-                $datas['themes'][(string) $theme] = $this->_name === (string) $theme;
-        }
+        $datas['themes'] = parent::getList();
+        $datas['plugins'] = Plugins::getList();
 
-        if(!empty($datas['themes']))
-            ksort($datas['themes']);
-        
         $this->_view->addBlock('head', 'head', $this->_view->get('head', $datas, null, $noCacheDatas));
         $this->_view->addBlock('user', 'contents', $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas));
         $this->_view->addBlock('footer', 'footer', $this->_view->get('footer', $datas, null, $noCacheDatas));
@@ -174,7 +209,7 @@ class Theme extends pTheme
         $noCacheDatas['groups_select'] = $this->_view->get('categories_selects', array(
                                                             'gid' => 0,
                                                             'groups' => $datas['groups']));
-        
+
         $noCacheDatas['unread_0'] = isset($datas['unreads'][0]) ? $datas['unreads'][0] : 0;
         $noCacheDatas['bold_0'] = $noCacheDatas['unread_0'] > 0 ? ' class="bold"' : '';
         $noCacheDatas['userlogin'] = htmlentities(User::iGet()->getLogin(), ENT_COMPAT, 'UTF-8');
@@ -270,7 +305,16 @@ class Theme extends pTheme
 
         return $block;
     }
-    
+
+
+    /**
+     * Generates stream_details template
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string generated content of stream_details template
+     */
     public function stream_details(array $datas, array $noCacheDatas)
     {
         unset($datas['title']);
@@ -298,6 +342,14 @@ class Theme extends pTheme
         return join(', ', $block);
     }
 
+    /**
+     * Generates stream template
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string generated content of stream template
+     */
     public function stream(array $datas, array $noCacheDatas)
     {
         $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
@@ -305,6 +357,14 @@ class Theme extends pTheme
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 
+    /**
+     * Generates streams template
+     *
+     * @param array $datas datas to generate template
+     * @param array $noCacheDatas not cached datas to generate template
+     * @access public
+     * @return string generated content of streams template
+     */
     public function streams(array $datas, array $noCacheDatas)
     {
         $streamsToDisplay = $groups_select = array();

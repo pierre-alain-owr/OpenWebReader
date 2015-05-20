@@ -47,6 +47,15 @@
                 echo '<option value="' . $theme . '"' . ($selected ? ' selected="selected"' : '') . '>' . $theme . '</option>';
 ?>
         </select>
+        <label for="config_plugins"><?php echo $this->_utilities->_('Plugins');?>&nbsp;:</label>
+        <select name="config[plugins]" id="config_plugins" multiple="multiple">
+<?php
+        foreach($plugins as $plugin => $selected)
+        {
+            echo '<option value="' . $plugin . '"' . ($selected ? ' selected="selected"' : '') . '>' . $plugin . '</option>';
+        }
+?>
+        </select>
         <label for="config_blockimg"><?php echo $this->_utilities->_('Block images with javascript');?> (*)&nbsp;:</label>
         <input type="checkbox" name="config[blockimg]" id="config_blockimg"<?php if(!empty($config['blockimg'])) { echo ' checked="checked"';}?>/>
         <label for="config_abstract"><?php echo $this->_utilities->_('Display an abstract for each news');?> (*)&nbsp;:</label>
