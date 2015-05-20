@@ -245,7 +245,7 @@ interface DB
      * @param string $sql the query
      * @param OWR\Request $datas the request
      * @param string $action the action
-     * @param boolean $returnID shall we return ID of the inserted row
+     * @param boolean $returnId shall we return ID of the inserted row
      * @return mixed a PDOStatement or the inserted ID
      */
     public function get($sql, Request $datas = null, $action = "query", $returnId = false);
@@ -259,7 +259,7 @@ interface DB
      * @param OWR\Request $datas the request
      * @param string $action the action
      * @param string $prepare prepare or not the query
-     * @param boolean $returnID shall we return ID of the inserted row
+     * @param boolean $returnId shall we return ID of the inserted row
      * @return mixed a PDOStatement or the inserted ID
      */
     public function getP($sql, Request $datas = null, $action = "query", $prepare = true, $returnId = false);

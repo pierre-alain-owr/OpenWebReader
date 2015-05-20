@@ -248,7 +248,6 @@ class Controller extends MainController
      * CLI only
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param boolean $redirect redirects the user to the login page
      * @access protected
      * @return $this
      */

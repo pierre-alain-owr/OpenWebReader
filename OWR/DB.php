@@ -715,6 +715,7 @@ class DB extends PDO implements iDB
      * @param string $sql the query
      * @param OWR\DB\Request $datas the request
      * @param string $action the action
+     * @param boolean $prepare prepare or not the query
      * @param boolean $returnId shall we return ID of inserted row 
      * @return mixed a PDOStatement or the inserted ID
      */
