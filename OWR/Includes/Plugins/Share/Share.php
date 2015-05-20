@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Plugin adding share social buttons
+ *
+ * Javascript code adapted from share42.com, thanks to the author
+ */
 class Share
 {
     public function controller_renderpage($request)
