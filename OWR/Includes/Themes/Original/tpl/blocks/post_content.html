@@ -13,7 +13,7 @@
                 $type = explode('/', $enclosure['attributes']['type']);
                 if('image' === $type[0])
                 {
-                    echo '<img src="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/>&nbsp;';
+                    echo '<p><img src="'.htmlspecialchars($enclosure['attributes']['url'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/></p>';
                 }
                 elseif('video' === $type[0] || 'application/ogg' === $enclosure['attributes']['type'])
                 {
@@ -91,7 +91,7 @@
                     $type = explode('/', $link['attributes']['type']);
                     if('image' === $type[0])
                     {
-                        echo '<img src="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/>&nbsp;';
+                        echo '<p><img src="'.htmlspecialchars($link['attributes']['href'], ENT_COMPAT, 'UTF-8').'" alt="'.$this->_utilities->_('Enclosure').'"/></p>';
                     }
                     elseif('video' === $type[0] || 'application/ogg' === $link['attributes']['type'])
                     {
