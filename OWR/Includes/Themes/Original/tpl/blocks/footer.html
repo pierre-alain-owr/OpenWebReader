@@ -1,8 +1,8 @@
 <?php
 if(!DEBUG) { ?>
-        <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.min.js"></script>
+        <script type="text/javascript" src="<?php echo $surl;?>display.php?f=owr.js&amp;minify=1"></script>
 <?php } else { ?>
-        <script type="text/javascript" src="<?php echo $surl;?>js/owr.js.php?f=owr.js"></script>
+        <script type="text/javascript" src="<?php echo $surl;?>display.php?f=owr.js"></script>
 <?php } ?>
         <script type="text/javascript">
 <?php if(isset($login)) { ?>
@@ -11,19 +11,12 @@ if(!DEBUG) { ?>
             });
 <?php } else { ?>
             var rP = {};
-            var addthis_config = {
-                data_use_flash: false
-            };
             window.addEvent('domready', function(){ 
 <?php
             echo 'rP = new OWR("'.$lang.'", <OWR:NOCACHE NAME=\'ttl\'/>, "<OWR:NOCACHE NAME=\'token\'/>", "<OWR:NOCACHE NAME=\'opensearch\'/>");';
 ?>
                 window.addEvent('beforeunload', function (){ return rP.confirmExit(); });
                 window.addEvent('unload', function(){ rP.clear(); });
-                var s = new Element('script');
-                s.set('type', 'text/javascript');
-                s.set('src', 'http://s7.addthis.com/js/250/addthis_widget.js');
-                $('menu').adopt(s);
             });
 <?php } ?>
         </script>
