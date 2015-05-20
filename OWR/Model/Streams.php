@@ -48,7 +48,8 @@ use OWR\Model,
     OWR\OPML\Parser as OPMLParser,
     OWR\Upload,
     OWR\Config,
-    OWR\Threads;
+    OWR\Threads,
+    OWR\Plugins;
 /**
  * This class is used to add/edit/delete stream and his related tables
  * @package OWR
@@ -61,6 +62,7 @@ use OWR\Model,
  * @uses OWR\Stream\Parser the stream parser
  * @uses OWR\Logs the logs object
  * @uses OWR\Cron add/modify crontab
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class Streams extends Model
@@ -74,6 +76,7 @@ class Streams extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->url))
         {
             $request->setResponse(new Response(array(
@@ -460,6 +463,8 @@ class Streams extends Model
             }
         }
 
+        Plugins::trigger($request);
+
         if(empty($request->escape) && empty($request->escapeNews))
         {
             $request->setResponse(new Response(array(
@@ -477,6 +482,7 @@ class Streams extends Model
         }
 
         $request->new = true;
+        Plugins::posttrigger($request);
 
         return $this;
     }
@@ -495,6 +501,7 @@ class Streams extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
         $args['FETCH_TYPE'] = 'assoc';
         $multiple = false;
 
@@ -534,10 +541,13 @@ class Streams extends Model
 
         $this->_setUserTimestamp($datas);
 
+        Plugins::trigger($request);
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => $multiple
         )));
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -550,6 +560,7 @@ class Streams extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -583,9 +594,9 @@ class Streams extends Model
             throw new Exception($e->getContent(), $e->getCode());
         }
         $this->_db->commit();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -598,6 +609,7 @@ class Streams extends Model
      */
     public function move(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -625,9 +637,9 @@ class Streams extends Model
         $stream->save();
 
         unset($stream);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -641,6 +653,7 @@ class Streams extends Model
      */
     public function update(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -778,11 +791,11 @@ class Streams extends Model
                     break;
             }
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas' => array('ids' => $ids)
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -796,6 +809,7 @@ class Streams extends Model
      */
     public function clear(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             DAO::getCachedDAO('news_relations')->delete();
@@ -834,6 +848,8 @@ class Streams extends Model
             }
         }
 
+        Plugins::trigger($request);
+
         if($request->currentid === $request->id || 0 === $request->currentid)
         {
             $request->setResponse(new Response(array(
@@ -846,7 +862,7 @@ class Streams extends Model
             ))));
         }
         else $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -860,6 +876,7 @@ class Streams extends Model
      */
     public function rename(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -893,9 +910,9 @@ class Streams extends Model
 
         $stream->name = $request->name;
         $stream->save();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -909,6 +926,7 @@ class Streams extends Model
      */
     public function checkAvailability(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $streams = $this->_db->execute('
@@ -968,9 +986,9 @@ class Streams extends Model
                 }
             }
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -985,6 +1003,7 @@ class Streams extends Model
      */
     public function manageFavicons(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $streams = $this->_dao->get(array(), 'id, url');
@@ -1242,8 +1261,9 @@ class Streams extends Model
             $stream->url = null;
             $stream->save();
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -1257,6 +1277,7 @@ class Streams extends Model
      */
     public function refresh(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $query = "
@@ -1276,6 +1297,7 @@ class Streams extends Model
             }
 
             unset($rss);
+            Plugins::trigger($request);
             $request->setResponse(new Response(array(
                 'status'    => 202
             )));
@@ -1310,15 +1332,22 @@ class Streams extends Model
                 }
 
                 unset($rss);
+                Plugins::trigger($request);
                 $request->setResponse(new Response(array(
                     'status'    => 202
                 )));
+                Plugins::posttrigger($request);
             }
-            else $request->setResponse(new Response(array(
-                'do'        => 'error',
-                'error'     => 'Invalid id',
-                'status'    => Exception::E_OWR_BAD_REQUEST
-            )));
+            else
+            {
+                Plugins::trigger($request);
+                $request->setResponse(new Response(array(
+                    'do'        => 'error',
+                    'error'     => 'Invalid id',
+                    'status'    => Exception::E_OWR_BAD_REQUEST
+                )));
+                Plugins::posttrigger($request);
+            }
         }
 
         return $this;
@@ -1334,6 +1363,7 @@ class Streams extends Model
      */
     public function refreshAll(Request $request)
     { // in cli, we refresh for all users
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             // status = 0 means stream is alive
@@ -1351,10 +1381,11 @@ class Streams extends Model
                 {
                     $threads->add(array('do'=>'refreshstream', 'id'=>$streams->id));
                 }
-
+                Plugins::trigger($request);
                 $request->setResponse(new Response(array(
                     'status'    => 202
                 )));
+                Plugins::posttrigger($request);
                 return $this;
             }
         }
@@ -1409,19 +1440,20 @@ class Streams extends Model
                     {
                         $threads->add(array('do'=>'refreshstream', 'id'=>$streams->id));
                     }
-
+                    Plugins::trigger($request);
                     $request->setResponse(new Response(array(
                         'status'    => 202
                     )));
+                    Plugins::posttrigger($request);
                     return $this;
                 }
 
                 unset($streams);
             }
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -1434,6 +1466,7 @@ class Streams extends Model
      */
     public function editOPML(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->escape) && empty($_POST) && empty($_FILES['opml']['tmp_name']))
         {
             $request->setResponse(new Response(array(
@@ -1609,12 +1642,12 @@ class Streams extends Model
             }
         }
         unset($gidRoot, $r, $sr);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'status'    => 201,
             'datas'     => array('ids' => $ids)
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 

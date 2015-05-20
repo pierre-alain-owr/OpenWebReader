@@ -38,7 +38,8 @@ namespace OWR\Model;
 use OWR\Model,
     OWR\Request,
     OWR\Exception,
-    OWR\DAO;
+    OWR\DAO,
+    OWR\Plugins;
 /**
  * This class is used to add/delete objects
  * @package OWR
@@ -48,6 +49,7 @@ use OWR\Model,
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\Request a request sent to the model
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class Objects extends Model
@@ -61,6 +63,7 @@ class Objects extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->type))
         {
             $request->setResponse(new Response(array(
@@ -72,10 +75,16 @@ class Objects extends Model
         }
 
         $request->id = $this->_dao->getUniqueId($request->type);
+
+         Plugins::trigger($request);
+
         // we don't send 201 status because it is an internal call
         // if we add news we don't want to send created status
         // because it is NOT a user action
         $request->setResponse(new Response);
+
+        Plugins::posttrigger($request);
+
         return $this;
     }
 
@@ -88,6 +97,8 @@ class Objects extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
+
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -111,7 +122,12 @@ class Objects extends Model
         }
         $this->_db->commit();
 
+        Plugins::trigger($request);
+
         $request->setResponse(new Response);
+
+        Plugins::posttrigger($request);
+
         return $this;
     }
 
@@ -129,6 +145,8 @@ class Objects extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
+
         $args['FETCH_TYPE'] = 'assoc';
 
         if(!empty($request->ids))
@@ -169,10 +187,15 @@ class Objects extends Model
             }
         }
 
+        Plugins::trigger($request);
+
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => !isset($types['id'])
         )));
+
+        Plugins::posttrigger($request);
+
         return $this;
     }
 }

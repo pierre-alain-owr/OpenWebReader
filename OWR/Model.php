@@ -116,7 +116,7 @@ abstract class Model implements iModel
     {
         if(!isset(self::$_models[$model]))
         {
-            $c = __NAMESPACE__.'\Model\\'.join('\\', array_map('ucfirst', explode('_', (string) $model)));;
+            $c = __NAMESPACE__.'\Model\\'.join('\\', array_map('ucfirst', explode('_', (string) $model)));
             self::$_models[$model] = $c;
         }
         return new self::$_models[$model];

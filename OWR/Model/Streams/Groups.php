@@ -40,7 +40,8 @@ use OWR\Model,
     OWR\Exception,
     OWR\DAO,
     OWR\Model\Response,
-    OWR\Config;
+    OWR\Config,
+    OWR\Plugins;
 /**
  * This class is used to add/edit/delete groups
  * @package OWR
@@ -49,6 +50,7 @@ use OWR\Model,
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class Groups extends Model
@@ -62,6 +64,7 @@ class Groups extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->name))
         {
             $request->setResponse(new Response(array(
@@ -99,12 +102,12 @@ class Groups extends Model
         $group->name = $request->name;
         $request->id = $group->save();
         unset($group);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'status'    => $request->new ? 201 : 200,
             'datas'     => array('id' => $request->id)
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -117,6 +120,7 @@ class Groups extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -176,9 +180,9 @@ class Groups extends Model
         }
 
         $this->_db->commit();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -196,6 +200,7 @@ class Groups extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
         $args['FETCH_TYPE'] = 'assoc';
 
         if(!empty($request->ids))
@@ -219,11 +224,12 @@ class Groups extends Model
         }
 
         $this->_setUserTimestamp($datas);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => !isset($datas['id'])
         )));
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -238,6 +244,7 @@ class Groups extends Model
      */
     public function checkGroupById(Request $request)
     {
+        Plugins::pretrigger($request);
         if(!empty($request->gid))
         {
             $group = $this->_dao->get($request->gid, 'id,name');
@@ -261,9 +268,9 @@ class Groups extends Model
         $request->gname = $group->name;
 
         unset($group);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -276,6 +283,7 @@ class Groups extends Model
      */
     public function rename(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->name))
         {
             $request->setResponse(new Response(array(
@@ -299,9 +307,9 @@ class Groups extends Model
 
         $group->name = $request->name;
         $group->save();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 }

@@ -40,7 +40,8 @@ use OWR\Model,
     OWR\Exception,
     OWR\DAO,
     OWR\Model\Response,
-    OWR\Config;
+    OWR\Config,
+    OWR\Plugins;
 /**
  * This class is used to add/edit/delete tags
  * @package OWR
@@ -49,6 +50,7 @@ use OWR\Model,
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class Tags extends Model
@@ -62,6 +64,7 @@ class Tags extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->name))
         {
             $request->setResponse(new Response(array(
@@ -99,12 +102,12 @@ class Tags extends Model
         $tag->name = $request->name;
         $request->id = $tag->save();
         unset($tag);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'status'    => $request->new ? 201 : 200,
             'datas'     => array('id' => $request->id)
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -117,6 +120,7 @@ class Tags extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -150,9 +154,9 @@ class Tags extends Model
         }
 
         $this->_db->commit();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -170,6 +174,7 @@ class Tags extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $tagby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
         $args['FETCH_TYPE'] = 'assoc';
 
         if(!empty($request->ids))
@@ -193,11 +198,12 @@ class Tags extends Model
         }
 
         $this->_setUserTimestamp($datas);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => !isset($datas['id'])
         )));
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -210,6 +216,7 @@ class Tags extends Model
      */
     public function rename(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->name))
         {
             $request->setResponse(new Response(array(
@@ -233,9 +240,9 @@ class Tags extends Model
 
         $tag->name = $request->name;
         $tag->save();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -248,6 +255,7 @@ class Tags extends Model
      */
     public function editRelations(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->ids))
         {
             $request->setResponse(new Response(array(
@@ -310,13 +318,13 @@ class Tags extends Model
                 $daoRelations->save();
             }
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(empty($ids) ? array() : array(
             'datas'     => array('ids' => $ids),
             'status'    => 201,
             'tpl'       => 'tag'
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 }

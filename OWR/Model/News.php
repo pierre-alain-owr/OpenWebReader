@@ -41,7 +41,8 @@ use OWR\Model,
     OWR\DAO,
     OWR\User,
     OWR\Config,
-    OWR\Logs;
+    OWR\Logs,
+    OWR\Plugins;
 /**
  * This class is used to add/edit/delete news
  * @package OWR
@@ -51,6 +52,7 @@ use OWR\Model,
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\Logs the log object
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class News extends Model
@@ -64,6 +66,8 @@ class News extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
+
         $link = $request->item->get('link');
         $hash = md5($link.$request->streamid);
         $pubDate = $request->item->get('pubDate');
@@ -125,7 +129,12 @@ class News extends Model
         $response = $request->getResponse();
         if('error' === $response->getNext())
             Logs::iGet()->log($response->getError(), $response->getStatus());
+
+        Plugins::trigger($request);
+
         $request->setResponse(new Response);
+
+        Plugins::posttrigger($request);
 
         return $this;
     }
@@ -139,6 +148,8 @@ class News extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
+
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -172,7 +183,12 @@ class News extends Model
         }
         $this->_db->commit();
 
+        Plugins::trigger($request);
+
         $request->setResponse(new Response);
+
+        Plugins::posttrigger($request);
+
         return $this;
     }
 
@@ -190,6 +206,7 @@ class News extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
         $args['FETCH_TYPE'] = 'assoc';
         $multiple = false;
 
@@ -238,11 +255,12 @@ class News extends Model
             if(!isset($request->getContents) || $request->getContents)
                 $datas['contents'] = unserialize(DAO::getCachedDAO('news_contents')->get(array('id' => $datas['id']), 'contents')->contents);
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => $multiple
         )));
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -256,6 +274,7 @@ class News extends Model
      */
     public function insertNewsRelations(Request $request)
     {
+        Plugins::pretrigger($request);
         $id = (int) $request->id;
         $streamid = (int) $request->streamid;
 
@@ -305,8 +324,10 @@ class News extends Model
             }
         }
 
-        $request->setResponse(new Response);
+        Plugins::trigger($request);
 
+        $request->setResponse(new Response);
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -320,6 +341,7 @@ class News extends Model
      */
     public function update(Request $request)
     {
+        Plugins::pretrigger($request);
         $status = (int) $request->status;
 
         if(!empty($request->ids) && is_array($request->ids))
@@ -426,9 +448,9 @@ class News extends Model
 //            }
         }
         $this->_db->set($query);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 }

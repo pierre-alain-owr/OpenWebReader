@@ -41,7 +41,8 @@ use OWR\Model,
     OWR\DAO,
     OWR\User,
     OWR\DB\Request as DBRequest,
-    OWR\Object;
+    OWR\Object,
+    OWR\Plugins;
 /**
  * This class is used to add/edit/delete users and his related tables ()
  * @package OWR
@@ -52,6 +53,7 @@ use OWR\Model,
  * @uses OWR\User the user
  * @uses OWR\DB\Request a request sent to DB
  * @uses OWR\Object transforms an object to an array
+ * @uses OWR\Plugins Plugins manager
  * @subpackage Model
  */
 class Users extends Model
@@ -65,6 +67,7 @@ class Users extends Model
      */
     public function edit(Request $request)
     {
+        Plugins::pretrigger($request);
         $query = '
     SELECT COUNT(id) AS nb
         FROM users';
@@ -196,6 +199,43 @@ class Users extends Model
         $cfg['nbnews'] = (int) (isset($cfg['nbnews']) && $cfg['nbnews'] > 0 && $cfg['nbnews'] <= 50 && !($cfg['nbnews']%10) ? $cfg['nbnews'] : 10);
         $cfg['blockimg'] = (bool) (isset($cfg['blockimg']) ? $cfg['blockimg'] : false);
         $cfg['abstract'] = (bool) (isset($cfg['abstract']) ? $cfg['abstract'] : false);
+        $plugins = (array) $cfg['plugins'];
+        $cfg['plugins'] = array();
+        foreach($plugins as $plugin)
+            $cfg['plugins'][$plugin] = true;
+
+        if($request->id)
+        {
+            $user = $this->_dao->get($request->id);
+            if(!$user)
+            {
+                $request->setResponse(new Response(array(
+                    'do'        => 'error',
+                    'error'     => 'Invalid id',
+                    'status'    => Exception::E_OWR_BAD_REQUEST
+                )));
+                return $this;
+            }
+            $request->new = false;
+
+            if($user->login !== $request->login && ((empty($request->passwd) && empty($request->confirmpasswd)) ||
+                 $request->passwd !== $request->confirmpasswd))
+            { // login change, we NEED password to make hash
+                $request->setResponse(new Response(array(
+                    'do'        => 'error',
+                    'tpl'       => 'user',
+                    'error'     => 'Please fill all the fields.',
+                    'datas'     => $datas,
+                    'status'    => Exception::E_OWR_BAD_REQUEST
+                )));
+                return $this; 
+            }
+        }
+        else
+        {
+            $user = $this->_dao;
+            $request->new = true;
+        }
 
         if(!empty($request->passwd) && !empty($request->confirmpasswd))
         {
@@ -213,7 +253,6 @@ class Users extends Model
         else
         {
             $args = array(
-                'login'     => $request->login,
                 'rights'    => $request->rights,
                 'lang'      => $request->ulang,
                 'email'     => $request->email,
@@ -224,26 +263,6 @@ class Users extends Model
         }
 
         unset($request->passwd, $request->confirmpasswd, $cfg); // remove from memory !
-
-        if($request->id)
-        {
-            $user = $this->_dao->get($request->id);
-            if(!$user)
-            {
-                $request->setResponse(new Response(array(
-                    'do'        => 'error',
-                    'error'     => 'Invalid id',
-                    'status'    => Exception::E_OWR_BAD_REQUEST
-                )));
-                return $this;
-            }
-            $request->new = false;
-        }
-        else
-        {
-            $user = $this->_dao;
-            $request->new = true;
-        }
 
         $user->populate($args);
         unset($args);
@@ -281,12 +300,13 @@ class Users extends Model
         $this->_db->commit();
 
         unset($user);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'do'        => 'redirect',
             'status'    => $request->new ? 201 : 200, // 201 on creation
             'datas'     => array('id' => $request->id)
         )));
+        Plugins::posttrigger($request);
 
         return $this;
     }
@@ -300,6 +320,7 @@ class Users extends Model
      */
     public function delete(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->id))
         {
             $request->setResponse(new Response(array(
@@ -334,7 +355,7 @@ class Users extends Model
         }
         $this->_db->commit();
 
-
+        Plugins::trigger($request);
         if($request->id === User::iGet()->getUid())
         {
             $request->setResponse(new Response(array(
@@ -346,7 +367,7 @@ class Users extends Model
         {
             $request->setResponse(new Response);
         }
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -364,6 +385,7 @@ class Users extends Model
      */
     public function view(Request $request, array $args = array(), $order = '', $groupby = '', $limit = '')
     {
+        Plugins::pretrigger($request);
         $args['FETCH_TYPE'] = 'assoc';
 
         if(!empty($request->ids))
@@ -396,11 +418,12 @@ class Users extends Model
             }
         }
         else $datas['config'] = @unserialize($datas['config']);
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas'        => $datas,
             'multiple'     => $multiple
         )));
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -413,6 +436,7 @@ class Users extends Model
      */
     public function deleteRelated(Request $request)
     {
+        Plugins::pretrigger($request);
         $this->_db->beginTransaction();
         try
         {
@@ -427,11 +451,11 @@ class Users extends Model
             throw new Exception($e->getContent(), $e->getCode());
         }
         $this->_db->commit();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'status'    => 204 // OK, no content to return
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -445,6 +469,7 @@ class Users extends Model
      */
     public function changeLang(Request $request)
     {
+        Plugins::pretrigger($request);
         if(empty($request->newlang))
         {
             $request->setResponse(new Response(array(
@@ -469,9 +494,9 @@ class Users extends Model
 
         $user->lang = $newLang;
         $user->save();
-
+        Plugins::trigger($request);
         $request->setResponse(new Response);
-
+        Plugins::posttrigger($request);
         return $this;
     }
 
@@ -485,6 +510,7 @@ class Users extends Model
      */
     public function stat(Request $request)
     {
+        Plugins::pretrigger($request);
         $datas = array();
         $datas['nbCategories'] = DAO::getCachedDAO('streams_groups')->count()->nb;
         $datas['nbStreams'] = DAO::getCachedDAO('streams_relations')->count()->nb;
@@ -500,12 +526,12 @@ class Users extends Model
             $datas['nbTotalNews'] = DAO::getCachedDAO('news')->count()->nb;
             $datas['nbTotalDeadStreams'] = $datas['nbTotalStreams'] - DAO::getCachedDAO('streams')->count(array('status' => 0))->nb;
         }
-
+        Plugins::trigger($request);
         $request->setResponse(new Response(array(
             'datas'     => $datas,
             'tpl'       => 'stats'
         )));
-
+        Plugins::posttrigger($request);
         return $this;
     }
 }
