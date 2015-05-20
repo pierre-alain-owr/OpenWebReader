@@ -33,6 +33,7 @@
  * @copyright Copyright (c) 2009, Pierre-Alain Mignot
  * @license http://www.gnu.org/copyleft/gpl.html
  * @package OWR
+ * @subpackage Stream
  */
 namespace OWR\Stream;
 use \XMLReader,
@@ -50,6 +51,7 @@ use \XMLReader,
  * @uses cURLWrapper get the stream source
  * @uses OWR\View\Utilities translate errors
  * @package OWR
+ * @subpackage Stream
  */
 class Parser extends XMLReader
 {
@@ -337,7 +339,6 @@ class Parser extends XMLReader
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_parseTime
      */
     static public function getTime()
@@ -350,7 +351,6 @@ class Parser extends XMLReader
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_nbParsedStreams
      */
     static public function getCount()

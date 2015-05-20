@@ -258,7 +258,6 @@ class cURLWrapper
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_httpTime
      */
     static public function getTime()

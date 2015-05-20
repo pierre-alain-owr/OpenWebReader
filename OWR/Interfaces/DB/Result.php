@@ -47,7 +47,7 @@ interface Result
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $stmt the PDOStatement
+     * @param PDOStatement $stmt the PDOStatement
      * @param int $type the fetch type
      */
     public function __construct(\PDOStatement $stmt=null, $type = self::FETCH_ALL);

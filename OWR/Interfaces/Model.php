@@ -70,7 +70,7 @@ interface Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request);
@@ -80,7 +80,7 @@ interface Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function delete(Request $request);
@@ -90,7 +90,7 @@ interface Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause

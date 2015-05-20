@@ -147,7 +147,7 @@ class DB extends PDO implements iDB
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param int $cachetime the cache time, in seconds
+     * @param int $cacheTime the cache time, in seconds
      */
     public function setCacheTime($cacheTime)
     {
@@ -312,8 +312,8 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @return mixed a Result
+     * @param OWR\DB\Request $datas the request
+     * @return OWR\DB\Result the result
      */
     public function cExecuteP($sql, DBRequest $datas)
     {
@@ -326,9 +326,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cExecute($sql, DBRequest $datas = null, $prepare = false)
     {
@@ -349,7 +349,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @return mixed an Result
      */
     public function executeP($sql, DBRequest $datas = null)
@@ -363,9 +363,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function execute($sql, DBRequest $datas = null, $prepare = false)
     {
@@ -379,7 +379,7 @@ class DB extends PDO implements iDB
      * @access protected
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action, if not prepared (can be 'query' or 'exec')
      * @param boolean $prepare prepare or not the query
      * @param boolean $returnId if a row is inserted, returns the id
@@ -560,7 +560,7 @@ class DB extends PDO implements iDB
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
      * @param string $action the action
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetAll($sql, $action = "query")
     {
@@ -573,10 +573,10 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetAllP($sql, DBRequest $datas = null, $action = "query", $prepare = true)
     {
@@ -596,7 +596,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetRow($sql)
     {
@@ -609,9 +609,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetRowP($sql, DBRequest $datas = null, $prepared = true)
     {
@@ -631,9 +631,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetOneP($sql, DBRequest $datas = null, $prepared = true)
     {
@@ -653,9 +653,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetOne($sql)
     {
@@ -669,7 +667,7 @@ class DB extends PDO implements iDB
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
      * @param string $action the action
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getAll($sql, $action = 'query')
     {
@@ -682,10 +680,10 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @param string $prepare prepare or not the query
+     * @return OWR\DB\Result the result
      */
     public function getAllP($sql, DBRequest $datas = null, $action = "query", $prepare = true)
     {
@@ -699,9 +697,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
+     * @param boolean $returnId shall we return ID of inserted row
      * @return mixed a PDOStatement or the inserted ID
      */
     public function get($sql, DBRequest $datas = null, $action = "query", $returnId = false)
@@ -715,9 +713,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
+     * @param boolean $returnId shall we return ID of inserted row 
      * @return mixed a PDOStatement or the inserted ID
      */
     public function getP($sql, DBRequest $datas = null, $action = "query", $prepare = true, $returnId = false)
@@ -731,7 +729,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getRow($sql)
     {
@@ -744,9 +742,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getRowP($sql, DBRequest $datas = null, $prepared = true)
     {
@@ -759,9 +757,9 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getOneP($sql, DBRequest $datas = null, $prepared = true)
     {
@@ -774,9 +772,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getOne($sql)
     {
@@ -789,7 +785,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
      * @param boolean $returnId returns the id of the inserted row
      * @return mixed the result/statement/id
@@ -806,7 +802,7 @@ class DB extends PDO implements iDB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\DB\Request $datas the request
      * @param string $action the action
      * @param string $prepare prepare the query or not
      * @param boolean $returnId returns the id of the inserted row
@@ -856,7 +852,6 @@ class DB extends PDO implements iDB
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_queryTime
      */
     static public function getTime()

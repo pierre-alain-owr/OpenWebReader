@@ -62,7 +62,7 @@ class Users extends Model
      * Adds/Edits a user
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request)
@@ -315,7 +315,7 @@ class Users extends Model
      * Deletes a user
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function delete(Request $request)
@@ -376,7 +376,7 @@ class Users extends Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause
@@ -431,7 +431,7 @@ class Users extends Model
      * Deletes everything related to a user
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function deleteRelated(Request $request)
@@ -464,7 +464,7 @@ class Users extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function changeLang(Request $request)
@@ -505,7 +505,7 @@ class Users extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function stat(Request $request)

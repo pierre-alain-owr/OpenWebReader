@@ -77,6 +77,7 @@ interface Singleton
      * This function can NOT be overloaded
      *
      * @access public
+     * @param mixed $instance an instance to register
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      */

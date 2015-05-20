@@ -45,14 +45,13 @@ use OWR\Model,
     OWR\Plugins;
 /**
  * This class is used to add/edit/delete news
- * @package OWR
- * @subpackage Model
  * @uses OWR\Model extends the base class
  * @uses OWR\Request the request
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\Logs the log object
  * @uses OWR\Plugins Plugins manager
+ * @package OWR
  * @subpackage Model
  */
 class News extends Model
@@ -61,7 +60,7 @@ class News extends Model
      * Adds/Edits a stream
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request)
@@ -143,7 +142,7 @@ class News extends Model
      * Deletes a new
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function delete(Request $request)
@@ -197,7 +196,7 @@ class News extends Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause
@@ -268,7 +267,7 @@ class News extends Model
      * Insert the relations between user(s) and a new
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      * @access public
      */
@@ -335,7 +334,7 @@ class News extends Model
      * Update new(s) status (read/unread)
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @access public
      * @return $this
      */

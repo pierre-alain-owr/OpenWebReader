@@ -69,7 +69,7 @@ interface DB
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param int $cachetime the cache time, in seconds
+     * @param int $cacheTime the cache time, in seconds
      */
     public function setCacheTime($cacheTime);
 
@@ -105,8 +105,8 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @return mixed a Result
+     * @param OWR\Request $datas the request
+     * @return OWR\DB\Result the result
      */
     public function cExecuteP($sql, Request $datas);
 
@@ -116,9 +116,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cExecute($sql, Request $datas = null, $prepare = false);
 
@@ -128,7 +128,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @return mixed an Result
      */
     public function executeP($sql, Request $datas = null);
@@ -139,9 +139,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function execute($sql, Request $datas = null, $prepare = false);
 
@@ -152,7 +152,7 @@ interface DB
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
      * @param string $action the action
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetAll($sql, $action = "query");
 
@@ -162,10 +162,10 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
      * @param boolean $prepare prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetAllP($sql, Request $datas = null, $action = "query", $prepare = true);
 
@@ -175,7 +175,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetRow($sql);
 
@@ -185,9 +185,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetRowP($sql, Request $datas = null, $prepared = true);
 
@@ -197,9 +197,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetOneP($sql, Request $datas = null, $prepared = true);
 
@@ -209,9 +209,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function cGetOne($sql);
 
@@ -222,7 +220,7 @@ interface DB
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
      * @param string $action the action
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getAll($sql, $action = 'query');
 
@@ -232,10 +230,10 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
-     * @return mixed a Result
+     * @param string $prepare prepare or not the query
+     * @return OWR\DB\Result the result
      */
     public function getAllP($sql, Request $datas = null, $action = "query", $prepare = true);
 
@@ -245,9 +243,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
+     * @param boolean $returnID shall we return ID of the inserted row
      * @return mixed a PDOStatement or the inserted ID
      */
     public function get($sql, Request $datas = null, $action = "query", $returnId = false);
@@ -258,9 +256,10 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
-     * @param string $prepared prepare or not the query
+     * @param string $prepare prepare or not the query
+     * @param boolean $returnID shall we return ID of the inserted row
      * @return mixed a PDOStatement or the inserted ID
      */
     public function getP($sql, Request $datas = null, $action = "query", $prepare = true, $returnId = false);
@@ -271,7 +270,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getRow($sql);
 
@@ -281,9 +280,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getRowP($sql, Request $datas = null, $prepared = true);
 
@@ -293,9 +292,9 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getOneP($sql, Request $datas = null, $prepared = true);
 
@@ -305,9 +304,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
-     * @param boolean $prepared prepare the query or not
-     * @return mixed a Result
+     * @return OWR\DB\Result the result
      */
     public function getOne($sql);
 
@@ -317,7 +314,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
      * @param boolean $returnId returns the id of the inserted row
      * @return mixed the result/statement/id
@@ -330,7 +327,7 @@ interface DB
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $sql the query
-     * @param mixed $datas the request
+     * @param OWR\Request $datas the request
      * @param string $action the action
      * @param string $prepare prepare the query or not
      * @param boolean $returnId returns the id of the inserted row
@@ -360,7 +357,6 @@ interface DB
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_queryTime
      */
     static public function getTime();

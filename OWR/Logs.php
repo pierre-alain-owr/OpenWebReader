@@ -65,6 +65,7 @@ class Logs extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $msg the message to log
+     * @param int $errcode the error code
      * @access public
      */
     public function log($msg, $errcode = Exception::E_OWR_WARNING)

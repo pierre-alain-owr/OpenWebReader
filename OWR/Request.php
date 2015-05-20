@@ -286,7 +286,7 @@ class Request
      * @access public
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $response the Model\Response instance
+     * @param OWR\Model\Response $response the Model\Response instance
      */
     public function setResponse(ModelResponse $response)
     {

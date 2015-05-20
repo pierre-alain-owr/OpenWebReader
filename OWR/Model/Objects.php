@@ -50,7 +50,6 @@ use OWR\Model,
  * @uses OWR\DAO the DAO
  * @uses OWR\Request a request sent to the model
  * @uses OWR\Plugins Plugins manager
- * @subpackage Model
  */
 class Objects extends Model
 {
@@ -58,7 +57,7 @@ class Objects extends Model
      * Adds an object entry into the DB
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request)
@@ -92,7 +91,7 @@ class Objects extends Model
      * Deletes an object
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function delete(Request $request)
@@ -136,7 +135,7 @@ class Objects extends Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause

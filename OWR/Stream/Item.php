@@ -63,7 +63,7 @@ class Item
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param array $stream the stream to represent
      * @param string $version the version of the stream (atom, rdf, rss..)
-     * @param mixed $reader the stream object
+     * @param OWR\Stream\Reader $reader the stream object
      */
     public function __construct(array $stream, $version, Reader $reader)
     {

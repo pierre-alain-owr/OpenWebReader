@@ -50,8 +50,8 @@ class XML
      * @param array $arr the array to convert
      * @param string $rootEl name of the root element
      * @param int $statusCode the status code of the response, optional
-     * @param mixed $dom \DOMDocument node, recursion
-     * @param mixed $domel \DOMElement node, recursion
+     * @param DOMDocument $dom \DOMDocument node, recursion
+     * @param DOMElement $domel \DOMElement node, recursion
      * @return string the xml representation of $arr
      */
     static public function serialize(array $arr, $rootEl = '', $statusCode = 0, \DOMDocument $dom = null, \DOMElement $domel = null)
@@ -114,7 +114,7 @@ class XML
      * @static
      * @access public
      * @param array $xml the xml string to convert
-     * @param mixed $reader \XMLReader the xmlreader instance, recursion
+     * @param XMLReader $reader \XMLReader the xmlreader instance, recursion
      * @param array &$arr the associative array, recursion
      * @param string $localName the current node name
      * @return array the array representing $xml, false on error

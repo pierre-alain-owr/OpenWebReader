@@ -732,7 +732,7 @@ class User extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param int $uid the user's id
+     * @param int $id the user's id
      */
     public function setUid($id)
     {

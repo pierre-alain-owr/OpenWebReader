@@ -195,7 +195,7 @@ class Controller extends Singleton
      * set $isInternal to true, and all errors will be logged instead
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed Request the request to execute
+     * @param OWR\Request $request the request to execute
      * @access public
      * @return $this
      */
@@ -587,7 +587,7 @@ class Controller extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed ModelResponse the response of the
+     * @param OWR\Model\Response $response response from a model
      */
     public function processResponse(ModelResponse $response)
     {

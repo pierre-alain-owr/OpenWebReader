@@ -51,7 +51,6 @@ use OWR\Model,
  * @uses OWR\Exception the exception handler
  * @uses OWR\DAO the DAO
  * @uses OWR\Plugins Plugins manager
- * @subpackage Model
  */
 class Groups extends Model
 {
@@ -59,7 +58,7 @@ class Groups extends Model
      * Adds/Edits a stream
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request)
@@ -115,7 +114,7 @@ class Groups extends Model
      * Deletes a group and all contained streams
      *
      * @access public
-     * @param int $id the id of the group to delete
+     * @param OWR\Request $request the request
      * @return $this
      */
     public function delete(Request $request)
@@ -191,7 +190,7 @@ class Groups extends Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause
@@ -279,7 +278,7 @@ class Groups extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      */
     public function rename(Request $request)
     {

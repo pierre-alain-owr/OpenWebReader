@@ -63,7 +63,6 @@ use OWR\Model,
  * @uses OWR\Logs the logs object
  * @uses OWR\Cron add/modify crontab
  * @uses OWR\Plugins Plugins manager
- * @subpackage Model
  */
 class Streams extends Model
 {
@@ -71,7 +70,7 @@ class Streams extends Model
      * Adds/Edits a stream
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function edit(Request $request)
@@ -492,7 +491,7 @@ class Streams extends Model
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @param array $args additional arguments, optionnal
      * @param string $order the order clause
      * @param string $groupby the groupby clause
@@ -555,7 +554,7 @@ class Streams extends Model
      * Deletes a stream
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function delete(Request $request)
@@ -605,7 +604,7 @@ class Streams extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      */
     public function move(Request $request)
     {
@@ -647,7 +646,7 @@ class Streams extends Model
      * Updates a stream
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return boolean true on success
      * @access public
      */
@@ -803,7 +802,7 @@ class Streams extends Model
      * Clear a stream of all the news
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return boolean true on success
      * @access public
      */
@@ -871,7 +870,7 @@ class Streams extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function rename(Request $request)
@@ -921,7 +920,7 @@ class Streams extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function checkAvailability(Request $request)
@@ -997,7 +996,7 @@ class Streams extends Model
      * If you have Imagick extension installed, it will also try to validate the icon
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @access protected
      * @return $this
      */
@@ -1272,7 +1271,7 @@ class Streams extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function refresh(Request $request)
@@ -1358,7 +1357,7 @@ class Streams extends Model
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access protected
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function refreshAll(Request $request)
@@ -1461,7 +1460,7 @@ class Streams extends Model
      * Adds/Edits a stream
      *
      * @access public
-     * @param mixed $request the Request instance
+     * @param OWR\Request $request the Request instance
      * @return $this
      */
     public function editOPML(Request $request)

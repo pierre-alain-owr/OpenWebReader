@@ -157,7 +157,6 @@ class View extends Singleton
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed string or array to sanitize
      * @return float $_renderingTime
      * @static
      */
@@ -190,7 +189,7 @@ class View extends Singleton
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param int $code the code to set
+     * @param int $statusCode the code to set
      * @param boolean $send must-we send headers ?
      */
     public function setStatusCode($statusCode, $send = false)

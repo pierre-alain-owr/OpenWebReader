@@ -907,7 +907,7 @@ abstract class DAO implements iDAO
      * Prepares the WHERE clauses for a query
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed $args parameters, can be null, a string (if an $_idField has been declared), or an array
+     * @param array $args parameters
      * @param array &$request the fields to SELECT
      * @param array &$fields the fields definition
      * @param array &$wheres the WHERE fields
@@ -1268,7 +1268,7 @@ abstract class DAO implements iDAO
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $query the SQL query
-     * @param mixed $request DBRequest the request
+     * @param OWR\DB\Request $request DBRequest the request
      * @param string $fetchType can be assoc, array or object
      * @param boolean $force used to say to the DB object that we must use prepared query
      * @access protected
@@ -1352,9 +1352,9 @@ abstract class DAO implements iDAO
      * Prepares the SELECT clauses for a query
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $select select fields, by default all
-     * @param array $joins the JOIN clause fields
-     * @param array $wheres the WHERE clause fields
+     * @param string $selects select fields, by default all
+     * @param array &$joins the JOIN clause fields
+     * @param array &$wheres the WHERE clause fields
      * @access protected
      * @todo clean up the code
      */

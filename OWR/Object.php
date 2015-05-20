@@ -184,8 +184,8 @@ class Object
      *
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param string $var the var name
-     * @return mixed the var if exists, or null
+     * @param array $datas the datas to set to $this
+     * @return boolean true
      */
     protected function _setDatas(array $datas = array())
     {

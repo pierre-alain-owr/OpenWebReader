@@ -107,6 +107,7 @@ abstract class Singleton implements iSingleton
      * This function can NOT be overloaded
      *
      * @access public
+     * @param mixed $instance the instance to register
      * @static
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      */

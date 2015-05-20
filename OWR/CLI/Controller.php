@@ -121,7 +121,7 @@ class Controller extends MainController
      * Throws a fatal Exception if something goes really wrong
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
-     * @param mixed Request the request to execute
+     * @param OWR\Request Request the request to execute
      * @access public
      */
     public function execute(Request $request)

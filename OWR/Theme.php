@@ -291,7 +291,7 @@ abstract class Theme implements iTheme
      * Removes all indentation from file
      *
      * @access public
-     * @var string $file the file to minify
+     * @param string $file the file to minify
      * @return string the mimnified file
      */
     public function minify($file)

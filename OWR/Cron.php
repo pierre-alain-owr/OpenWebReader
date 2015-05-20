@@ -346,6 +346,7 @@ class Cron extends Singleton
      * @param int $hour
      * @param int $minute
      * @param int $monthDay
+     * @param int $weekDay
      * @param int $month
      * @param string $cmd the command to execute
      * @param string $comment a comment for this cron job

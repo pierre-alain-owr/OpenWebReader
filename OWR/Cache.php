@@ -73,6 +73,8 @@ class Cache
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
+     * @param string $name the name of the method to call
+     * @param array $args the arguments to pass to the method
      * @static
      */
     static public function __callStatic($name, $args)

@@ -151,6 +151,7 @@ class Session extends Singleton
      * @access public
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @param string $id the id of the session to store
+     * @param string $data serialized datas to store to the session
      */
     public function _write($id, $data)
     {

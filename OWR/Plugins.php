@@ -158,7 +158,7 @@ abstract class Plugins
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param OWR\Request the request
+     * @param OWR\Request $request the request
      */
     static public function execute(Request $request)
     {
