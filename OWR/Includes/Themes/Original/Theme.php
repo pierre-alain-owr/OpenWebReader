@@ -275,7 +275,8 @@ class Theme extends pTheme
                 $icon = @cURLWrapper::get($datas['favicon'], array('nolog' => true), false);
                 if(!empty($icon))
                 {
-                    $ext = pathinfo($datas['favicon'], PATHINFO_EXTENSION);
+                    $url = parse_url($datas['favicon']);
+                    $ext = pathinfo($url['path'], PATHINFO_EXTENSION);
                     switch($ext)
                     {
                         case 'jpg':
