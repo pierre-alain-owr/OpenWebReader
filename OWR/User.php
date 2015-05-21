@@ -675,11 +675,13 @@ class User extends Singleton
      *
      * @author Pierre-Alain Mignot <contact@openwebreader.org>
      * @access public
-     * @param string $var the var name
+     * @param string $var optionnal the var name
      * @return mixed the value(s)
      */
-    public function getConfig($var)
+    public function getConfig($var = null)
     {
+        if(!isset($var)) return $this->_config;
+
         $var = (string) $var;
 
         if(false === strpos($var, '.'))
