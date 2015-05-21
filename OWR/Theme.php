@@ -130,14 +130,14 @@ abstract class Theme implements iTheme
         $this->_view = View::iGet();
 
         $this->_defaultClassName = 'OWR\Includes\Themes\\' . self::$_defaultName . '\Theme';
-
-        $this->_name = ucfirst((string) (User::iGet()->getConfig('theme') ?: self::$_defaultName));
-
-        $this->_className = 'OWR\Includes\Themes\\' . $this->_name . '\Theme';
-
+        $this->_className = get_called_class();
+        $this->_name = ucfirst(str_replace(__NAMESPACE__ . '\Includes\Themes\\', '', substr_replace($this->_className, '', -6)));
         $this->_path = OWR_THEMES_PATH . $this->_name . DIRECTORY_SEPARATOR;
         $this->_pagesPath = $this->_path . 'tpl' . DIRECTORY_SEPARATOR;
         $this->_blocksPath = $this->_path . 'tpl' . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR;
+
+        if(isset($this->_parent))
+            $this->_parentClassName = 'OWR\Includes\Themes\\' . $this->_parent . '\Theme';
 
         if(!is_subclass_of($this->_className, __CLASS__))
             throw new Exception('Your class theme needs to extend class "' . __CLASS__ . '"');
@@ -185,8 +185,23 @@ abstract class Theme implements iTheme
      */
     final public function getPath($tpl = null)
     {
-        return isset($tpl) ? (isset($this->_pages[(string) $tpl]) ?
-            $this->_pagesPath : $this->_blocksPath) : $this->_path;
+        if(!isset($tpl)) return $this->_path;
+        
+        $tpl = (string) $tpl;
+        $tplFile = $tpl . '.html';
+        $dir = 'tpl' . (isset($this->_pages[$tpl]) ? DIRECTORY_SEPARATOR : DIRECTORY_SEPARATOR . 'blocks');
+        $theme = $this;
+        do
+        {
+            $file = $theme->getPath() . $dir . DIRECTORY_SEPARATOR . $tplFile;
+            if(file_exists($file))
+                break;
+        } while($theme = $theme->getParentTheme());
+
+        if(empty($theme))
+            throw new Exception('Invalid tpl name');
+
+        return dirname($file) . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -203,11 +218,17 @@ abstract class Theme implements iTheme
     {
         if(method_exists(self::$__theme, $name))
             $call = self::$__theme;
-        elseif(isset($this->_parentClassName) && method_exists($this->_parentClassName, $name))
-            $call = $this->getParentTheme();
-        elseif(method_exists($this, $name))
-            $call = $this;
         else
+        {
+            $call = self::$__theme->getParentTheme();
+            do
+            {
+                if(method_exists($call, $name))
+                    break;
+            } while($call = $call->getParentTheme());
+        }
+
+        if(empty($call))
             throw new Exception('Invalid call to missing method "' . get_class(self::$__theme) . '::' . $name . '"');
 
         return call_user_func_array(array($call, $name), $args);
@@ -227,11 +248,17 @@ abstract class Theme implements iTheme
     {
         if(method_exists(self::$__theme, $name))
             $call = self::$__theme;
-        elseif(isset($this->_parentClassName) && method_exists($this->_parentClassName, $name))
-            $call = $this->_parentClassName;
-        elseif(method_exists(__CLASS__, $name))
-            $call = __CLASS__;
         else
+        {
+            $call = self::$__theme->getParentTheme();
+            do
+            {
+                if(method_exists($call, $name))
+                    break;
+            } while($call = $call->getParentTheme());
+        }
+
+        if(empty($call))
             throw new Exception('Invalid call to missing method "' . get_class(self::$__theme) . '::' . $name . '"');
 
         return call_user_func_array(array($call, $name), $args);
@@ -275,6 +302,8 @@ abstract class Theme implements iTheme
         $themes = array();
 
         $userTheme = User::iGet()->getConfig('theme');
+        if(!isset($userTheme))
+            $userTheme = self::$_defaultName;
         
         foreach(new \DirectoryIterator(OWR_THEMES_PATH) as $theme)
         {
