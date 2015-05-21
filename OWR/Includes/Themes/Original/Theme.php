@@ -152,6 +152,7 @@ class Theme extends pTheme
         $datas['lang'] = User::iGet()->getLang();
         $datas['xmllang'] = User::iGet()->getXMLLang();
         $datas['htmllang'] = substr($datas['lang'], 0, 2);
+        $datas['config'] = User::iGet()->getConfig();
         $noCacheDatas['uid'] = User::iGet()->getUid();
         $noCacheDatas['ttl'] = Config::iGet()->get('defaultMinStreamRefreshTime') * 60 * 1000;
         $noCacheDatas['opensearch'] = isset($datas['opensearch']) ? $datas['opensearch'] : 0;
