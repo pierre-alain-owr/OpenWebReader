@@ -1238,7 +1238,9 @@ OWR.prototype = {
         r.post($('editstream'));
         return false;
     },
-    getStreamGroup: function(id = 0, open = true) {
+    getStreamGroup: function(id, open) {
+        id = typeof id !== 'undefined' ? id : 0;
+        open = typeof open !== 'undefined' ? open : true;
         this.loading(true);
         var n = this.setLog('Getting category');
         var r = new Request.JSON({

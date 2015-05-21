@@ -953,33 +953,40 @@ div#logs_container
 
 body
 {
+    
     background-color:rgba(255,255,255,.04);
+    background-color:rgb(27,27,27);
 }
 
 div#loginbox,div#edituser,table.users td,table.stats td,div.article_full_details,
 ul.menu_actions li,ul.menu_streams li,ul.menu_streams li.groups,div.article_title
 {
     background-color:rgba(255,255,255,.05);
+    background-color:rgb(39,39,39);
 }
 
 div#menu,#main,table.users th,table.stats th
 {
     background-color:rgba(255,255,255,0);
+    background-color:rgb(27,27,27);
 }
 
 ul.menu_groups li:hover,div.article_title.opened,div.article_contents,table.users td.actions:hover
 {
     background-color:rgba(255,255,255,.1);
+    background-color:rgb(50,50,50);
 }
 
 #news_ordering,#menu_toggler,#board_toggler
 {
     background-color:rgba(26,26,26,1);
+    background-color:rgb(26,26,26);
 }
 
 div#board
 {
     background-color:rgba(0,0,0,1);
+    background-color:rgb(0,0,0);
 }
 
 /* end main colors */
