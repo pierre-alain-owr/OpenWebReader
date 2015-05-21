@@ -1050,12 +1050,12 @@ OWR.prototype = {
                     } else {
                         var cur = el.getStyle('color');
                         var scroll = false;
-                        if(!cur || 'white' === cur || '#000000' === cur || '#000' === cur || '#ffffff' === cur || '#FFFFFF' === cur || '#fff' === cur || '#ffffff' === cur) {
+                        if(el.hasClass('opened')) {
                             if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).removeClass('hidden'); }
-                            el.setStyles({'background-color': '#BBBBBB', 'color': 'black'});
+                            el.removeClass('opened');
                         } else {
                             if($('new_abstract_'+id[1])) { $('new_abstract_'+id[1]).addClass('hidden'); }
-                            el.setStyles({'background-color': '#888888', 'color':'white'});
+                            el.addClass('opened');
                             scroll = true;
                         }
                         element.toggle();
@@ -2378,7 +2378,7 @@ OWR.prototype = {
             var contents = this.parseResponse(json);
             if(contents) {
                 idc.set('html', contents).setStyle('visibility', 'visible').toggle();
-                el.removeClass('new_container_nread').addClass('new_container_read').setStyles({'background-color': '#888888', 'color': 'white'});
+                el.removeClass('new_container_nread').addClass('new_container_read').addClass('opened');
             }
             var img = $('imgnew_'+ids[1]);
             if(img) {img.setStyle('display', 'none');}
