@@ -798,7 +798,7 @@ ul.menu_container li.menu_part_title
 
 img.favicon, a.favicon, span.favicon
 {
-    margin:-20px 8px 0 -24px;
+    margin:-20px 8px 0 -24px !important;
 }
 
 .no_favicon
