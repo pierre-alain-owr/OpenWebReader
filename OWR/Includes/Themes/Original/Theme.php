@@ -35,7 +35,7 @@
  * @package OWR
  */
 namespace OWR\Includes\Themes\Original;
-use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins;
+use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins, OWR\cURLWrapper;
 
 /**
  * Default theme
@@ -265,6 +265,47 @@ class Theme extends pTheme
      */
     public function post(array $datas, array $noCacheDatas)
     {
+        static $icons = array();
+        if(!empty($datas['favicon']))
+        {
+            if(isset($icons[$datas['favicon']]))
+                $datas['favicon'] = $icons[$datas['favicon']];
+            else
+            {
+                $icon = @cURLWrapper::get($datas['favicon'], array('nolog' => true), false);
+                if(!empty($icon))
+                {
+                    $ext = pathinfo($datas['favicon'], PATHINFO_EXTENSION);
+                    switch($ext)
+                    {
+                        case 'jpg':
+                        case 'jpeg':
+                            $mime = 'jpeg';
+                            break;
+
+                        case 'png':
+                        case 'gif':
+                            $mime = $ext;
+                            break;
+
+                        case 'ico':
+                            $mime = 'x-icon';
+                            break;
+
+                        default:
+                            $icon = null;
+                            break;
+                    }
+
+                    if(!empty($icon))
+                    {
+                        $favicon = $datas['favicon'];
+                        $datas['favicon'] = 'data:image/' . $mime . ';base64,' . base64_encode($icon);
+                        $icons[$favicon] = $datas['favicon'];
+                    }
+                }
+            }
+        }
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 

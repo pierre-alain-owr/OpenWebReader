@@ -72,6 +72,12 @@ class cURLWrapper
         (!($url = realpath($url)) || 0 !== mb_strpos($url, Config::iGet()->get('defaultTmpDir')))))
             return false;
 
+        if(isset($opts['nolog']))
+        {
+            $nolog = true;
+            unset($opts['nolog']);
+        }
+
         if(!extension_loaded('curl'))
         {
             $time = microtime(true);
@@ -97,7 +103,8 @@ class cURLWrapper
 
             if(false === $ret)
             {
-                Logs::iGet()->log($url.': file_get_contents failed !', Exception::E_OWR_WARNING);
+                if(!isset($nolog))
+                    Logs::iGet()->log($url.': file_get_contents failed !', Exception::E_OWR_WARNING);
                 return false;
             }
 
@@ -171,7 +178,8 @@ class cURLWrapper
 
             if(false === $resp)
             {
-                Logs::iGet()->log($url.':'.curl_error($ch), Exception::E_OWR_WARNING);
+                if(!isset($nolog))
+                    Logs::iGet()->log($url.':'.curl_error($ch), Exception::E_OWR_WARNING);
                 return false;
             }
 
