@@ -10,6 +10,8 @@ define('HOME_PATH', PATH.'OWR'.DIRECTORY_SEPARATOR); // define home path
 
 require HOME_PATH . 'cfg.php';
 
+Controller::iGet();
+
 $filename = $_GET['f'];
 
 $theme = Theme::iGet();
