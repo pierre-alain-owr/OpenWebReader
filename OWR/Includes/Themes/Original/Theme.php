@@ -35,7 +35,7 @@
  * @package OWR
  */
 namespace OWR\Includes\Themes\Original;
-use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins, OWR\cURLWrapper;
+use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins, OWR\cURLWrapper, OWR\Cache;
 
 /**
  * Default theme
@@ -44,6 +44,7 @@ use OWR\Theme as pTheme, OWR\User, OWR\Config, OWR\Dates, OWR\Plugins, OWR\cURLW
  * @uses OWR\User the current user
  * @uses OWR\Config the config instance
  * @uses OWR\Plugins the plugins object
+ * @uses OWR\Cache the cache object
  * @package OWR
  */
 class Theme extends pTheme
@@ -250,7 +251,7 @@ class Theme extends pTheme
     {
         $block = '';
         foreach($datas['tags'] as $tag)
-            $block .= self::tag($tag, $noCacheDatas);
+            $block .= $this->tag($tag, $noCacheDatas);
 
         return $block;
     }
@@ -265,48 +266,9 @@ class Theme extends pTheme
      */
     public function post(array $datas, array $noCacheDatas)
     {
-        static $icons = array();
         if(!empty($datas['favicon']))
-        {
-            if(isset($icons[$datas['favicon']]))
-                $datas['favicon'] = $icons[$datas['favicon']];
-            else
-            {
-                $icon = @cURLWrapper::get($datas['favicon'], array('nolog' => true), false);
-                if(!empty($icon))
-                {
-                    $url = parse_url($datas['favicon']);
-                    $ext = pathinfo($url['path'], PATHINFO_EXTENSION);
-                    switch($ext)
-                    {
-                        case 'jpg':
-                        case 'jpeg':
-                            $mime = 'jpeg';
-                            break;
+            $datas['favicon'] = $this->_transformFavicon($datas['favicon']);
 
-                        case 'png':
-                        case 'gif':
-                            $mime = $ext;
-                            break;
-
-                        case 'ico':
-                            $mime = 'x-icon';
-                            break;
-
-                        default:
-                            $icon = null;
-                            break;
-                    }
-
-                    if(!empty($icon))
-                    {
-                        $favicon = $datas['favicon'];
-                        $datas['favicon'] = 'data:image/' . $mime . ';base64,' . base64_encode($icon);
-                        $icons[$favicon] = $datas['favicon'];
-                    }
-                }
-            }
-        }
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 
@@ -344,7 +306,7 @@ class Theme extends pTheme
         unset($datas['news']['ids']);
 
         foreach($datas['news'] as $k => $new)
-            $block .= self::post($new, $noCacheDatas);
+            $block .= $this->post($new, $noCacheDatas);
 
         return $block;
     }
@@ -397,6 +359,9 @@ class Theme extends pTheme
     {
         $noCacheDatas['bold'] = $noCacheDatas['unread'] > 0 ? 'bold ' : '';
 
+        if(!empty($datas['favicon']))
+            $datas['favicon'] = $this->_transformFavicon($datas['favicon']);
+
         return $this->_view->get(__FUNCTION__, $datas, null, $noCacheDatas);
     }
 
@@ -426,7 +391,7 @@ class Theme extends pTheme
 
         foreach($streamsToDisplay as $stream)
         {
-            $block .= self::stream($stream, array(
+            $block .= $this->stream($stream, array(
                     'groups_select'     => $groups_select[$stream['gid']],
                     'unread'            => $stream['unread']
                     ));
@@ -449,7 +414,7 @@ class Theme extends pTheme
         foreach($datas['groups'] as $group)
         {
             $noCacheDatas['unread'] = $group['unread'];
-            $block .= self::category($group, $noCacheDatas);
+            $block .= $this->category($group, $noCacheDatas);
         }
 
         return $block;
@@ -530,5 +495,69 @@ class Theme extends pTheme
     public function logs(array $datas, array $noCacheDatas)
     {
         return $this->_view->get(__FUNCTION__, $datas);
+    }
+
+    /**
+     * Transform a favicon URL into a base64_encoded string
+     *
+     * @access protected
+     * @param string $favicon the URL of the favicon to transform
+     * @return string the base64_encoded string, or the URL of the favicon if it can not be transformed
+     */
+    protected function _transformFavicon($favicon)
+    {
+        static $icons = array();
+
+        $favicon = (string) $favicon;
+        
+        if(isset($icons[$favicon]))
+            $favicon = $icons[$favicon];
+        else
+		{
+			if(!($icon = Cache::get(md5($favicon))))
+			{
+                $icon = @cURLWrapper::get($favicon, array('nolog' => true), false, true);
+
+            	if(!empty($icon))
+	            {
+    	            $url = parse_url($favicon);
+        	        $ext = pathinfo($url['path'], PATHINFO_EXTENSION);
+            	    switch($ext)
+	                {
+    	                case 'jpg':
+        	            case 'jpeg':
+            	            $mime = 'jpeg';
+                	        break;
+
+		                case 'png':
+        	            case 'gif':
+            	            $mime = $ext;
+                	        break;
+
+                	    case 'ico':
+                    	    $mime = 'x-icon';
+                        	break;
+
+	                    default:
+    	                    $icon = null;
+        	                break;
+            	    }
+
+	                if(!empty($icon))
+    	            {
+						$icons[$favicon] = 'data:image/' . $mime . ';base64,' . base64_encode($icon);
+						Cache::write(md5($favicon), $icons[$favicon]);
+						$favicon = $icons[$favicon];
+	                }
+				}
+			}
+			else
+			{
+				$icons[$favicon] = $icon;
+				$favicon = $icon;
+			}
+		}
+
+        return $favicon;
     }
 }
