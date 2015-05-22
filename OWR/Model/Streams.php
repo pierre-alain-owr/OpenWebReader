@@ -1027,7 +1027,6 @@ class Streams extends Model
 
         $stream = $this->_dao->get(array('id'=>$request->id), 'id, url, favicon');
         $currentFavicon = $stream->favicon;
-        $streamContents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$request->id), 'contents');
         if(empty($stream))
         {
             $request->setResponse(new Response(array(
@@ -1038,7 +1037,7 @@ class Streams extends Model
             return $this;
         }
 
-        $streamContents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$stream->id));
+        $streamContents = DAO::getCachedDAO('streams_contents')->get(array('rssid'=>$stream->id), 'contents');
         $reader = new StreamReader(array('channel'=>unserialize($streamContents->contents)));
         unset($streamContents);
         $favicons = $indexes = array();
