@@ -13,8 +13,9 @@ if(!DEBUG) { ?>
             var rP = {};
             window.addEvent('domready', function(){ 
 <?php
-            echo 'rP = new OWR("'.$lang.'", <OWR:NOCACHE NAME=\'ttl\'/>, "<OWR:NOCACHE NAME=\'token\'/>", "<OWR:NOCACHE NAME=\'opensearch\'/>");';
+			echo 'rP = new OWR("'.$lang.'", <OWR:NOCACHE NAME=\'ttl\'/>, "<OWR:NOCACHE NAME=\'token\'/>", "<OWR:NOCACHE NAME=\'opensearch\'/>");';
 ?>
+				rP.showStream(0);
                 window.addEvent('beforeunload', function (){ return rP.confirmExit(); });
                 window.addEvent('unload', function(){ rP.clear(); });
             });

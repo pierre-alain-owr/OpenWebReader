@@ -1,6 +1,6 @@
                         <li id="stream_<?php echo $groupid;?>" class="groups">
                             <div class="groupname">
-                                <a href="javascript:;" class="<OWR:NOCACHE NAME='bold'/>anchor" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this tag');?>"><span class="icon_category backgrounded"></span> <span class="current backgrounded hidden" id="current_<?php echo $groupid;?>"></span><?php echo $gname;?> (<span id="unread_<?php echo $groupid;?>"><OWR:NOCACHE NAME='unread'/></span>)</a>
+								<a href="javascript:;" class="anchor" onclick="rP.showStream(<?php echo $groupid;?>);" id="showStream_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Show the news for this tag');?>"><span class="icon_category backgrounded"></span> <span class="current backgrounded hidden" id="current_<?php echo $groupid;?>"></span><?php echo $gname;?> (<span id="unread_<?php echo $groupid;?>">0</span>)</a>
                             </div>
                             <div id="sprites_<?php echo $groupid;?>" class="sprites_actions">
                                 <a href="javascript:;" class="read backgrounded opac" onclick="rP.updateNews(<?php echo $groupid;?>);" id="update_<?php echo $groupid;?>" title="<?php echo $this->_utilities->_('Mark all the news of this tag as read');?>"></a>

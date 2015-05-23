@@ -1864,7 +1864,7 @@ OWR.prototype = {
             if(!this.boardTogglerStatus && $('news_ordering')) {
                 $('news_ordering').setStyle('top', '10px');
             }
-            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 105}});
+            var s = new Fx.Scroll(document.body, {'wheelStops':true, 'offset':{x:0,y:$('contents').getPosition().y - 116}});
             s.toTop();
             this.setTS();
             this.pageOffset = 0;
