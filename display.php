@@ -89,7 +89,7 @@ header('Content-type: ' . $mime);
 header('Cache-Control: Public, must-revalidate');
 header("Expires: ".@gmdate("D, d M Y H:i:s", time() + 60*60*24*365)." GMT");
 header("Last-Modified: ".@gmdate("D, d M Y H:i:s", filemtime($file))." GMT"); 
-$etag = '"' . $ext . (isset($minify) ? '-minify' : '') . '-'.md5_file($file).'"';
+$etag = '"' . $ext . (!empty($minify) ? '-minify' : '') . '-'.md5_file($file).'"';
 header('Etag: '.$etag);
 if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag)
 {
