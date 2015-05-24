@@ -855,7 +855,7 @@ OWR.prototype = {
     dir: '',
     token: '',
     boardTogglerStatus: 1,
-    init: function(lang, ttl, token, isSearch)
+    init: function(lang, ttl, isSearch)
     {
         this.loading(true);
         if(!this.languages.contains(lang)) { lang='en_US'; }
@@ -863,7 +863,15 @@ OWR.prototype = {
         this.ttl = ttl / 1000;
         this.lastUpd = this.getTS();
         this.period = this.getLastNews.periodical(ttl, this);
-        this.token = token;
+        var args = window.location.search.replace(/^\?/, '').split('&');
+        var split, i;
+        for(i = 0; i < args.length; i++) {
+        	split = args[i].split('=');
+        	if('token' === split[0]) {
+        		this.token = split[1];
+        		break;
+        	}
+		}
         switch(this.lang) {
             case 'fr_FR':
                 this.messages['Loading interface'] = "Chargement de l'interface";
