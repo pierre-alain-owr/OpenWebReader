@@ -5,7 +5,7 @@
 <?php } else { ?>
 <link rel="stylesheet" href="<?php echo $surl;?>display.php?f=owr.css" type="text/css" media="screen"/>
 <?php } ?>
-<link rel="search" type="application/opensearchdescription+xml" href="<?php echo OWR\Config::iGet()->makeURI('getopensearch', 'token=<OWR:NOCACHE NAME=\'token\'/>');?>" title="<?php echo $this->_utilities->_('Search').' '.$this->_utilities->_('In');?> OWR !"/>
+<link rel="search" type="application/opensearchdescription+xml" href="<?php echo OWR\Config::iGet()->makeURI('getopensearch');?>" title="<?php echo $this->_utilities->_('Search').' '.$this->_utilities->_('In');?> OWR !"/>
 <link rel="icon" type="image/png" href="<?php echo $surl;?>display.php?f=owr_16_16.png"/>
 <link rel="shortcut icon" type="image/png" href="<?php echo $surl;?>display.php?f=owr_16_16.png"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>

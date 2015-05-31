@@ -872,6 +872,11 @@ OWR.prototype = {
         		break;
         	}
 		}
+		$$('a[href^=' + window.location.origin + '],link[rel=search]').each(function(item) {
+            var href = item.get('href');
+            if(-1 !== href.indexOf('logout')) return;
+            item.set('href', href + (-1 === href.indexOf('?') ? '?token=' : '&token=') + this.token);
+        }.bind(this));
         switch(this.lang) {
             case 'fr_FR':
                 this.messages['Loading interface'] = "Chargement de l'interface";
@@ -1662,7 +1667,8 @@ OWR.prototype = {
     {
         if(isLoading) {
             if(!this.isLoading) {
-                $('logo').set('src', './display.php?f=owr_loading.gif');
+            	$('logo').addClass('hide');
+                $('logo-loading').removeClass('hide');
             }
             ++this.isLoading;
         } else {
@@ -1670,7 +1676,8 @@ OWR.prototype = {
                 --this.isLoading;
             }
             if(!this.isLoading) {
-                $('logo').set('src', './display.php?f=owr_50_50.png');
+                $('logo-loading').addClass('hide');
+                $('logo').removeClass('hide');
             }
             if($chk(ind)) {
                 ind = ind.toInt();
