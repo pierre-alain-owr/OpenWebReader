@@ -2118,19 +2118,19 @@ class Controller extends Singleton
                     if(empty($datas['id']))
                         break;
                     $request = new Request(array('ids' => $datas['id'], 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array(), $order, '', $offset);
                     $datas['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
                 {
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, '', $offset);
                     $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
                 }
                 elseif(-1 === $datas['id'])
                 { // all news
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array(), $order, 'news.id', $offset);
+                    Model::getCachedModel('news')->view($request, array(), $order, '', $offset);
                     $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
                     $datas['nbNews'] = $nb ? $nb->nb : 0;
                 }
@@ -2156,19 +2156,19 @@ class Controller extends Singleton
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     if('streams' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, '', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('streams_groups' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, '', $offset);
                         $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
                     elseif('news_tags' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, 'news.id', $offset);
+                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, '', $offset);
                         $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
                         $datas['nbNews'] = $nb ? $nb->nb : 0;
                     }
