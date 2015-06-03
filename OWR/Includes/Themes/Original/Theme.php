@@ -538,6 +538,10 @@ class Theme extends pTheme
                     	    $mime = 'x-icon';
                         	break;
 
+						case 'svg':
+							$mime = 'svg+xml';
+							break;
+
 	                    default:
     	                    $icon = null;
         	                break;
