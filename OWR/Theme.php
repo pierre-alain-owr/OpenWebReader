@@ -329,7 +329,8 @@ abstract class Theme implements iTheme
         if(empty($content)) return '';
 
 //        $content = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $content);
-        $content = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $content);
+		$content = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $content);
+		$content = str_replace(array(';}', ', '), array('}', ','), $content);
 
         return $content;
     }
