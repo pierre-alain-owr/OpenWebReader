@@ -30,6 +30,7 @@ CREATE TABLE `news` (
   KEY `uid` (`rssid`),
   KEY `upd` (`lastupd`),
   KEY `pubDate` (`pubDate`),
+  KEY `title` (`title`(191)),
   CONSTRAINT `news_ibfk_1` FOREIGN KEY (`id`) REFERENCES `objects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `news_ibfk_3` FOREIGN KEY (`rssid`) REFERENCES `streams` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
