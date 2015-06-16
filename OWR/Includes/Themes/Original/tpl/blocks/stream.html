@@ -3,7 +3,9 @@
 <?php       if($status > 0) {
                 echo '<div class="icon_unavailable_feed backgrounded" title="'.$this->_utilities->_('Set unavailable on').' '.$unavailable.'"></div>';
             } ?>
-            <a href="javascript:;" class="anchor" onclick="rP.showStream(<?php echo $id;?>);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php if(!empty($favicon)) echo '<img src="'.$favicon.'" class="favicon_stream" width="16px" height="16px" alt="" title="'.$this->_utilities->_('Favicon of').' '.$name.'" />'; else echo '<span class="favicon_stream no_favicon backgrounded" title="Favicon"></span>';?> <span class="current_stream backgrounded hidden" id="current_<?php echo $id;?>"></span> <span class="title"><?php echo $name;?></span> (<span id="unread_<?php echo $id;?>">0</span>)</a>
+			<a href="javascript:;" class="anchor" onclick="rP.showStream(<?php echo $id;?>,1);" id="showStream_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Show the news for this stream');?>"><?php if(!empty($favicon)) echo '<img src="'.$favicon.'" class="favicon_stream" width="16px" height="16px" alt="" title="'.$this->_utilities->_('Favicon of').' '.$name.'" />'; else echo '<span class="favicon_stream no_favicon backgrounded" title="Favicon"></span>';?> <span class="current_stream backgrounded hidden" id="current_<?php echo $id;?>"></span> <span class="title"><?php echo $name;?></span> (<span id="unread_<?php echo $id;?>">0</span>)</a>
+			<br/>
+            <a href="javascript:;" id="showStream_<?php echo $id;?>_all" onclick="rP.showStream(<?php echo $id;?>);" title="<?php echo $this->_utilities->_('Show all news');?>"><span class="current backgrounded hidden" id="current_<?php echo $id;?>_all"></span> <?php echo $this->_utilities->_('All news');?></a>
         </div>
         <div id="sprites_<?php echo $id;?>" class="sprites_actions">
             <a href="javascript:;" class="stream_toggler backgrounded opac" id="stream_toggler_<?php echo $id;?>" title="<?php echo $this->_utilities->_('Expand this stream');?>" onclick="rP.streamsToggle(<?php echo $id;?>, this);"></a>

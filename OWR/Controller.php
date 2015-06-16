@@ -861,14 +861,15 @@ class Controller extends Singleton
 
         if(isset($this->_request->status) && !empty($this->_request->ids))
         {
-            $this->do_upNew();
-        }
+			$this->do_upNew();
+		}
 
         $this->_buildPage('posts', array(
                             'id'        => $this->_request->id,
                             'offset'    => $this->_request->offset,
                             'sort'      => $this->_request->sort,
-                            'dir'       => $this->_request->dir
+							'dir'       => $this->_request->dir,
+							'live'      => isset($this->_request->live) ? $this->_request->live : null,
         ));
         return $this;
     }
@@ -2122,17 +2123,27 @@ class Controller extends Singleton
                     $datas['nbNews'] = count($datas['id']);
                 }
                 elseif(empty($datas['id']))
-                {
+				{
+					$args = array();
+					if(isset($datas['live']))
+					{
+						$args['status'] = $datas['live'];
+						if(empty($datas['live']))
+						{
+							$nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
+							$datas['nbNews'] = $nb ? $nb->nb : 0;
+						}
+						else
+							$datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
+					}
+					else
+					{
+						$nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
+						$datas['nbNews'] = $nb ? $nb->nb : 0;
+					}
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array('status' => 1), $order, '', $offset);
+                    Model::getCachedModel('news')->view($request, $args, $order, '', $offset);
                     $datas['nbNews'] = isset($this->_request->unreads[0]) ? $this->_request->unreads[0] : 0;
-                }
-                elseif(-1 === $datas['id'])
-                { // all news
-                    $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
-                    Model::getCachedModel('news')->view($request, array(), $order, '', $offset);
-                    $nb = DAO::getCachedDAO('news_relations')->count(array(), 'newsid');
-                    $datas['nbNews'] = $nb ? $nb->nb : 0;
                 }
                 else
                 {
@@ -2152,31 +2163,32 @@ class Controller extends Singleton
                                 break;
                         }
                     }
-
                     $request = new Request(array('id' => null, 'getContents' => $datas['abstract']));
                     if('streams' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('rssid' => $datas['id']), $order, '', $offset);
-                        $nb = DAO::getCachedDAO('news_relations')->count(array('rssid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                        $args = array('rssid' => $datas['id']);
+                        $dao = 'news_relations';
                     }
                     elseif('streams_groups' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('gid' => $datas['id']), $order, '', $offset);
-                        $nb = DAO::getCachedDAO('news_relations')->count(array('gid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                        $args = array('gid' => $datas['id']);
+                        $dao = 'news_relations';
                     }
                     elseif('news_tags' === $table)
                     {
-                        Model::getCachedModel('news')->view($request, array('tid' => $datas['id']), $order, '', $offset);
-                        $nb = DAO::getCachedDAO('news_relations_tags')->count(array('tid' => $datas['id']), 'newsid');
-                        $datas['nbNews'] = $nb ? $nb->nb : 0;
+                        $args = array('tid' => $datas['id']);
+                        $dao = 'news_relations_tags';
                     }
                     else
                     {
                         Logs::iGet()->log(Utilities::iGet()->_('Invalid id'));
                         break;
                     }
+
+                    if(!empty($datas['live'])) $args['status'] = $datas['live'];
+					Model::getCachedModel('news')->view($request, $args, $order, '', $offset);
+                    $nb = DAO::getCachedDAO($dao)->count($args, 'newsid');
+                    $datas['nbNews'] = $nb ? $nb->nb : 0;
                 }
 
                 $response = $request->getResponse();
@@ -2196,7 +2208,8 @@ class Controller extends Singleton
                                 'offset'        => $datas['offset'],
                                 'sort'          => !empty($datas['sort']) ? $datas['sort'] : null,
                                 'dir'           => !empty($datas['dir']) ? $datas['dir'] : null,
-                                'nbNewsByPage'  => $nbNewsByPage);
+								'nbNewsByPage'  => $nbNewsByPage,
+								'live'          => !empty($datas['live']) ? 1 : 0);
 
                 unset($datas['news']['ids']);
                                 
@@ -2215,7 +2228,7 @@ class Controller extends Singleton
                 $datas['unreads'] = $this->_request->unreads;
                 
                 $this->getPageDatas('categories', $datas, $noCacheDatas);
-                $this->getPageDatas('posts', $datas, $noCacheDatas);
+                //$this->getPageDatas('posts', $datas, $noCacheDatas);
                 $this->getPageDatas('tags', $datas, $noCacheDatas);
                 break;
 
