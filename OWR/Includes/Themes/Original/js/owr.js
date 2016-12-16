@@ -221,7 +221,9 @@ OWR.prototype = {
                     }
                     return false;
                 }
-                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags') || e.target.hasClass('delete')) {return false;}
+                if(e.target.hasClass('new_status') || e.target.hasClass('new_tag') || e.target.hasClass('new_tags') 
+                		|| e.target.hasClass('delete') || e.target.hasClass('read')) 
+                	{ return false; }
                 e.stop();
                 timer = (function(){
                     var id = el.get('id').split('_');
