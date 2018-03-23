@@ -1437,9 +1437,9 @@ class Controller extends Singleton
         {
             if(!$this->_user->checkToken(true, $this->_request->uid, $this->_request->tlogin, $this->_request->key, $this->_request->do))
             {
-                $this->_user->reset();
-                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
-                return $this;
+                //$this->_user->reset();
+                //$this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
+                return $this->do_logout();
             }
         }
         else
@@ -1447,9 +1447,9 @@ class Controller extends Singleton
             $isLogged = $this->_user->isLogged();
             if(!$this->_user->checkToken())
             {
-                $this->_user->reset();
-                $this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
-                return $this;
+                //$this->_user->reset();
+                //$this->_buildPage('login', array('error' => Utilities::iGet()->_('Invalid token')));
+                return $this->do_logout();
             }
 
             if(empty($this->_request->login) || empty($this->_request->passwd))
