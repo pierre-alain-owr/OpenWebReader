@@ -227,7 +227,7 @@ class CFile implements Cache
             }
             else
             {
-                Logs::iGet()->log(Utilities::iGet()->_('The directory "%s" is not writeable', HOME_PATH.'cache'));
+                Logs::iGet()->log(sprintf(Utilities::iGet()->_('The directory "%s" is not writeable'), HOME_PATH.'cache'));
                 return false;
             }
         }
