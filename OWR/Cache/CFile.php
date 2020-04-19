@@ -36,7 +36,8 @@
  */
 namespace OWR\Cache;
 use OWR\View\Utilities,
-    OWR\Interfaces\Cache;
+    OWR\Interfaces\Cache,
+    OWR\Logs;
 /**
  * This object manages cache files
  * @package OWR
