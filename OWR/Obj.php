@@ -39,7 +39,7 @@ namespace OWR;
  * This object is used to deal with objects instead of arrays
  * @package OWR
  */
-class Object
+class Obj
 {
     /**
      * Constructor
@@ -151,23 +151,23 @@ class Object
 
         $v = array_shift($var);
 
-        isset($this->$v) || $this->$v = new Object;
+        isset($this->$v) || $this->$v = new Obj;
 
         $datas = $this->$v;
 
         foreach($var as $arr)
         {
-            isset($datas->$arr) || $datas->$arr = new Object;
+            isset($datas->$arr) || $datas->$arr = new Obj;
             $datas = $datas->$arr;
         }
 
         if(is_object($value))
         {
-            $datas = new Object(self::toArray($value));
+            $datas = new Obj(self::toArray($value));
         }
         elseif(is_array($value))
         {
-            $datas = new Object($value);
+            $datas = new Obj($value);
         }
         else
         {
@@ -195,7 +195,7 @@ class Object
         {
             if(is_array($data))
             {
-                $this->$k = new Object($data);
+                $this->$k = new Obj($data);
             }
             else
             {

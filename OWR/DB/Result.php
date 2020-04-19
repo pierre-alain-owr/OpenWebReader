@@ -35,17 +35,17 @@
  * @subpackage DB
  */
 namespace OWR\DB;
-use OWR\Object,
+use OWR\Obj,
     OWR\Exception,
     OWR\Interfaces\DB\Result as iResult;
 /**
  * This object represents a result from DB
- * @uses Object convert everything to an object
+ * @uses Obj convert everything to an object
  * @uses Exception the exceptions handler
  * @package OWR
  * @subpackage DB
  */
-class Result extends Object implements iResult
+class Result extends Obj implements iResult
 {
     /**
     * @var int fetch type (all results)

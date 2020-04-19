@@ -876,7 +876,7 @@ class Strings
                     "diams" => "&#9830;"
                 );
             }
-            $str = preg_replace("/&(\w+);/e", 'isset($replace[\'\\1\']) ? $replace[\'\\1\'] : "\\0"', $str);
+            $str = preg_replace_callback("/&(\w+);/", function ($matches) use ($replace) { return (isset($replace[$matches[1]]) ? $replace[$matches[1]] : $matches[0]);}, $str);
             // we must keep '<', '>' and quotes
             $str = preg_replace('/&(?!amp;|#[0-9]+;)/', '&amp;', $str);
         }

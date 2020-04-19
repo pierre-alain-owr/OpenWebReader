@@ -269,7 +269,7 @@ class Request
         }
         elseif(is_object($value))
         {
-            $datas = new Request(Object::toArray($value), true);
+            $datas = new Request(Obj::toArray($value), true);
         }
         else
         {
@@ -334,7 +334,7 @@ class Request
         }
         elseif($isObject)
         {
-            $datas = Object::toArray($datas);
+            $datas = Obj::toArray($datas);
             array_walk_recursive($datas, array('static', 'sanitize'));
         }
         elseif($isArray)

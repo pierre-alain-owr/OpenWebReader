@@ -460,11 +460,12 @@ class Theme extends pTheme
         if(User::iGet()->getConfig('blockimg'))
         {
             array_walk_recursive($datas, function(&$data) {
-                $data = preg_replace('/<img\b([^>]*)(src\s*=\s*([\'"])?(.*?)\\3\s*)[^>]*\/?>/ise',
-                    "'<a href=\"javascript:;\" title=\"Blocked image, click to see it ! " .
-                    "('.addcslashes(\"\\4\", '\"').')\" class=\"img_blocked backgrounded\" " .
-                    "onclick=\"rP.loadImage(this, \''.addcslashes(\"\\4\", '\'').'\');\">" .
-                    "<img alt=\"&nbsp;&nbsp;&nbsp;&nbsp;\"/></a>'", $data);
+                 $data = preg_replace_callback('/<img\b([^>]*)(src\s*=\s*([\'"])?(.*?)\\3\s*)[^>]*\/?>/is',
+                    function ($matches) {
+						return "<a href=\"javascript:;\" title=\"Blocked image, click to see it ! " .
+                    "(" . addcslashes($matches[4], '"') . ")\" class=\"img_blocked backgrounded\" " .
+                     "onclick=\"rP.loadImage(this, '" . addcslashes($matches[4], "'") . "');\">" .
+					"<img alt=\"&nbsp;&nbsp;&nbsp;&nbsp;\"/></a>"; }, $data);
             });
         }
 

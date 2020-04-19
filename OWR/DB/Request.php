@@ -268,7 +268,7 @@ class Request extends ArrayObject
                 $datas = (string) $datas;
                 if('' !== $datas)
                 {
-                    $validUrl = filter_var($datas, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
+                    $validUrl = filter_var($datas, FILTER_VALIDATE_URL);
                     if(false === $validUrl)
                     {
                         $url = @parse_url($datas);
@@ -276,7 +276,7 @@ class Request extends ArrayObject
                         {
                             $url['path'] = join('/', array_map('rawurlencode', explode('/', $url['path'])));
                             $url = $url['scheme'].'://'.$url['host'].$url['path'];
-                            $validUrl = filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
+                            $validUrl = filter_var($url, FILTER_VALIDATE_URL);
                         }
                     }
 

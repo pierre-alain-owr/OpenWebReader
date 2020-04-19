@@ -45,7 +45,7 @@ use OWR\DB\Result as DBResult,
  * @uses OWR\Request a request sent to the database
  * @uses OWR\DB\Result a DB\Result from the database
  * @uses OWR\Exception the exceptions handler
- * @uses OWR\Object transforms an object to an associative array
+ * @uses OWR\Obj transforms an object to an associative array
  * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
@@ -201,7 +201,7 @@ abstract class DAO implements iDAO
     {
         if(is_object($args))
         {
-            $args = Object::toArray($args);
+            $args = Obj::toArray($args);
         }
 
         $fetchType = 'object';
@@ -376,7 +376,7 @@ abstract class DAO implements iDAO
 
                 if(!isset($skip))
                 {
-                    $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Object::toArray($this), $whereFieldsDecl, true));
+                    $exists = self::$_db->executeP($chkUniQuery, new DBRequest(Obj::toArray($this), $whereFieldsDecl, true));
 
                     if($exists->next() && $exists->nb > 0)
                         throw new Exception('Some values are not uniques', 409);
@@ -442,7 +442,7 @@ abstract class DAO implements iDAO
 
         try
         {
-            self::$_db->setP($query, new DBRequest(Object::toArray($this), $requestFields, $update));
+            self::$_db->setP($query, new DBRequest(Obj::toArray($this), $requestFields, $update));
         }
         catch(Exception $e)
         { // we catch here to rollback and throw another exception
@@ -478,7 +478,7 @@ abstract class DAO implements iDAO
         }
         elseif(is_object($args))
         {
-            $args = Object::toArray($args);
+            $args = Obj::toArray($args);
         }
 
         $uid = false;
@@ -547,7 +547,7 @@ abstract class DAO implements iDAO
     {
         if(is_object($args))
         {
-            $args = Object::toArray($args);
+            $args = Obj::toArray($args);
         }
         $fetchType = 'object';
         $wheres = $request = $fields = $joins = array();

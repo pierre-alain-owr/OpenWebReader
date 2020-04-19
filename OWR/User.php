@@ -43,7 +43,7 @@ use OWR\DB\Request as DBRequest,
  * @uses Exception the exceptions handler
  * @uses DBRequest a request sent to the database
  * @uses DB the link database
- * @uses Object transforms $this into an array
+ * @uses Obj transforms $this into an array
  * @uses OWR\View\Utilities translate errors
  * @package OWR
  */
