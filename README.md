@@ -2,7 +2,7 @@ OpenWebReader is a PHP5, multi-user feed aggregator. It is designed for becoming
 It is released under the GPL license, see COPYING.
 Copyright (c) 2009, Pierre-Alain Mignot <pierre-alain@openwebreader.org>
 
-Features :
+- Features :
     * Support for ATOM, RSS 0.92, RSS 1 (RDF), RSS 2 formats
     * Import/export feeds in OPML format
     * Multi-lingual interface (English and French at the moment), sober and fast, powered by AJAX
