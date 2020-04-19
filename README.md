@@ -1,4 +1,4 @@
-OpenWebReader is a PHP5, multi-user feed aggregator.
+OpenWebReader is a PHP, multi-user feed aggregator.
 It is designed for becoming a RIA and uses AJAX technology as main rich interface amplifyer.
 It is released under the GPL license, see COPYING.
 Copyright (c) 2009, Pierre-Alain Mignot <pierre-alain@openwebreader.org>
